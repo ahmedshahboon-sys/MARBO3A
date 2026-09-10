@@ -1,7 +1,15 @@
 import "./globals.css";
 import "./brand.css";
+import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import AdminConsole from "./AdminConsole";
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-cairo"
+});
 
 export const metadata = {
   title: "مربوعة | MARBO3A",
@@ -20,8 +28,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body>
+    <html lang="ar" dir="rtl" className={cairo.variable}>
+      <body className={cairo.className}>
         <AppBootstrap />
         {children}
         <AdminConsole />
