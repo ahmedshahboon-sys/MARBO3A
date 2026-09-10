@@ -10,6 +10,7 @@ import "./chat-social.css";
 import "./social-polish.css";
 import "./release-polish.css";
 import "./social-shell-v2.css";
+import "./launch-completion.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
