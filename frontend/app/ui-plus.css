@@ -1,0 +1,15 @@
+.home-tabs.five-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+.home-tabs.five-tabs button{font-size:12px;padding-inline:4px}
+.row-actions .green-text{display:flex;align-items:center;padding:0 4px;font-size:10px}
+.message-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.message-actions button{border:0;border-radius:9px;background:#242932;color:#aeb6c2;font-size:9px;padding:5px 8px}
+.message-actions button.danger{color:#ff9a9a;background:rgba(255,80,80,.08)}
+.message-bubble.deleted{opacity:.7;font-style:italic}
+.message-bubble.forwarded{border-color:rgba(255,122,0,.32)}
+.forwarded-label{display:block;color:#ff9a1f;font-size:9px;font-weight:700;margin-bottom:5px}
+.chat-list{display:grid;gap:9px}
+.chat-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid #292e38;border-radius:16px;background:#15191f}
+.chat-row>div:nth-child(2){min-width:0;display:grid;gap:2px}
+.chat-row b{font-size:13px}.chat-row span{font-size:10px;color:#7f8795;direction:ltr;text-align:right}.chat-row p{margin:2px 0 0;color:#858e9c;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-row button{min-height:34px;border:0;border-radius:10px;background:#ff7a00;color:#111318;font-weight:900;padding:0 10px}
+@media(max-width:560px){.home-tabs.five-tabs{gap:4px;padding:5px}.home-tabs.five-tabs button{font-size:9px;padding:2px}.chat-row{grid-template-columns:38px minmax(0,1fr) auto;padding:10px}.message-actions button{font-size:8px;padding:5px 6px}}
