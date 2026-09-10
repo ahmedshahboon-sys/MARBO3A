@@ -24,6 +24,8 @@ jobs:
       - run: node --check core-extensions.mjs
       - run: node --check social-extensions.mjs
       - run: node --check direct-extensions.mjs
+      - run: node --check feed-extensions.mjs
+      - run: node --check social-ui-backend.mjs
       - run: node --check generate-vapid.mjs
   frontend:
     runs-on: ubuntu-latest
