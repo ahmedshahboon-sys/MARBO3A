@@ -8,6 +8,7 @@ import "./social-pages.css";
 import "./social-hubs.css";
 import "./chat-social.css";
 import "./social-polish.css";
+import "./release-polish.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
