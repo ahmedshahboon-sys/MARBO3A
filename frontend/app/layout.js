@@ -8,6 +8,7 @@ import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
 import SettingsPanel from "./SettingsPanel";
 import AdminConsole from "./AdminConsole";
+import AdminShortcuts from "./AdminShortcuts";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
         {children}
         <SettingsPanel />
         <AdminConsole />
+        <AdminShortcuts />
       </body>
     </html>
   );
