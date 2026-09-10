@@ -5,7 +5,7 @@
   "description":"مكانك للتواصل، الغرف، والأصحاب",
   "lang":"ar",
   "dir":"rtl",
-  "start_url":"/?source=pwa",
+  "start_url":"/home?source=pwa",
   "scope":"/",
   "display":"standalone",
   "display_override":["window-controls-overlay","standalone","minimal-ui"],
@@ -14,12 +14,12 @@
   "theme_color":"#FF7A00",
   "categories":["social","communication"],
   "icons":[
-    {"src":"/logo.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"},
-    {"src":"/logo.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any"},
-    {"src":"/logo.svg","sizes":"512x512","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ],
   "shortcuts":[
-    {"name":"الغرف","short_name":"الغرف","url":"/?tab=rooms","icons":[{"src":"/logo.svg","sizes":"192x192","type":"image/svg+xml"}]},
-    {"name":"الرسائل","short_name":"الرسائل","url":"/?tab=chats","icons":[{"src":"/logo.svg","sizes":"192x192","type":"image/svg+xml"}]}
+    {"name":"الرئيسية","short_name":"الرئيسية","url":"/home","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"الغرف","short_name":"الغرف","url":"/rooms","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"الرسائل","short_name":"الرسائل","url":"/messages","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]}
   ]
 }
