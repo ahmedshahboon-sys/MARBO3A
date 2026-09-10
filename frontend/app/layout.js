@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./brand.css";
 import AppBootstrap from "./AppBootstrap";
 import AdminConsole from "./AdminConsole";
 
