@@ -2,12 +2,14 @@ import express from "express";
 import cors from "cors";
 import http from "http";
 import crypto from "crypto";
+import { promisify } from "util";
 import { Server } from "socket.io";
 import pg from "pg";
 import { createClient } from "redis";
 
 const app = express();
 const server = http.createServer(app);
+const scryptAsync = promisify(crypto.scrypt);
 
 app.use(cors());
 app.use(express.json({ limit: "32kb" }));
@@ -26,13 +28,35 @@ const OTP_TTL_SECONDS = 10 * 60;
 const OTP_RESEND_SECONDS = 60;
 const OTP_MAX_PER_HOUR = 6;
 const OTP_MAX_VERIFY_ATTEMPTS = 5;
+const VERIFIED_EMAIL_TTL_SECONDS = 30 * 60;
+const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 function normalizeEmail(value = "") {
   return String(value).trim().toLowerCase();
 }
 
+function normalizeUsername(value = "") {
+  return String(value).trim().toLowerCase();
+}
+
+function normalizeDisplayName(value = "") {
+  return String(value).trim().replace(/\s+/g, " ");
+}
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+}
+
+function isValidUsername(username) {
+  return /^[a-z0-9._]{3,24}$/.test(username);
+}
+
+function isValidDisplayName(name) {
+  return name.length >= 2 && name.length <= 50;
+}
+
+function isValidPassword(password) {
+  return typeof password === "string" && password.length >= 8 && password.length <= 128;
 }
 
 function otpHash(email, code) {
@@ -47,6 +71,52 @@ function safeEqualHex(a, b) {
   } catch {
     return false;
   }
+}
+
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16);
+  const derived = await scryptAsync(password, salt, 64);
+  return `scrypt:${salt.toString("hex")}:${Buffer.from(derived).toString("hex")}`;
+}
+
+async function verifyPassword(password, stored) {
+  try {
+    const [algo, saltHex, hashHex] = String(stored).split(":");
+    if (algo !== "scrypt" || !saltHex || !hashHex) return false;
+    const derived = await scryptAsync(password, Buffer.from(saltHex, "hex"), 64);
+    const expected = Buffer.from(hashHex, "hex");
+    const actual = Buffer.from(derived);
+    return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+  } catch {
+    return false;
+  }
+}
+
+async function createSession(userId) {
+  const token = crypto.randomBytes(32).toString("hex");
+  await redis.set(`session:${token}`, String(userId), { EX: SESSION_TTL_SECONDS });
+  return token;
+}
+
+async function getSessionUser(req) {
+  const auth = req.headers.authorization || "";
+  const match = auth.match(/^Bearer\s+([a-f0-9]{64})$/i);
+  if (!match) return null;
+
+  const token = match[1];
+  const userId = await redis.get(`session:${token}`);
+  if (!userId) return null;
+
+  const result = await pool.query(
+    `SELECT id, email, username, display_name, gender, created_at
+     FROM users
+     WHERE id = $1`,
+    [userId]
+  );
+
+  if (!result.rows[0]) return null;
+  await redis.expire(`session:${token}`, SESSION_TTL_SECONDS);
+  return { token, user: result.rows[0] };
 }
 
 async function sendOtpEmail(email, code) {
@@ -102,6 +172,23 @@ async function boot() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id BIGSERIAL PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      username TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL,
+      gender TEXT NOT NULL CHECK (gender IN ('male', 'female')),
+      password_hash TEXT NOT NULL,
+      email_verified_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`CREATE INDEX IF NOT EXISTS users_username_lower_idx ON users ((LOWER(username)))`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS users_email_lower_idx ON users ((LOWER(email)))`);
+
   const io = new Server(server, {
     cors: { origin: "*" }
   });
@@ -142,6 +229,11 @@ async function boot() {
 
     if (!isValidEmail(email)) {
       return res.status(400).json({ ok: false, error: "INVALID_EMAIL" });
+    }
+
+    const existing = await pool.query("SELECT id FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1", [email]);
+    if (existing.rows[0]) {
+      return res.status(409).json({ ok: false, error: "EMAIL_ALREADY_REGISTERED" });
     }
 
     const cooldownKey = `otp:cooldown:${email}`;
@@ -241,13 +333,112 @@ async function boot() {
     }
 
     await redis.del(otpKey);
-    await redis.set(`email:verified:${email}`, "1", { EX: 30 * 60 });
+    await redis.set(`email:verified:${email}`, "1", { EX: VERIFIED_EMAIL_TTL_SECONDS });
 
     return res.json({
       ok: true,
       verified: true,
       email
     });
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    const email = normalizeEmail(req.body?.email);
+    const username = normalizeUsername(req.body?.username);
+    const displayName = normalizeDisplayName(req.body?.displayName);
+    const gender = req.body?.gender;
+    const password = req.body?.password;
+
+    if (!isValidEmail(email)) return res.status(400).json({ ok: false, error: "INVALID_EMAIL" });
+    if (!isValidUsername(username)) return res.status(400).json({ ok: false, error: "INVALID_USERNAME" });
+    if (!isValidDisplayName(displayName)) return res.status(400).json({ ok: false, error: "INVALID_DISPLAY_NAME" });
+    if (!['male', 'female'].includes(gender)) return res.status(400).json({ ok: false, error: "INVALID_GENDER" });
+    if (!isValidPassword(password)) return res.status(400).json({ ok: false, error: "WEAK_PASSWORD" });
+
+    const verified = await redis.get(`email:verified:${email}`);
+    if (!verified) {
+      return res.status(403).json({ ok: false, error: "EMAIL_NOT_VERIFIED" });
+    }
+
+    const duplicate = await pool.query(
+      `SELECT email, username FROM users
+       WHERE LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($2)
+       LIMIT 1`,
+      [email, username]
+    );
+
+    if (duplicate.rows[0]) {
+      if (duplicate.rows[0].email.toLowerCase() === email) {
+        return res.status(409).json({ ok: false, error: "EMAIL_ALREADY_REGISTERED" });
+      }
+      return res.status(409).json({ ok: false, error: "USERNAME_TAKEN" });
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    try {
+      const inserted = await pool.query(
+        `INSERT INTO users (email, username, display_name, gender, password_hash)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, email, username, display_name, gender, created_at`,
+        [email, username, displayName, gender, passwordHash]
+      );
+
+      await redis.del(`email:verified:${email}`);
+      const token = await createSession(inserted.rows[0].id);
+
+      return res.status(201).json({
+        ok: true,
+        token,
+        expiresIn: SESSION_TTL_SECONDS,
+        user: inserted.rows[0]
+      });
+    } catch (error) {
+      if (error?.code === "23505") {
+        return res.status(409).json({ ok: false, error: "ACCOUNT_CONFLICT" });
+      }
+      console.error("Register failed:", error);
+      return res.status(500).json({ ok: false, error: "REGISTER_FAILED" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    const identifier = String(req.body?.identifier || "").trim().toLowerCase();
+    const password = req.body?.password;
+
+    if (!identifier || !isValidPassword(password)) {
+      return res.status(400).json({ ok: false, error: "INVALID_LOGIN" });
+    }
+
+    const result = await pool.query(
+      `SELECT id, email, username, display_name, gender, password_hash, created_at
+       FROM users
+       WHERE LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1)
+       LIMIT 1`,
+      [identifier]
+    );
+
+    const row = result.rows[0];
+    if (!row || !(await verifyPassword(password, row.password_hash))) {
+      return res.status(401).json({ ok: false, error: "INVALID_LOGIN" });
+    }
+
+    const token = await createSession(row.id);
+    delete row.password_hash;
+
+    return res.json({ ok: true, token, expiresIn: SESSION_TTL_SECONDS, user: row });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    const session = await getSessionUser(req);
+    if (!session) return res.status(401).json({ ok: false, error: "UNAUTHORIZED" });
+    return res.json({ ok: true, user: session.user });
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    const session = await getSessionUser(req);
+    if (session) await redis.del(`session:${session.token}`);
+    return res.json({ ok: true });
   });
 
   server.listen(4000, "0.0.0.0", () => {
