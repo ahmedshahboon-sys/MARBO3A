@@ -1,9 +1,6 @@
 name: MARBO3A Deploy
 
 on:
-  workflow_run:
-    workflows: ["MARBO3A CI"]
-    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -12,9 +9,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -50,5 +44,4 @@ jobs:
 
       - name: Cleanup key
         if: always()
-        shell: bash
         run: rm -f ~/.ssh/marbo3a_deploy
