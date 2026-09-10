@@ -1,0 +1,62 @@
+/* Final production overrides: mobile density, safe areas, message sheets, call polish. */
+:root{--marbo3a-bg:#0b0f15;--marbo3a-surface:#111720;--marbo3a-border:#283241;--marbo3a-text:#f5f6f8;--marbo3a-muted:#9aa4b2;--marbo3a-accent:#ff7a00}
+html,body{background:var(--marbo3a-bg)!important;min-height:100%;overscroll-behavior-y:none}
+body{min-height:100dvh;color:var(--marbo3a-text);padding-bottom:0!important}
+html[data-theme="light"],html[data-theme="light"] body{background:#f4f1eb!important;color:#17191d}
+.social-page,.home-page{min-height:100dvh;background:transparent!important}
+.social-shell{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+
+/* Do not let the mobile top bar cover content while scrolling. */
+@media(max-width:720px){
+  .sf-top{position:relative!important;top:auto!important;z-index:20!important}
+  .home-page .social-shell{padding-bottom:calc(122px + env(safe-area-inset-bottom))!important}
+  .home-grid{gap:14px!important}
+  .home-main,.home-side{gap:14px!important}
+}
+
+/* Compact home screen without crushing readability. */
+.home-hero{padding:18px!important;border-radius:22px!important;gap:14px!important;min-height:auto!important}
+.home-hero h1{font-size:clamp(28px,8vw,40px)!important;line-height:1.08!important;margin:.2em 0!important}
+.home-hero p{font-size:14px!important;line-height:1.7!important;margin:0!important}
+.home-hero>a{min-height:46px!important;padding:10px 15px!important;border-radius:14px!important;font-size:14px!important}
+.home-stats-five{gap:8px!important}
+.home-stats-five>a{min-height:84px!important;padding:10px 6px!important;border-radius:16px!important}
+.home-stats-five>a b{font-size:24px!important;line-height:1!important}.home-stats-five>a span{font-size:11px!important;margin-top:7px!important}
+.home-section-head{margin:8px 0!important;min-height:36px!important}.home-section-head h2,.home-section-head h3{font-size:22px!important;line-height:1.2!important;margin:0!important}.home-section-head>a{font-size:12px!important}
+.home-post-list{gap:12px!important}.home-post-card{padding:14px!important;border-radius:20px!important;gap:10px!important}.home-post-user img,.home-post-user>span{width:42px!important;height:42px!important}.home-post-user b{font-size:16px!important}.home-post-user small{font-size:11px!important}.home-post-card>p{font-size:16px!important;line-height:1.65!important;margin:6px 0!important}.home-post-thumb{display:block;width:100%!important;max-height:360px!important;object-fit:cover!important;object-position:center!important;border-radius:15px!important;background:#090c11}.home-post-card footer{padding-top:9px!important;font-size:12px!important}
+.home-side .sf-panel{padding:14px!important;border-radius:20px!important}.home-mini{padding:11px 12px!important;min-height:64px!important;border-radius:14px!important}.home-mini b{font-size:14px!important}.home-mini small{font-size:11px!important;line-height:1.45!important}.home-map-link{padding:14px!important;min-height:78px!important;border-radius:18px!important}
+@media(max-width:520px){.home-post-thumb{max-height:310px!important}.home-hero{padding:16px!important}.home-stats-five{grid-template-columns:repeat(5,minmax(0,1fr))!important}.home-stats-five>a{min-width:0!important}.home-stats-five>a span{font-size:9.5px!important}.home-section-head h2,.home-section-head h3{font-size:20px!important}}
+
+/* Dock: keep it clear of content and device safe area. */
+.social-dock{bottom:max(10px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(96vw,680px)!important;min-height:72px!important;padding:7px 10px!important;border-radius:22px!important;z-index:120!important}
+.social-dock>a{min-height:54px!important;font-size:11px!important;gap:3px!important}.social-dock .dock-create{min-width:66px!important;min-height:66px!important;border-radius:18px!important}
+@media(max-width:520px){.social-dock{width:calc(100vw - 16px)!important;bottom:max(8px,env(safe-area-inset-bottom))!important}.social-dock>a{font-size:10px!important}.social-dock svg{width:22px!important;height:22px!important}}
+
+/* Chat scroll/composer spacing. */
+.chat-social,.room-chat-page{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;background:var(--marbo3a-bg)!important}
+.chat-social-shell,.room-chat-shell{height:100dvh!important;max-height:100dvh!important;min-height:0!important;overflow:hidden!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
+.chat-stream,.room-chat-stream{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;scrollbar-gutter:stable;padding-bottom:18px!important}
+.chat-compose,.room-compose{z-index:125!important;margin-bottom:0!important}
+.chat-message-more,.room-message-more{border:0!important;background:transparent!important;color:var(--marbo3a-muted)!important;width:34px!important;height:34px!important;border-radius:10px!important;display:grid!important;place-items:center!important;padding:0!important}
+.chat-message-more:active,.room-message-more:active{background:#ffffff10!important}
+
+/* One message menu only, rendered as a true mobile bottom sheet. */
+.message-sheet-backdrop{position:fixed;inset:0;z-index:460;background:rgba(0,0,0,.56);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;padding:0 8px calc(88px + env(safe-area-inset-bottom));animation:sheetFade .16s ease-out}
+.message-sheet{width:min(100%,520px);max-height:min(72dvh,560px);overflow:auto;background:#171e28;border:1px solid #313b4a;border-radius:24px;padding:9px 12px 12px;box-shadow:0 -18px 60px #0009;animation:sheetUp .18s ease-out;color:#f6f7f9}
+.message-sheet-handle{width:42px;height:4px;border-radius:999px;background:#657082;margin:2px auto 11px}.message-sheet-reactions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px 0 10px;border-bottom:1px solid #2b3542}.message-sheet-reactions button{height:52px;border:0;border-radius:14px;background:#101620;font-size:24px}.message-sheet-actions{display:grid;gap:5px;padding-top:8px}.message-sheet-actions button,.message-sheet-cancel{width:100%;min-height:46px;border:0;border-radius:13px;background:#202936;color:#f5f6f8;text-align:right;padding:0 14px;font:inherit;font-size:14px}.message-sheet-actions button.danger{color:#ff8790;background:#32191e}.message-sheet-cancel{margin-top:8px;text-align:center;background:#0f141c;color:#aeb7c4}
+html[data-theme="light"] .message-sheet{background:#fff;color:#17191d;border-color:#ddd6cc}html[data-theme="light"] .message-sheet-reactions{border-color:#e9e2d8}html[data-theme="light"] .message-sheet-reactions button,html[data-theme="light"] .message-sheet-actions button{background:#f4f0e9;color:#17191d}html[data-theme="light"] .message-sheet-actions button.danger{background:#fff0f0;color:#a6242e}html[data-theme="light"] .message-sheet-cancel{background:#eee8df;color:#333}
+@keyframes sheetFade{from{opacity:0}to{opacity:1}}@keyframes sheetUp{from{transform:translateY(24px);opacity:.7}to{transform:translateY(0);opacity:1}}
+
+/* Debug recorder stays active but no longer covers the product UI. */
+.debug-trace-pill{position:fixed!important;left:10px!important;bottom:calc(92px + env(safe-area-inset-bottom))!important;z-index:180!important;width:36px!important;height:36px!important;min-width:36px!important;padding:0!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#0d131cdd!important;border:1px solid #344050!important;box-shadow:0 5px 18px #0007!important;overflow:hidden!important;text-decoration:none!important;font-size:0!important;color:#fff!important;opacity:.78!important}
+.debug-trace-pill i{display:block!important;width:9px!important;height:9px!important;border-radius:50%!important;background:#ff4757!important;box-shadow:0 0 0 4px #ff47572a!important}.debug-trace-pill b,.debug-trace-pill span{display:none!important}.debug-trace-pill:active{transform:scale(.94)!important;opacity:1!important}
+
+/* Calls: remote placeholder should remain visible until media actually arrives. */
+.call-video-stage>video:first-child{background:transparent!important;transition:opacity .18s ease}.call-video-stage:not(.has-remote-video)>video:first-child{opacity:0!important}.remote-placeholder{transition:opacity .18s ease}.remote-placeholder.ready{opacity:0!important;pointer-events:none!important}.call-local-video.camera-off{opacity:0!important;pointer-events:none!important}.call-audio-unlock{position:absolute;z-index:15;left:50%;bottom:112px;transform:translateX(-50%);border:1px solid #ff9a3d;background:#ff7a00;color:#111;border-radius:999px;padding:10px 16px;font:inherit;font-size:12px;font-weight:800;box-shadow:0 8px 30px #0008}.call-status{max-width:min(88vw,460px)!important;text-align:center!important;white-space:normal!important;line-height:1.5!important}.call-actions.active-call{bottom:max(18px,env(safe-area-inset-bottom))!important}.call-top{pointer-events:none}
+@media(max-width:520px){.call-actions.active-call{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;padding:0 8px!important}.call-actions.active-call button{width:56px!important;height:56px!important;justify-self:center!important}.call-actions.active-call button span{font-size:8px!important}.call-local-video{bottom:92px!important;width:88px!important;height:122px!important}.call-audio-unlock{bottom:94px!important}}
+
+/* Safer layout for settings tabs and other horizontal controls. */
+.settings-tabs,.settings-panel-tabs,.settings-nav{max-width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important}.settings-tabs::-webkit-scrollbar,.settings-panel-tabs::-webkit-scrollbar,.settings-nav::-webkit-scrollbar{display:none!important}
+
+/* Never allow a page to end on a white strip in dark mode. */
+body>main:last-of-type{margin-bottom:0!important}
