@@ -1,150 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {useEffect,useMemo,useState} from "react";
+import Icon from "./Icon";
+const savedToken=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
 
-function savedToken() {
-  return localStorage.getItem("marbo3a_token") || sessionStorage.getItem("marbo3a_token") || "";
-}
-
-export default function AdminConsole() {
-  const [allowed, setAllowed] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState("overview");
-  const [stats, setStats] = useState(null);
-  const [logs, setLogs] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [level, setLevel] = useState("");
-  const [query, setQuery] = useState("");
-  const [userQuery, setUserQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function api(path, options = {}) {
-    const token = savedToken();
-    if (!token) throw new Error("NO_TOKEN");
-    const headers = { ...(options.headers || {}), authorization: `Bearer ${token}` };
-    if (options.body) headers["content-type"] = "application/json";
-    const res = await fetch(path, { ...options, headers, cache: "no-store" });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || String(res.status));
-    return data;
-  }
-
-  async function loadStats() {
-    try {
-      const data = await api("/api/admin/stats");
-      setAllowed(true);
-      setStats(data.stats);
-    } catch {
-      setAllowed(false);
-    }
-  }
-
-  async function loadLogs() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (level) params.set("level", level);
-      if (query.trim()) params.set("q", query.trim());
-      params.set("limit", "160");
-      const data = await api(`/api/admin/logs?${params}`);
-      setLogs(data.logs || []);
-    } catch {}
-    setLoading(false);
-  }
-
-  async function loadUsers() {
-    setLoading(true);
-    try {
-      const data = await api(`/api/admin/users?q=${encodeURIComponent(userQuery.trim())}`);
-      setUsers(data.users || []);
-    } catch {}
-    setLoading(false);
-  }
-
-  async function loadRooms() {
-    setLoading(true);
-    try { setRooms((await api("/api/admin/rooms")).rooms || []); } catch {}
-    setLoading(false);
-  }
-
-  async function setUserStatus(user, status) {
-    if (user.username === "ahmed") return;
-    let reason = "";
-    if (status !== "active") reason = window.prompt(status === "banned" ? "سبب الحظر:" : "سبب التجميد:", "") || "";
-    if (!window.confirm(status === "active" ? `تفعيل @${user.username}؟` : `${status === "banned" ? "حظر" : "تجميد"} @${user.username}؟`)) return;
-    try {
-      await api(`/api/admin/users/${user.id}/status`, { method: "PATCH", body: JSON.stringify({ status, reason }) });
-      await Promise.all([loadUsers(), loadStats(), loadLogs()]);
-    } catch (e) { alert(`فشلت العملية: ${e.message}`); }
-  }
-
-  async function deleteRoom(room) {
-    if (!window.confirm(`حذف غرفة «${room.name}» نهائيًا مع رسائلها؟`)) return;
-    try { await api(`/api/admin/rooms/${room.id}`, { method: "DELETE" }); await Promise.all([loadRooms(), loadStats(), loadLogs()]); }
-    catch (e) { alert(`تعذر حذف الغرفة: ${e.message}`); }
-  }
-
-  useEffect(() => {
-    const timer = setTimeout(loadStats, 1200);
-    const refresh = setInterval(loadStats, 30000);
-    const onStorage = () => loadStats();
-    window.addEventListener("storage", onStorage);
-    return () => { clearTimeout(timer); clearInterval(refresh); window.removeEventListener("storage", onStorage); };
-  }, []);
-
-  useEffect(() => {
-    if (!open || !allowed) return;
-    if (tab === "overview" || tab === "logs") loadLogs();
-    if (tab === "users") loadUsers();
-    if (tab === "rooms") loadRooms();
-  }, [open, tab, level]);
-
-  const cards = useMemo(() => stats ? [
-    ["متصلون الآن", stats.onlineUsers, "●"],
-    ["الزوار الآن", stats.onlineVisitors, "◉"],
-    ["زوار اليوم", stats.visitorsToday, "↗"],
-    ["المسجلون", stats.registeredUsers, "◎"],
-    ["جدد اليوم", stats.newUsersToday, "+"],
-    ["الغرف", stats.rooms, "#"],
-    ["الرسائل", stats.messages, "✦"],
-    ["أخطاء اليوم", stats.errorsToday, "!"],
-    ["مجمّدون", stats.frozen, "❄"],
-    ["محظورون", stats.banned, "⊘"],
-  ] : [], [stats]);
-
-  if (!allowed) return null;
-
-  return <>
-    <button className="admin-fab" type="button" onClick={() => setOpen(v => !v)} aria-label="لوحة الإدارة"><span>⚙</span>{stats && <b>{stats.onlineUsers}</b>}</button>
-    {open && <div className="admin-overlay" onMouseDown={e => e.target === e.currentTarget && setOpen(false)}>
-      <section className="admin-console" dir="rtl">
-        <header className="admin-head"><div><span className="admin-kicker">SUPER ADMIN • @ahmed</span><h2>مركز إدارة مربوعة</h2><p>إحصائيات، المستخدمون، الغرف، الحظر والتشخيص</p></div><button type="button" onClick={() => setOpen(false)}>×</button></header>
-
-        <nav className="admin-tabs">
-          <button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>الرئيسية</button>
-          <button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>الحسابات</button>
-          <button className={tab === "rooms" ? "active" : ""} onClick={() => setTab("rooms")}>الغرف</button>
-          <button className={tab === "logs" ? "active" : ""} onClick={() => setTab("logs")}>السجل</button>
-        </nav>
-
-        {tab === "overview" && <>
-          <div className="admin-stats-grid">{cards.map(([label,value,icon]) => <article key={label}><span>{icon}</span><strong>{Number(value || 0).toLocaleString("en-US")}</strong><small>{label}</small></article>)}</div>
-          <div className="admin-note">حساب <b>@ahmed</b> هو حساب الإدارة العليا الوحيد. لا يمكن تجميده أو حظره من لوحة التحكم.</div>
-        </>}
-
-        {tab === "users" && <>
-          <div className="admin-toolbar users-toolbar"><input value={userQuery} onChange={e => setUserQuery(e.target.value)} placeholder="ابحث بالاسم، @username أو البريد..."/><button onClick={loadUsers}>{loading ? "..." : "بحث"}</button></div>
-          <div className="admin-user-list">{users.map(u => <article className="admin-user-card" key={u.id}><div className="admin-user-main"><div className="admin-user-avatar">{u.display_name?.[0] || "م"}</div><div><b>{u.display_name}</b><span>@{u.username} • {u.email}</span><small>{new Date(u.created_at).toLocaleDateString("ar-LY")}</small></div></div><div className="admin-user-actions"><span className={`status-pill ${u.account_status}`}>{u.username === "ahmed" ? "SUPER ADMIN" : u.account_status === "active" ? "نشط" : u.account_status === "frozen" ? "مجمّد" : "محظور"}</span>{u.username !== "ahmed" && <><button onClick={() => setUserStatus(u,"active")}>تفعيل</button><button className="warn" onClick={() => setUserStatus(u,"frozen")}>تجميد</button><button className="danger" onClick={() => setUserStatus(u,"banned")}>حظر</button></>}</div>{u.ban_reason && <p className="admin-reason">السبب: {u.ban_reason}</p>}</article>)}</div>
-        </>}
-
-        {tab === "rooms" && <div className="admin-room-list">{rooms.map(r => <article key={r.id}><div><b>{r.name}</b><span>{r.members_count} عضو • المالك {r.owner_username ? `@${r.owner_username}` : "النظام"}</span><small>{r.description}</small></div><button className="danger" onClick={() => deleteRoom(r)}>حذف الغرفة</button></article>)}</div>}
-
-        {tab === "logs" && <>
-          <div className="admin-toolbar"><select value={level} onChange={e => setLevel(e.target.value)}><option value="">كل المستويات</option><option value="INFO">INFO</option><option value="WARNING">WARNING</option><option value="ERROR">ERROR</option></select><input value={query} onChange={e => setQuery(e.target.value)} placeholder="بحث في العمليات أو المستخدم..."/><button type="button" onClick={loadLogs}>{loading ? "..." : "تحديث"}</button></div>
-          <div className="admin-log-list">{logs.length === 0 && <div className="admin-empty">ما فيش سجلات مطابقة توا.</div>}{logs.map(log => <article className={`admin-log ${String(log.level || "").toLowerCase()}`} key={log.id}><div className="admin-log-top"><span>{log.level}</span><b>{log.category}</b><time>{new Date(log.created_at).toLocaleString("ar-LY")}</time></div><strong>{log.action}</strong><div className="admin-log-meta">{log.username && <span>@{log.username}</span>}{log.status_code && <span>HTTP {log.status_code}</span>}{Number.isFinite(log.duration_ms) && <span>{log.duration_ms}ms</span>}{log.ip_address && <span dir="ltr">{log.ip_address}</span>}</div></article>)}</div>
-        </>}
-      </section>
-    </div>}
-  </>;
+export default function AdminConsole(){
+  const [allowed,setAllowed]=useState(false),[open,setOpen]=useState(false),[tab,setTab]=useState("overview"),[stats,setStats]=useState(null),[logs,setLogs]=useState([]),[users,setUsers]=useState([]),[rooms,setRooms]=useState([]),[debug,setDebug]=useState([]),[broadcasts,setBroadcasts]=useState([]),[loading,setLoading]=useState(false);
+  const [level,setLevel]=useState(""),[query,setQuery]=useState(""),[userQuery,setUserQuery]=useState("");
+  const [bMessage,setBMessage]=useState(""),[bKind,setBKind]=useState("info"),[bDuration,setBDuration]=useState(5000),[bPersist,setBPersist]=useState(0),[bSound,setBSound]=useState(false),[bActionLabel,setBActionLabel]=useState(""),[bActionUrl,setBActionUrl]=useState("");
+  async function api(path,options={}){const t=savedToken();if(!t)throw new Error("NO_TOKEN");const headers={...(options.headers||{}),authorization:`Bearer ${t}`};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||String(r.status));return d;}
+  async function loadStats(){try{const d=await api("/api/admin/stats");setAllowed(true);setStats(d.stats);}catch{setAllowed(false);}}
+  async function loadLogs(){setLoading(true);try{const p=new URLSearchParams();if(level)p.set("level",level);if(query.trim())p.set("q",query.trim());p.set("limit","160");setLogs((await api(`/api/admin/logs?${p}`)).logs||[]);}catch{}setLoading(false);}
+  async function loadUsers(){setLoading(true);try{setUsers((await api(`/api/admin/users?q=${encodeURIComponent(userQuery.trim())}`)).users||[]);}catch{}setLoading(false);}
+  async function loadRooms(){setLoading(true);try{setRooms((await api("/api/admin/rooms")).rooms||[]);}catch{}setLoading(false);}
+  async function loadDebug(){setLoading(true);try{setDebug((await api(`/api/admin/debug?q=${encodeURIComponent(query.trim())}`)).events||[]);}catch{}setLoading(false);}
+  async function loadBroadcasts(){try{setBroadcasts((await api("/api/admin/broadcasts")).broadcasts||[]);}catch{}}
+  async function setUserStatus(u,status){if(u.username==="ahmed")return;let reason="";if(status!=="active")reason=prompt(status==="banned"?"سبب الحظر:":"سبب التجميد:","")||"";if(!confirm(status==="active"?`تفعيل @${u.username}؟`:`${status==="banned"?"حظر":"تجميد"} @${u.username}؟`))return;try{await api(`/api/admin/users/${u.id}/status`,{method:"PATCH",body:JSON.stringify({status,reason})});await Promise.all([loadUsers(),loadStats(),loadLogs()]);}catch(e){alert(`فشلت العملية: ${e.message}`);}}
+  async function deleteRoom(r){if(!confirm(`حذف غرفة «${r.name}» نهائيًا مع رسائلها؟`))return;try{await api(`/api/admin/rooms/${r.id}`,{method:"DELETE"});await Promise.all([loadRooms(),loadStats(),loadLogs()]);}catch(e){alert(`تعذر حذف الغرفة: ${e.message}`);}}
+  async function sendBroadcast(e){e.preventDefault();if(!bMessage.trim())return;setLoading(true);try{const d=await api("/api/admin/broadcasts",{method:"POST",body:JSON.stringify({message:bMessage,kind:bKind,durationMs:Number(bDuration),persistSeconds:Number(bPersist),sound:bSound,actionLabel:bActionLabel,actionUrl:bActionUrl})});setBMessage("");await Promise.all([loadBroadcasts(),loadLogs()]);alert(`تم الإرسال — وصل لحظيًا إلى ${d.broadcast?.delivered_count||0} اتصال`);}catch(e){alert(`تعذر البث: ${e.message}`);}setLoading(false);}
+  useEffect(()=>{const a=setTimeout(loadStats,900),b=setInterval(loadStats,30000);return()=>{clearTimeout(a);clearInterval(b)}},[]);
+  useEffect(()=>{if(!open||!allowed)return;if(tab==="logs")loadLogs();if(tab==="users")loadUsers();if(tab==="rooms")loadRooms();if(tab==="debug")loadDebug();if(tab==="broadcast"){loadBroadcasts();}},[open,tab,level]);
+  const cards=useMemo(()=>stats?[["متصلون الآن",stats.onlineUsers],["الزوار الآن",stats.onlineVisitors],["زوار اليوم",stats.visitorsToday],["المسجلون",stats.registeredUsers],["نشطون 24س",stats.activeUsers24h],["جدد اليوم",stats.newUsersToday],["الغرف",stats.rooms],["غرف نشطة",stats.activeRooms24h],["الرسائل",stats.messages],["أخطاء اليوم",stats.errorsToday],["مجمّدون",stats.frozen],["محظورون",stats.banned]]:[],[stats]);
+  if(!allowed)return null;
+  return <><button className="admin-fab" onClick={()=>setOpen(v=>!v)} aria-label="لوحة الإدارة"><Icon name="settings" size={22}/>{stats&&<b>{stats.onlineUsers}</b>}</button>{open&&<div className="admin-overlay" onMouseDown={e=>e.target===e.currentTarget&&setOpen(false)}><section className="admin-console" dir="rtl">
+    <header className="admin-head"><div><span className="admin-kicker">SUPER ADMIN • @ahmed</span><h2>مركز إدارة مربوعة</h2><p>إحصائيات، مراقبة، حسابات، غرف وبث فوري</p></div><button onClick={()=>setOpen(false)}><Icon name="close"/></button></header>
+    <nav className="admin-tabs">{[["overview","الرئيسية"],["users","الحسابات"],["rooms","الغرف"],["broadcast","البث الفوري"],["debug","Debug"],["logs","Audit"]].map(([k,l])=><button key={k} className={tab===k?"active":""} onClick={()=>setTab(k)}>{l}</button>)}</nav>
+    {tab==="overview"&&<><div className="admin-stats-grid">{cards.map(([l,v])=><article key={l}><strong>{Number(v||0).toLocaleString("en-US")}</strong><small>{l}</small></article>)}</div><div className="admin-note">صلاحيات الإدارة العليا محصورة Server-side في <b>@ahmed</b>.</div></>}
+    {tab==="users"&&<><div className="admin-toolbar users-toolbar"><input value={userQuery} onChange={e=>setUserQuery(e.target.value)} placeholder="ابحث بالاسم أو البريد أو @username"/><button onClick={loadUsers}>بحث</button></div><div className="admin-user-list">{users.map(u=><article className="admin-user-card" key={u.id}><div className="admin-user-main"><div className="admin-user-avatar">{u.display_name?.[0]||"م"}</div><div><b>{u.display_name}</b><span>@{u.username} • {u.email}</span><small>{u.last_seen_at?`آخر ظهور ${new Date(u.last_seen_at).toLocaleString("ar-LY")}`:"لا يوجد نشاط مسجل"}</small></div></div><div className="admin-user-actions"><span className={`status-pill ${u.account_status}`}>{u.username==="ahmed"?"SUPER ADMIN":u.account_status}</span>{u.username!=="ahmed"&&<><button onClick={()=>setUserStatus(u,"active")}>تفعيل</button><button className="warn" onClick={()=>setUserStatus(u,"frozen")}>تجميد</button><button className="danger" onClick={()=>setUserStatus(u,"banned")}>حظر</button></>}</div></article>)}</div></>}
+    {tab==="rooms"&&<div className="admin-room-list">{rooms.map(r=><article key={r.id}><div><b>{r.name}</b><span>{r.members_count} عضو • {r.owner_username?`@${r.owner_username}`:"النظام"}</span><small>{r.description}</small></div><button className="danger" onClick={()=>deleteRoom(r)}>حذف الغرفة</button></article>)}</div>}
+    {tab==="broadcast"&&<><form className="broadcast-form" onSubmit={sendBroadcast}><label>نص الرسالة<textarea value={bMessage} onChange={e=>setBMessage(e.target.value)} maxLength={500} required/></label><div className="broadcast-grid"><label>النوع<select value={bKind} onChange={e=>setBKind(e.target.value)}><option value="normal">عادية</option><option value="info">معلومة</option><option value="alert">تنبيه</option><option value="warning">تحذير</option><option value="announcement">إعلان</option></select></label><label>مدة الظهور<select value={bDuration} onChange={e=>setBDuration(e.target.value)}><option value="3000">3 ثوان</option><option value="5000">5 ثوان</option><option value="10000">10 ثوان</option><option value="30000">30 ثانية</option></select></label><label>يبقى للقادمين<select value={bPersist} onChange={e=>setBPersist(e.target.value)}><option value="0">لا</option><option value="300">5 دقائق</option><option value="1800">30 دقيقة</option><option value="3600">ساعة</option></select></label></div><label className="check-row"><input type="checkbox" checked={bSound} onChange={e=>setBSound(e.target.checked)}/> صوت خفيف</label><div className="broadcast-grid"><label>نص الزر اختياري<input value={bActionLabel} onChange={e=>setBActionLabel(e.target.value)} maxLength={40}/></label><label>الرابط اختياري<input value={bActionUrl} onChange={e=>setBActionUrl(e.target.value)} maxLength={300}/></label></div><button disabled={loading}>{loading?"جاري الإرسال...":"إرسال للجميع الآن"}</button></form><div className="admin-log-list">{broadcasts.slice(0,20).map(b=><article className="admin-log" key={b.id}><div className="admin-log-top"><span>{b.kind}</span><time>{new Date(b.created_at).toLocaleString("ar-LY")}</time></div><strong>{b.message}</strong><div className="admin-log-meta"><span>{b.duration_ms}ms</span><span>وصول مباشر {b.delivered_count}</span></div></article>)}</div></>}
+    {tab==="debug"&&<><div className="admin-toolbar"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="بحث في الأخطاء..."/><button onClick={loadDebug}>تحديث</button></div><div className="admin-log-list">{debug.map(d=><article className={`admin-log ${String(d.level).toLowerCase()}`} key={d.id}><div className="admin-log-top"><span>{d.level}</span><b>{d.source}</b><time>{new Date(d.created_at).toLocaleString("ar-LY")}</time></div><strong>{d.message}</strong><div className="admin-log-meta">{d.username&&<span>@{d.username}</span>}{d.context?.component&&<span>{d.context.component}</span>}</div></article>)}</div></>}
+    {tab==="logs"&&<><div className="admin-toolbar"><select value={level} onChange={e=>setLevel(e.target.value)}><option value="">الكل</option><option>INFO</option><option>WARNING</option><option>ERROR</option></select><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="بحث في السجل..."/><button onClick={loadLogs}>تحديث</button></div><div className="admin-log-list">{logs.map(l=><article className={`admin-log ${String(l.level).toLowerCase()}`} key={l.id}><div className="admin-log-top"><span>{l.level}</span><b>{l.category}</b><time>{new Date(l.created_at).toLocaleString("ar-LY")}</time></div><strong>{l.action}</strong><div className="admin-log-meta">{l.username&&<span>@{l.username}</span>}{l.status_code&&<span>HTTP {l.status_code}</span>}{l.duration_ms!=null&&<span>{l.duration_ms}ms</span>}</div></article>)}</div></>}
+  </section></div>}</>;
 }
