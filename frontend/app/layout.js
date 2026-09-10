@@ -12,7 +12,6 @@ import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
 import SettingsPanel from "./SettingsPanel";
 import AdminConsole from "./AdminConsole";
-import AdminShortcuts from "./AdminShortcuts";
 import ChatBridge from "./ChatBridge";
 import SocialDock from "./SocialDock";
 import SocialHomeRedirect from "./SocialHomeRedirect";
@@ -50,7 +49,6 @@ export default function RootLayout({ children }) {
         <SocialDock />
         <SettingsPanel />
         <AdminConsole />
-        <AdminShortcuts />
         <ChatBridge />
       </body>
     </html>
