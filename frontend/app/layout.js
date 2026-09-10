@@ -15,6 +15,7 @@ import "./v1-final.css";
 import "./stability.css";
 import "./ui-final.css";
 import "./ui-polish.css";
+import "./voice.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
