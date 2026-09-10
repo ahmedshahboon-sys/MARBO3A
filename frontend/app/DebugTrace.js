@@ -7,10 +7,17 @@ const safe=s=>String(s||"")
   .replace(/bearer\s+[a-z0-9._-]+/ig,"Bearer [redacted]")
   .slice(0,240);
 const isTraceEndpoint=url=>String(url||"").startsWith("/api/debug/session/");
+const cleanRtc=v=>{
+  if(v==null||typeof v==="number"||typeof v==="boolean")return v;
+  if(typeof v==="string")return safe(v);
+  if(Array.isArray(v))return v.slice(0,10).map(cleanRtc);
+  if(typeof v==="object"){const out={};for(const[k,val]of Object.entries(v)){if(/credential|secret|sdp|candidate$/i.test(k))continue;out[safe(k)]=cleanRtc(val)}return out}
+  return safe(v);
+};
 
 export default function DebugTrace(){
   const[on,setOn]=useState(false);
-  const[counts,setCounts]=useState({error:0,api:0,ui:0});
+  const[counts,setCounts]=useState({error:0,api:0,ui:0,rtc:0});
   const sid=useRef("");
 
   useEffect(()=>{
@@ -41,6 +48,7 @@ export default function DebugTrace(){
       if(type.includes("error"))setCounts(x=>({...x,error:x.error+1}));
       if(type==="api_error")setCounts(x=>({...x,api:x.api+1}));
       if(type==="ui_overlap"||type==="ui_overflow")setCounts(x=>({...x,ui:x.ui+1}));
+      if(type.startsWith("rtc_"))setCounts(x=>({...x,rtc:x.rtc+1}));
       clearTimeout(timer);
       timer=setTimeout(flush,700);
     };
@@ -48,7 +56,6 @@ export default function DebugTrace(){
     const flush=()=>{
       if(!batch.length||!sid.current)return;
       const events=batch.splice(0,50);
-      /* Use the original fetch so a trace-write failure can never recursively trace itself. */
       originalFetch(`/api/debug/session/${sid.current}/events`,{
         method:"POST",
         headers:{authorization:`Bearer ${tok()}`,"content-type":"application/json"},
@@ -60,13 +67,11 @@ export default function DebugTrace(){
     const click=e=>{
       const el=e.target?.closest?.("button,a,input,label,summary,[role=button]");
       if(!el)return;
-      add("click",{
-        target:safe(el.getAttribute("aria-label")||el.getAttribute("title")||el.name||el.id||el.innerText||el.tagName),
-        href:safe(el.getAttribute("href"))
-      });
+      add("click",{target:safe(el.getAttribute("aria-label")||el.getAttribute("title")||el.name||el.id||el.innerText||el.tagName),href:safe(el.getAttribute("href"))});
     };
     const err=e=>add("js_error",{message:safe(e.message),source:safe(e.filename),line:e.lineno});
     const rej=e=>add("promise_error",{message:safe(e.reason?.message||e.reason)});
+    const rtc=e=>{const d=cleanRtc(e.detail||{}),type=String(d.type||"rtc_event");delete d.type;add(type.startsWith("rtc_")?type:"rtc_event",d)};
 
     const originalFetch=window.fetch.bind(window);
     window.fetch=async(...args)=>{
@@ -85,21 +90,16 @@ export default function DebugTrace(){
 
     const scan=()=>{
       const nowPath=location.pathname+location.search;
-      if(nowPath!==lastPath){
-        add("navigation",{from:safe(lastPath),to:safe(nowPath),title:safe(document.title)});
-        lastPath=nowPath;
-      }
+      if(nowPath!==lastPath){add("navigation",{from:safe(lastPath),to:safe(nowPath),title:safe(document.title)});lastPath=nowPath}
       if(document.documentElement.scrollWidth>innerWidth+8)add("ui_overflow",{width:document.documentElement.scrollWidth,viewport:innerWidth});
-      const dock=document.querySelector(".social-dock"),compose=document.querySelector(".chat-compose,.sf-composer");
-      if(dock&&compose){
-        const a=dock.getBoundingClientRect(),b=compose.getBoundingClientRect();
-        if(a.top<b.bottom&&a.bottom>b.top)add("ui_overlap",{target:"social-dock/composer"});
-      }
+      const dock=document.querySelector(".social-dock"),compose=document.querySelector(".chat-compose,.room-compose,.sf-composer");
+      if(dock&&compose){const a=dock.getBoundingClientRect(),b=compose.getBoundingClientRect();if(a.top<b.bottom&&a.bottom>b.top)add("ui_overlap",{target:"social-dock/composer"})}
     };
 
     document.addEventListener("click",click,true);
     window.addEventListener("error",err);
     window.addEventListener("unhandledrejection",rej);
+    window.addEventListener("marbo3a:rtc-debug",rtc);
     add("page_view",{title:safe(document.title),viewport:`${innerWidth}x${innerHeight}`});
     const iv=setInterval(scan,2500);
 
@@ -107,6 +107,7 @@ export default function DebugTrace(){
       document.removeEventListener("click",click,true);
       window.removeEventListener("error",err);
       window.removeEventListener("unhandledrejection",rej);
+      window.removeEventListener("marbo3a:rtc-debug",rtc);
       window.fetch=originalFetch;
       clearInterval(iv);
       clearTimeout(timer);
@@ -115,5 +116,5 @@ export default function DebugTrace(){
   },[on]);
 
   if(!on)return null;
-  return <a href="/admin/debug" className="debug-trace-pill" title="فتح سجل الديباق"><i/> REC <b>{counts.error}</b><span>API {counts.api}</span><span>UI {counts.ui}</span></a>;
+  return <a href="/admin/debug" className="debug-trace-pill" title="فتح سجل الديباق" aria-label={`ديباق: ${counts.error} خطأ، ${counts.api} API، ${counts.ui} واجهة، ${counts.rtc} WebRTC`}><i/> <span className="debug-rec-label">REC</span> <b>{counts.error}</b><span>API {counts.api}</span><span>UI {counts.ui}</span><span>RTC {counts.rtc}</span></a>;
 }
