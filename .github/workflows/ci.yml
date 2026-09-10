@@ -22,6 +22,7 @@ jobs:
       - run: node --check instrumentation.mjs
       - run: node --check platform-extra.mjs
       - run: node --check core-extensions.mjs
+      - run: node --check social-extensions.mjs
   frontend:
     runs-on: ubuntu-latest
     defaults:
