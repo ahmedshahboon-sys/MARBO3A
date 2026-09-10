@@ -1,0 +1,5 @@
+"use client";
+import {useParams} from "next/navigation";
+import {useState} from "react";
+const saved=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
+export default function Invite(){const{token}=useParams(),[status,setStatus]=useState("");async function join(){const t=saved();if(!t){location.href="/";return;}const r=await fetch(`/api/invites/${token}/redeem`,{method:"POST",headers:{authorization:`Bearer ${t}`}});const d=await r.json().catch(()=>({}));if(!r.ok){setStatus(d.error||"تعذر استخدام الدعوة");return;}setStatus("تم الانضمام للغرفة بنجاح");setTimeout(()=>location.href="/",900);}return <main className="feature-page"><section className="feature-card invite-card"><img src="/logo.svg" width="72" height="72" alt="مربوعة"/><h1>دعوة إلى غرفة في مربوعة</h1><p>اضغط للانضمام. إذا مش مسجل دخول بنرجعك للصفحة الرئيسية أولًا.</p><div className="invite-token">{token}</div><button className="feature-action" onClick={join}>قبول الدعوة</button>{status&&<div className="settings-status">{status}</div>}</section></main>}
