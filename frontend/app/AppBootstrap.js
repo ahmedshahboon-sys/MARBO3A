@@ -17,8 +17,7 @@ function visitorId() {
 
 export default function AppBootstrap() {
   useEffect(() => {
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
-
+    /* Service-worker lifecycle is owned by PlatformClient only. */
     let stopped = false;
     async function ping() {
       if (stopped || document.visibilityState === "hidden") return;
