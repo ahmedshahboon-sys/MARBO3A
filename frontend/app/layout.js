@@ -5,6 +5,7 @@ import "./platform.css";
 import "./advanced.css";
 import "./social-feed.css";
 import "./social-pages.css";
+import "./social-hubs.css";
 import "./chat-social.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
@@ -14,6 +15,7 @@ import AdminConsole from "./AdminConsole";
 import AdminShortcuts from "./AdminShortcuts";
 import ChatBridge from "./ChatBridge";
 import SocialDock from "./SocialDock";
+import SocialHomeRedirect from "./SocialHomeRedirect";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -43,6 +45,7 @@ export default function RootLayout({ children }) {
       <body className={cairo.className}>
         <AppBootstrap />
         <PlatformClient />
+        <SocialHomeRedirect />
         {children}
         <SocialDock />
         <SettingsPanel />
