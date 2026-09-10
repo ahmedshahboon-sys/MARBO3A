@@ -2,7 +2,55 @@
 import {useEffect,useState} from "react";
 import {usePathname} from "next/navigation";
 import Icon from "./Icon";
+
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
 const appPaths=["/home","/feed","/search","/notifications","/friends","/messages","/rooms","/map","/u/","/profile/","/blocked","/chat/","/room/"];
-export default function SideDrawer(){const path=usePathname(),[open,setOpen]=useState(false),[me,setMe]=useState(null);useEffect(()=>{const t=token();if(!t){setMe(null);return}fetch("/api/auth/me",{headers:{authorization:`Bearer ${t}`}}).then(r=>r.ok?r.json():null).then(d=>setMe(d?.user||null)).catch(()=>{});setOpen(false)},[path]);const inApp=appPaths.some(p=>p.endsWith("/")?path?.startsWith(p):path===p||path?.startsWith(p+"/"));if(!me||!inApp||path?.startsWith("/admin"))return null;async function logout(){try{await fetch("/api/auth/logout",{method:"POST",headers:{authorization:`Bearer ${token()}`}})}catch{}localStorage.removeItem("marbo3a_token");sessionStorage.removeItem("marbo3a_token");location.href="/"}function openSettings(){setOpen(false);setTimeout(()=>document.querySelector(".settings-fab")?.click(),60)}function openAdmin(){setOpen(false);setTimeout(()=>document.querySelector(".admin-fab")?.click(),60)}
-const items=[["/home","home","الرئيسية"],["/feed","sparkles","المنشورات"],["/search","search","البحث"],["/notifications","bell","الإشعارات"],["/friends","users","الأصحاب"],["/messages","message","الرسائل"],["/rooms","hash","الغرف"],["/map","map","الخريطة"],[`/u/${me.username}`,"user","ملفي الشخصي"],["/profile/edit","image","تعديل الملف"],["/blocked","warning","المحظورون"]];return <><button className="drawer-trigger" onClick={()=>setOpen(true)} aria-label="فتح القائمة"><Icon name="menu" size={24}/></button>{open&&<div className="drawer-overlay" onMouseDown={e=>e.target===e.currentTarget&&setOpen(false)}><aside className="social-drawer"><header><div className="drawer-user">{me.avatar_url?<img src={me.avatar_url} alt=""/>:<span>{me.display_name?.[0]||"م"}</span>}<div><b>{me.display_name}</b><small>@{me.username}</small></div></div><button onClick={()=>setOpen(false)}><Icon name="close"/></button></header><nav>{items.map(([href,icon,label])=><a key={href} href={href} className={path===href||path?.startsWith(href+"/")?"active":""}><Icon name={icon}/><span>{label}</span></a>)}</nav><footer>{me.username==="ahmed"&&<><button onClick={openAdmin}><Icon name="settings"/><span>مركز الإدارة</span></button><a href="/admin/readiness"><Icon name="check"/><span>فحص جاهزية V1</span></a></>}<button onClick={openSettings}><Icon name="settings"/><span>الإعدادات</span></button><button className="drawer-logout" onClick={logout}><Icon name="logout"/><span>تسجيل الخروج</span></button></footer></aside></div>}</>}
+
+export default function SideDrawer(){
+  const path=usePathname(),[open,setOpen]=useState(false),[me,setMe]=useState(null);
+  useEffect(()=>{
+    const t=token();
+    if(!t){setMe(null);return}
+    fetch("/api/auth/me",{headers:{authorization:`Bearer ${t}`}})
+      .then(r=>r.ok?r.json():null)
+      .then(d=>setMe(d?.user||null))
+      .catch(()=>{});
+    setOpen(false);
+  },[path]);
+
+  const inApp=appPaths.some(p=>p.endsWith("/")?path?.startsWith(p):path===p||path?.startsWith(p+"/"));
+  if(!me||!inApp||path?.startsWith("/admin"))return null;
+
+  async function logout(){
+    try{await fetch("/api/auth/logout",{method:"POST",headers:{authorization:`Bearer ${token()}`}})}catch{}
+    localStorage.removeItem("marbo3a_token");
+    sessionStorage.removeItem("marbo3a_token");
+    location.href="/";
+  }
+  function openSettings(){setOpen(false);setTimeout(()=>document.querySelector(".settings-fab")?.click(),60)}
+
+  const items=[
+    ["/home","home","الرئيسية"],["/feed","sparkles","المنشورات"],["/search","search","البحث"],
+    ["/notifications","bell","الإشعارات"],["/friends","users","الأصحاب"],["/messages","message","الرسائل"],
+    ["/rooms","hash","الغرف"],["/map","map","الخريطة"],[`/u/${me.username}`,"user","ملفي الشخصي"],
+    ["/profile/edit","image","تعديل الملف"],["/blocked","warning","المحظورون"]
+  ];
+
+  return <>
+    <button className="drawer-trigger" onClick={()=>setOpen(true)} aria-label="فتح القائمة"><Icon name="menu" size={24}/></button>
+    {open&&<div className="drawer-overlay" onMouseDown={e=>e.target===e.currentTarget&&setOpen(false)}>
+      <aside className="social-drawer">
+        <header>
+          <div className="drawer-user">{me.avatar_url?<img src={me.avatar_url} alt=""/>:<span>{me.display_name?.[0]||"م"}</span>}<div><b>{me.display_name}</b><small>@{me.username}</small></div></div>
+          <button onClick={()=>setOpen(false)} aria-label="إغلاق"><Icon name="close"/></button>
+        </header>
+        <nav>{items.map(([href,icon,label])=><a key={href} href={href} className={path===href||path?.startsWith(href+"/")?"active":""}><Icon name={icon}/><span>{label}</span></a>)}</nav>
+        <footer>
+          {String(me.username).toLowerCase()==="ahmed"&&<><a href="/admin"><Icon name="settings"/><span>مركز الإدارة</span></a><a href="/admin/readiness"><Icon name="check"/><span>فحص جاهزية V1</span></a></>}
+          <button onClick={openSettings}><Icon name="settings"/><span>الإعدادات</span></button>
+          <button className="drawer-logout" onClick={logout}><Icon name="logout"/><span>تسجيل الخروج</span></button>
+        </footer>
+      </aside>
+    </div>}
+  </>;
+}
