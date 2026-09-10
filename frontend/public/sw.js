@@ -1,4 +1,4 @@
-const VERSION="marbo3a-shell-v4";
+const VERSION="marbo3a-shell-v5";
 const OFFLINE="/offline.html";
 const SHELL=[OFFLINE,"/manifest.webmanifest","/logo.svg"];
 
