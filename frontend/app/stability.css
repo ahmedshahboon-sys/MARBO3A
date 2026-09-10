@@ -1,0 +1,78 @@
+/* Final stabilization layer. Keep this file loaded last. */
+*,*::before,*::after{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:clip}
+img,video,canvas,svg{max-width:100%}
+button,input,textarea,select{font:inherit}
+
+/* Dedicated admin route */
+.admin-route-page{width:min(100%,1400px);margin:0 auto;padding:24px clamp(14px,3vw,30px) 80px}
+.admin-route-page>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;max-width:none;margin:0 0 20px}
+.admin-route-page>header>div{min-width:0;flex:1}
+.admin-route-page>header h1{font-size:clamp(30px,5vw,56px);line-height:1.15;margin:4px 0 10px}
+.admin-route-page>header p{margin:0;max-width:720px;line-height:1.8}
+.admin-route-page>header>a{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid #374151;border-radius:14px;text-decoration:none;color:#ff9a3d;background:#111720}
+.admin-route-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.admin-route-actions>a,.admin-route-actions>button{min-width:0;min-height:108px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-content:center;gap:6px 10px;padding:16px;border-radius:18px;border:1px solid #2c3544;background:#131922;color:#eef2f7;text-align:right;text-decoration:none}
+.admin-route-actions svg{grid-row:1/3;align-self:center;color:#ff7a00}
+.admin-route-actions b{font-size:16px}
+.admin-route-actions span{font-size:12px;color:#9da7b7;line-height:1.5}
+.admin-route-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.admin-route-stats>div{min-width:0;min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #283141;background:#111720}
+.admin-route-stats>div>b{font-size:clamp(26px,4vw,42px)}
+.admin-route-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.admin-route-links a{display:flex;align-items:center;min-height:54px;padding:12px 14px;border-radius:14px;border:1px solid #2c3544;background:#131922;color:#dce3ed;text-decoration:none}
+
+/* Debug page */
+.debug-admin-page{width:100%}
+.debug-grid{align-items:start}
+.debug-grid aside{position:sticky;top:12px}
+.debug-grid aside button{overflow:hidden}
+.debug-grid aside button b,.debug-grid aside button span,.debug-grid aside button code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.debug-events{min-width:0}
+.debug-event{min-width:0;overflow:hidden}
+.debug-event pre{max-width:100%;overflow:auto;border-radius:10px;background:#0a0f15;padding:10px}
+.debug-error{max-width:1400px;margin:12px auto;padding:12px 14px;border-radius:14px;border:1px solid #7f3340;background:#3b171d;color:#ffc2ca}
+
+/* Prevent fixed UI from covering primary content */
+.social-page,.chat-social-shell{isolation:isolate}
+.social-dock{z-index:70}
+.drawer-trigger{z-index:90}
+.drawer-overlay,.admin-overlay,.settings-overlay,.pwa-modal{z-index:100}
+.broadcast-toast,.update-toast,.network-banner{z-index:120}
+.debug-trace-pill{z-index:130}
+
+@media(max-width:760px){
+  .admin-route-page{padding:18px 12px 88px}
+  .admin-route-page>header{display:grid;grid-template-columns:1fr;gap:12px}
+  .admin-route-page>header h1{font-size:38px;line-height:1.2}
+  .admin-route-page>header p{font-size:15px;line-height:1.7}
+  .admin-route-page>header>a{justify-self:start}
+  .admin-route-actions{grid-template-columns:1fr;margin:14px 0}
+  .admin-route-actions>a,.admin-route-actions>button{min-height:82px;grid-template-columns:34px 1fr;padding:13px 14px}
+  .admin-route-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .admin-route-stats>div{min-height:92px;padding:10px 6px}
+  .admin-route-stats>div>b{font-size:31px}
+  .admin-route-stats>div>span{font-size:12px;text-align:center}
+  .admin-route-links{grid-template-columns:1fr}
+
+  .debug-admin-page>header{display:grid;grid-template-columns:1fr;gap:10px}
+  .debug-admin-page>header h1{font-size:36px;line-height:1.2}
+  .debug-admin-page>header>a{justify-self:start}
+  .debug-grid{grid-template-columns:1fr;gap:12px}
+  .debug-grid aside{position:static;max-height:260px;overflow:auto}
+  .debug-event{display:grid;grid-template-columns:70px minmax(70px,100px) minmax(0,1fr);gap:6px;font-size:11px}
+  .debug-event pre{font-size:10px}
+  .debug-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+  .social-dock{max-width:calc(100vw - 20px)}
+  .social-dock a{overflow:hidden}
+  .social-dock a>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chat-compose{max-width:100vw}
+}
+
+@media(max-width:380px){
+  .admin-route-page>header h1,.debug-admin-page>header h1{font-size:32px}
+  .admin-route-stats{grid-template-columns:1fr 1fr}
+  .debug-event{grid-template-columns:1fr 1fr}
+  .debug-event>span,.debug-event pre{grid-column:1/-1}
+}
