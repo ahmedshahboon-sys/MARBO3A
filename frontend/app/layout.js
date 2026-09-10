@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./brand.css";
+import "./ui-plus.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import AdminConsole from "./AdminConsole";
