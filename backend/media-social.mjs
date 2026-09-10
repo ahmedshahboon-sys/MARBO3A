@@ -13,8 +13,8 @@ const redis=createClient({url:process.env.REDIS_URL});
 redis.on("error",e=>console.error("MediaSocial Redis:",e));
 const uploadDir=path.resolve(process.env.UPLOAD_DIR||"/app/uploads");
 fs.mkdirSync(uploadDir,{recursive:true});
-const allowed=new Set(["image/jpeg","image/png","image/webp","image/gif","audio/mpeg","audio/mp4","audio/ogg","application/pdf"]);
-const storage=multer.diskStorage({destination:(_req,_file,cb)=>cb(null,uploadDir),filename:(_req,file,cb)=>{const ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","audio/mpeg":"mp3","audio/mp4":"m4a","audio/ogg":"ogg","application/pdf":"pdf"}[file.mimetype]||"bin";cb(null,`${Date.now()}-${crypto.randomBytes(10).toString("hex")}.${ext}`)}});
+const allowed=new Set(["image/jpeg","image/png","image/webp","image/gif","audio/mpeg","audio/mp4","audio/ogg","audio/webm","audio/wav","audio/x-wav","audio/aac","application/pdf"]);
+const storage=multer.diskStorage({destination:(_req,_file,cb)=>cb(null,uploadDir),filename:(_req,file,cb)=>{const ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","audio/mpeg":"mp3","audio/mp4":"m4a","audio/ogg":"ogg","audio/webm":"webm","audio/wav":"wav","audio/x-wav":"wav","audio/aac":"aac","application/pdf":"pdf"}[file.mimetype]||"bin";cb(null,`${Date.now()}-${crypto.randomBytes(10).toString("hex")}.${ext}`)}});
 const upload=multer({storage,limits:{fileSize:8*1024*1024,files:1},fileFilter:(_req,file,cb)=>allowed.has(file.mimetype)?cb(null,true):cb(new Error("UNSUPPORTED_FILE"))});
 const tok=req=>String(req.headers.authorization||"").match(/^Bearer\s+([a-f0-9]{64})$/i)?.[1]||"";
 async function current(req){if(!redis.isOpen)await redis.connect();const t=tok(req);if(!t)return null;const id=await redis.get(`session:${t}`);if(!id)return null;return (await pool.query(`SELECT id,username,display_name,avatar_url,account_status FROM users WHERE id=$1`,[id])).rows[0]||null}
