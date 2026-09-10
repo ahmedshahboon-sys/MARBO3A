@@ -19,7 +19,7 @@ export default function SocialDock(){
   const active=p=>path===p||path?.startsWith(p+"/");
   return <nav className="social-dock" aria-label="التنقل الرئيسي">
     <a className={active("/feed")?"active":""} href="/feed"><Icon name="home"/><span>الرئيسية</span></a>
-    <a href="/?tab=chats"><Icon name="message"/><span>الرسائل</span></a>
+    <a className={active("/messages")||active("/chat")?"active":""} href="/messages"><Icon name="message"/><span>الرسائل</span></a>
     <a className="dock-create" href="/feed#compose" aria-label="إنشاء منشور"><Icon name="sparkles"/></a>
     <a href="/?tab=rooms"><Icon name="hash"/><span>الغرف</span></a>
     <a className="dock-avatar" href={username?`/u/${username}`:"/"}><Icon name="users"/><span>حسابي</span></a>
