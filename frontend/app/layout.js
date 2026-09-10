@@ -9,6 +9,7 @@ import PlatformClient from "./PlatformClient";
 import SettingsPanel from "./SettingsPanel";
 import AdminConsole from "./AdminConsole";
 import AdminShortcuts from "./AdminShortcuts";
+import ChatBridge from "./ChatBridge";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -42,6 +43,7 @@ export default function RootLayout({ children }) {
         <SettingsPanel />
         <AdminConsole />
         <AdminShortcuts />
+        <ChatBridge />
       </body>
     </html>
   );
