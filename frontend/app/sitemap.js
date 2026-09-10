@@ -1,17 +1,5 @@
-export default function sitemap() {
-  const now = new Date();
-  return [
-    {
-      url: "https://marbo3a.ly/",
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 1
-    },
-    {
-      url: "https://marbo3a.ly/feed",
-      lastModified: now,
-      changeFrequency: "hourly",
-      priority: 0.8
-    }
-  ];
-}
+export default function sitemap(){const now=new Date();return[
+{url:"https://marbo3a.ly/",lastModified:now,changeFrequency:"daily",priority:1},
+{url:"https://marbo3a.ly/privacy",lastModified:now,changeFrequency:"monthly",priority:.4},
+{url:"https://marbo3a.ly/terms",lastModified:now,changeFrequency:"monthly",priority:.4}
+]}
