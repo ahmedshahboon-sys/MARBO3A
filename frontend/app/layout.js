@@ -19,6 +19,7 @@ import "./voice.css";
 import "./stability-v2.css";
 import "./calls.css";
 import "./room-voice.css";
+import "./production-fixes.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
