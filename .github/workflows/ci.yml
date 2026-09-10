@@ -28,6 +28,7 @@ jobs:
       - run: node --check social-ui-backend.mjs
       - run: node --check release-hardening.mjs
       - run: node --check media-social.mjs
+      - run: node --check launch-completion.mjs
       - run: node --check generate-vapid.mjs
   frontend:
     runs-on: ubuntu-latest
