@@ -1,15 +1,7 @@
 {
-  "name": "marbo3a-web",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start -H 0.0.0.0"
-  },
-  "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  }
+  "name":"marbo3a-web",
+  "version":"0.2.0",
+  "private":true,
+  "scripts":{"dev":"next dev","build":"next build","start":"next start -H 0.0.0.0"},
+  "dependencies":{"next":"latest","react":"latest","react-dom":"latest","qrcode":"^1.5.4"}
 }
