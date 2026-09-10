@@ -5,6 +5,7 @@ import "./platform.css";
 import "./advanced.css";
 import "./social-feed.css";
 import "./social-pages.css";
+import "./chat-social.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
