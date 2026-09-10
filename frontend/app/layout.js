@@ -9,6 +9,7 @@ import "./social-hubs.css";
 import "./chat-social.css";
 import "./social-polish.css";
 import "./release-polish.css";
+import "./social-shell-v2.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
@@ -17,6 +18,7 @@ import AdminConsole from "./AdminConsole";
 import ChatBridge from "./ChatBridge";
 import SocialDock from "./SocialDock";
 import SocialHomeRedirect from "./SocialHomeRedirect";
+import SideDrawer from "./SideDrawer";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -27,73 +29,22 @@ const cairo = Cairo({
 
 export const metadata = {
   metadataBase: new URL("https://marbo3a.ly"),
-  title: {
-    default: "مربوعة | MARBO3A",
-    template: "%s | مربوعة"
-  },
+  title: {default: "مربوعة | MARBO3A",template: "%s | مربوعة"},
   description: "مربوعة منصة تواصل اجتماعي عربية للتواصل، الغرف، الأصحاب والمجتمع.",
   applicationName: "مربوعة",
   keywords: ["مربوعة", "MARBO3A", "موقع مربوعة", "تواصل اجتماعي", "غرف دردشة", "أصدقاء", "ليبيا"],
   alternates: { canonical: "/" },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1
-    }
-  },
-  openGraph: {
-    type: "website",
-    locale: "ar_LY",
-    url: "https://marbo3a.ly/",
-    siteName: "مربوعة",
-    title: "مربوعة | MARBO3A",
-    description: "مكانك للتواصل، الغرف، الأصحاب والمجتمع."
-  },
-  twitter: {
-    card: "summary",
-    title: "مربوعة | MARBO3A",
-    description: "مكانك للتواصل، الغرف، الأصحاب والمجتمع."
-  },
+  robots: {index:true,follow:true,googleBot:{index:true,follow:true,"max-image-preview":"large","max-snippet":-1,"max-video-preview":-1}},
+  openGraph: {type:"website",locale:"ar_LY",url:"https://marbo3a.ly/",siteName:"مربوعة",title:"مربوعة | MARBO3A",description:"مكانك للتواصل، الغرف، الأصحاب والمجتمع."},
+  twitter: {card:"summary",title:"مربوعة | MARBO3A",description:"مكانك للتواصل، الغرف، الأصحاب والمجتمع."},
   manifest: "/manifest.webmanifest",
   icons: { icon: "/logo.svg", apple: "/logo.svg" },
   appleWebApp: { capable: true, title: "مربوعة", statusBarStyle: "black-translucent" }
 };
 
-export const viewport = {
-  themeColor: "#FF7A00",
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover"
-};
+export const viewport = {themeColor:"#FF7A00",width:"device-width",initialScale:1,viewportFit:"cover"};
 
 export default function RootLayout({ children }) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "مربوعة",
-    alternateName: "MARBO3A",
-    url: "https://marbo3a.ly/",
-    inLanguage: "ar"
-  };
-
-  return (
-    <html lang="ar" dir="rtl" className={cairo.variable}>
-      <body className={cairo.className}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-        <AppBootstrap />
-        <PlatformClient />
-        <SocialHomeRedirect />
-        {children}
-        <SocialDock />
-        <SettingsPanel />
-        <AdminConsole />
-        <ChatBridge />
-      </body>
-    </html>
-  );
+  const structuredData={"@context":"https://schema.org","@type":"WebSite",name:"مربوعة",alternateName:"MARBO3A",url:"https://marbo3a.ly/",inLanguage:"ar"};
+  return <html lang="ar" dir="rtl" className={cairo.variable}><body className={cairo.className}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/><AppBootstrap/><PlatformClient/><SocialHomeRedirect/>{children}<SideDrawer/><SocialDock/><SettingsPanel/><AdminConsole/><ChatBridge/></body></html>;
 }
