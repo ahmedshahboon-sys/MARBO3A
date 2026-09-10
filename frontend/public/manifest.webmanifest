@@ -1,0 +1,15 @@
+{
+  "name": "مربوعة",
+  "short_name": "مربوعة",
+  "description": "مكانك للتواصل، الغرف، والأصحاب",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111318",
+  "theme_color": "#FF7A00",
+  "icons": [
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
