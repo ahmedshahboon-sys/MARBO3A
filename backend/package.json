@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node --import ./instrumentation.mjs server.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",
