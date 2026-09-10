@@ -1,0 +1,1 @@
+export default function NotFound(){return <main className="feature-page"><section className="feature-card error-card"><div className="error-code">404</div><h1>الصفحة مش موجودة</h1><p>الرابط ممكن يكون تغير أو المحتوى اتحذف.</p><a className="feature-action" href="/">الرجوع لمربوعة</a></section></main>}
