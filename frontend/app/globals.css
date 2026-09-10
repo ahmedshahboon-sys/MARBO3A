@@ -99,7 +99,7 @@ h2 {
   box-shadow: 0 0 0 3px rgba(120, 100, 242, 0.12);
 }
 
-.form-stack button {
+.form-stack > button {
   min-height: 52px;
   border: 0;
   border-radius: 16px;
@@ -137,6 +137,29 @@ h2 {
   letter-spacing: 8px;
   font-size: 26px !important;
   font-weight: 900;
+}
+
+.gender-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gender-option {
+  min-height: 50px;
+  border-radius: 15px;
+  border: 1px solid #34405a;
+  background: #0e131d;
+  color: #d7dceb;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gender-option.selected {
+  border-color: #7a66f2;
+  background: rgba(108, 85, 235, 0.18);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(120, 100, 242, 0.1);
 }
 
 .notice {
