@@ -1,0 +1,16 @@
+"use client";
+
+import {useEffect,useState} from "react";
+import Icon from "./Icon";
+const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
+
+export default function SettingsPanel(){
+  const [visible,setVisible]=useState(false),[open,setOpen]=useState(false),[settings,setSettings]=useState({theme:"dark",notifications_enabled:true,notification_sounds:true}),[permission,setPermission]=useState("default");
+  async function api(path,options={}){const t=token();if(!t)throw new Error("NO_TOKEN");const headers={authorization:`Bearer ${t}`,...(options.headers||{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers});if(!r.ok)throw new Error("REQUEST_FAILED");return r.json();}
+  function applyTheme(theme){const actual=theme==="system"?(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):theme;document.documentElement.dataset.theme=actual;}
+  useEffect(()=>{setPermission(typeof Notification!=="undefined"?Notification.permission:"unsupported");const check=async()=>{if(!token()){setVisible(false);return;}try{const d=await api("/api/settings");setSettings(d.settings);applyTheme(d.settings.theme);setVisible(true);}catch{setVisible(false);}};check();const timer=setInterval(check,10000);return()=>clearInterval(timer);},[]);
+  async function save(next){setSettings(next);applyTheme(next.theme);try{await api("/api/settings",{method:"PATCH",body:JSON.stringify({theme:next.theme,notificationsEnabled:next.notifications_enabled,notificationSounds:next.notification_sounds})});}catch{}}
+  async function enableNotifications(){if(typeof Notification==="undefined")return;const p=await Notification.requestPermission();setPermission(p);if(p==="granted")await save({...settings,notifications_enabled:true});}
+  if(!visible)return null;
+  return <><button className="settings-fab" onClick={()=>setOpen(v=>!v)} aria-label="الإعدادات"><Icon name="settings"/></button>{open&&<div className="settings-overlay" onMouseDown={e=>e.target===e.currentTarget&&setOpen(false)}><section className="settings-card"><header><div><small>إعدادات مربوعة</small><h3>التطبيق والخصوصية</h3></div><button onClick={()=>setOpen(false)}><Icon name="close"/></button></header><div className="setting-row"><div><b>المظهر</b><span>اختار شكل مربوعة على جهازك</span></div><select value={settings.theme} onChange={e=>save({...settings,theme:e.target.value})}><option value="dark">داكن</option><option value="light">فاتح</option><option value="system">حسب الجهاز</option></select></div><div className="setting-row"><div><b>الإشعارات</b><span>{permission==="granted"?"مسموح بها على الجهاز":permission==="denied"?"محظورة من إعدادات المتصفح":"اطلب الإذن وقت ما تبي"}</span></div>{permission==="granted"?<input type="checkbox" checked={settings.notifications_enabled} onChange={e=>save({...settings,notifications_enabled:e.target.checked})}/>:<button className="setting-action" onClick={enableNotifications}>تفعيل</button>}</div><div className="setting-row"><div><b>صوت الإشعارات</b><span>صوت خفيف للتنبيهات المدعومة</span></div><input type="checkbox" checked={settings.notification_sounds} onChange={e=>save({...settings,notification_sounds:e.target.checked})}/></div></section></div>}</>;
+}
