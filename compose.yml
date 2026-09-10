@@ -44,7 +44,6 @@ services:
       - --no-tls
       - --no-dtls
       - --no-multicast-peers
-      - --no-loopback-peers
       - --log-file=stdout
 
   api:
