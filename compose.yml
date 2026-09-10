@@ -29,32 +29,30 @@ services:
       - "3478:3478/tcp"
       - "3478:3478/udp"
       - "49160-49200:49160-49200/udp"
-    entrypoint: ["/bin/sh", "-c"]
-    command: >-
-      'exec turnserver
-      --no-cli
-      --fingerprint
-      --lt-cred-mech
-      --use-auth-secret
-      --static-auth-secret="$${TURN_SECRET}"
-      --realm="$${TURN_REALM:-marbo3a.ly}"
-      --server-name="$${TURN_REALM:-marbo3a.ly}"
-      --external-ip="$${TURN_EXTERNAL_IP}"
-      --listening-port=3478
-      --min-port=49160
-      --max-port=49200
-      --no-tls
-      --no-dtls
-      --stale-nonce=600
-      --no-multicast-peers
-      --no-loopback-peers
-      --log-file=stdout'
+    command:
+      - -n
+      - --no-cli
+      - --fingerprint
+      - --lt-cred-mech
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SECRET}
+      - --realm=${TURN_REALM:-marbo3a.ly}
+      - --server-name=${TURN_REALM:-marbo3a.ly}
+      - --external-ip=${TURN_EXTERNAL_IP}
+      - --listening-port=3478
+      - --min-port=49160
+      - --max-port=49200
+      - --no-tls
+      - --no-dtls
+      - --no-multicast-peers
+      - --no-loopback-peers
+      - --log-file=stdout
     healthcheck:
-      test: ["CMD-SHELL", "pgrep turnserver >/dev/null || exit 1"]
+      test: ["CMD-SHELL", "kill -0 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 10s
+      retries: 5
+      start_period: 5s
 
   api:
     build:
@@ -68,7 +66,7 @@ services:
       redis:
         condition: service_started
       turn:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - uploads_data:/app/uploads
     ports:
