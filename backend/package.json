@@ -2,7 +2,7 @@
   "name":"marbo3a-api",
   "version":"1.0.0-rc1",
   "type":"module",
-  "scripts":{"start":"node --import ./instrumentation.mjs --import ./platform-extra.mjs --import ./core-extensions.mjs --import ./feed-extensions.mjs --import ./direct-extensions.mjs --import ./social-extensions.mjs --import ./social-ui-backend.mjs --import ./release-hardening.mjs --import ./media-social.mjs --import ./launch-completion.mjs --import ./v1-completion.mjs server.mjs"},
+  "scripts":{"start":"node --import ./instrumentation.mjs --import ./platform-extra.mjs --import ./core-extensions.mjs --import ./feed-extensions.mjs --import ./direct-extensions.mjs --import ./social-extensions.mjs --import ./social-ui-backend.mjs --import ./release-hardening.mjs --import ./media-social.mjs --import ./launch-completion.mjs --import ./v1-social-extra.mjs --import ./v1-completion.mjs server.mjs"},
   "dependencies":{
     "cors":"^2.8.5",
     "dotenv":"^16.4.7",
