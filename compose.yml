@@ -31,6 +31,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    volumes:
+      - uploads_data:/app/uploads
     ports:
       - "127.0.0.1:4000:4000"
 
@@ -43,6 +45,28 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
 
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - postgres_backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      'while true; do
+        export PGPASSWORD="$${POSTGRES_PASSWORD}";
+        TS=$$(date +%Y%m%d-%H%M%S);
+        pg_dump -h db -U "$${POSTGRES_USER:-marbo3a}" -d "$${POSTGRES_DB:-marbo3a}" -Fc -f "/backups/marbo3a-$${TS}.dump" && echo "backup completed: $${TS}";
+        find /backups -type f -name "marbo3a-*.dump" -mtime +14 -delete;
+        sleep 86400;
+      done'
+
 volumes:
   postgres_data:
   redis_data:
+  uploads_data:
+  postgres_backups:
