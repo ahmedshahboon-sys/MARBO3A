@@ -1,1 +1,0 @@
-The production Apple touch icon is generated from the canonical MARBO3A SVG artwork during deployment/build tooling. Keep the SVG source authoritative.
