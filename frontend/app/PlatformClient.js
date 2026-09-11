@@ -51,7 +51,7 @@ export default function PlatformClient(){
   function applyUpdate(){registrationRef.current?.waiting?.postMessage({type:"SKIP_WAITING"});}
 
   return <>
-    {!installed&&(installPrompt||isIOS())&&<button className="pwa-install" onClick={install}><Icon name="install" size={18}/><span>تثبيت مربوعة</span></button>}
+    {!installed&&(installPrompt||isIOS())&&<button className="pwa-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>}
     {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><button onClick={()=>location.reload()}>إعادة المحاولة</button></div>}
     {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><button onClick={applyUpdate}>تحديث</button></div>}
     {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcast.action_url&&<a href={broadcast.action_url}>{broadcast.action_label||"فتح"}</a>}<button className="broadcast-close" onClick={()=>setBroadcast(null)} aria-label="إغلاق"><Icon name="close" size={16}/></button></div>}
