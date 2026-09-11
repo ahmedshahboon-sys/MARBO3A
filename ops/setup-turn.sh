@@ -53,28 +53,46 @@ else
 fi
 
 echo
-echo "Starting TURN + API + web..."
-docker compose up -d --build turn api web
+echo "Starting API + web first so TURN cannot take the site offline..."
+docker compose up -d --build api web
+
+echo
+echo "Starting TURN independently..."
+docker compose up -d --force-recreate turn || true
 
 for _ in $(seq 1 18); do
-  status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$(docker compose ps -q turn)" 2>/dev/null || true)"
+  cid="$(docker compose ps -q turn 2>/dev/null || true)"
+  if [ -z "$cid" ]; then
+    status="missing"
+  else
+    status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid" 2>/dev/null || true)"
+  fi
   [ "$status" = "healthy" ] && break
   [ "$status" = "unhealthy" ] && break
+  [ "$status" = "exited" ] && break
   sleep 2
 done
 
 echo
 printf '%s\n' "===== TURN STATUS ====="
-docker compose ps turn
+docker compose ps turn || true
 printf '%s\n' "===== TURN LOGS ====="
-docker compose logs --tail=80 turn
+docker compose logs --tail=120 turn || true
 printf '%s\n' "===== API HEALTH ====="
-curl -fsS http://127.0.0.1:4000/api/health
-echo
+if curl -fsS http://127.0.0.1:4000/api/health; then
+  echo
+else
+  echo "API health check failed" >&2
+fi
 
-status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$(docker compose ps -q turn)" 2>/dev/null || true)"
+cid="$(docker compose ps -q turn 2>/dev/null || true)"
+if [ -z "$cid" ]; then
+  status="missing"
+else
+  status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid" 2>/dev/null || true)"
+fi
 if [ "$status" != "healthy" ]; then
-  echo "ERROR: TURN is not healthy (status=$status). Do not test calls until this is fixed." >&2
+  echo "ERROR: TURN is not healthy (status=$status). The site/API stays online, but do not test calls until TURN is fixed." >&2
   exit 2
 fi
 
