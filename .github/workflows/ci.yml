@@ -103,7 +103,15 @@ jobs:
         run: |
           set -euo pipefail
           npm run migrate
-          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM schema_migrations WHERE name IN ('009_core_runtime_schema.sql','010_social_membership_schema.sql','011_release_indexes.sql')")" = "3"
+          expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)"
+          actual="$(psql "$DATABASE_URL" -Atc 'SELECT name FROM schema_migrations ORDER BY name')"
+          if [ "$actual" != "$expected" ]; then
+            echo "=== EXPECTED MIGRATIONS ==="
+            printf '%s\n' "$expected"
+            echo "=== APPLIED MIGRATIONS ==="
+            printf '%s\n' "$actual"
+            exit 1
+          fi
       - name: API integration smoke test
         shell: bash
         run: |
