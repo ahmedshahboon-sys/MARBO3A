@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useState} from "react";
+import Link from "next/link";
 import {usePathname} from "next/navigation";
 import Icon from "./Icon";
 
@@ -11,7 +12,7 @@ export default function SideDrawer(){
   useEffect(()=>{
     const t=token();
     if(!t){setMe(null);return}
-    fetch("/api/auth/me",{headers:{authorization:`Bearer ${t}`}})
+    fetch("/api/auth/me",{headers:{authorization:`Bearer ${t}`},cache:"no-store"})
       .then(r=>r.ok?r.json():null)
       .then(d=>setMe(d?.user||null))
       .catch(()=>{});
@@ -44,9 +45,9 @@ export default function SideDrawer(){
           <div className="drawer-user">{me.avatar_url?<img src={me.avatar_url} alt=""/>:<span>{me.display_name?.[0]||"م"}</span>}<div><b>{me.display_name}</b><small>@{me.username}</small></div></div>
           <button onClick={()=>setOpen(false)} aria-label="إغلاق"><Icon name="close"/></button>
         </header>
-        <nav>{items.map(([href,icon,label])=><a key={href} href={href} className={path===href||path?.startsWith(href+"/")?"active":""}><Icon name={icon}/><span>{label}</span></a>)}</nav>
+        <nav>{items.map(([href,icon,label])=><Link prefetch key={href} href={href} className={path===href||path?.startsWith(href+"/")?"active":""}><Icon name={icon}/><span>{label}</span></Link>)}</nav>
         <footer>
-          {String(me.username).toLowerCase()==="ahmed"&&<><a href="/admin"><Icon name="settings"/><span>مركز الإدارة</span></a><a href="/admin/readiness"><Icon name="check"/><span>فحص جاهزية V1</span></a></>}
+          {String(me.username).toLowerCase()==="ahmed"&&<><Link prefetch href="/admin"><Icon name="settings"/><span>مركز الإدارة</span></Link><Link prefetch href="/admin/readiness"><Icon name="check"/><span>فحص جاهزية V1</span></Link></>}
           <button onClick={openSettings}><Icon name="settings"/><span>الإعدادات</span></button>
           <button className="drawer-logout" onClick={logout}><Icon name="logout"/><span>تسجيل الخروج</span></button>
         </footer>
