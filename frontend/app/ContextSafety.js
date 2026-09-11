@@ -1,0 +1,7 @@
+"use client";
+import {useEffect,useState} from "react";
+import {usePathname} from "next/navigation";
+import {createPortal} from "react-dom";
+import SafetyMenu from "./SafetyMenu";
+const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
+export default function ContextSafety(){const path=usePathname(),[target,setTarget]=useState(null),[host,setHost]=useState(null),[status,setStatus]=useState("");useEffect(()=>{setTarget(null);setHost(null);setStatus("");if(!token())return;let dead=false,timer;const chat=path?.match(/^\/chat\/(\d+)/)?.[1],room=path?.match(/^\/room\/(\d+)\/chat/)?.[1];async function resolve(){if(chat){try{const r=await fetch("/api/chats",{headers:{authorization:`Bearer ${token()}`},cache:"no-store"}),d=await r.json();const peer=(d.chats||[]).find(x=>String(x.id)===String(chat));if(!dead&&peer)setTarget({type:"user",id:Number(peer.user_id),userId:Number(peer.user_id)})}catch{}}else if(room)setTarget({type:"room",id:Number(room),userId:null});}function findHost(){const el=chat?document.querySelector(".chat-head-actions"):room?document.querySelector(".room-chat-tools-grid"):null;if(el){setHost(el);return}timer=setTimeout(findHost,250)}if(chat||room){resolve();findHost()}return()=>{dead=true;clearTimeout(timer)}},[path]);if(!target||!host)return null;return createPortal(<div className="context-safety-action"><SafetyMenu compact targetType={target.type} targetId={target.id} userId={target.userId} onStatus={setStatus}/>{status&&<span role="status">{status}</span>}</div>,host)}
