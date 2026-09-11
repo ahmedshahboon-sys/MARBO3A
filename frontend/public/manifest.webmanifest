@@ -15,12 +15,12 @@
   "categories":["social","communication"],
   "prefer_related_applications":false,
   "icons":[
-    {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/pwa-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/pwa-maskable.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ],
   "shortcuts":[
-    {"name":"الرئيسية","short_name":"الرئيسية","url":"/home","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]},
-    {"name":"الغرف","short_name":"الغرف","url":"/rooms","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]},
-    {"name":"الرسائل","short_name":"الرسائل","url":"/messages","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]}
+    {"name":"الرئيسية","short_name":"الرئيسية","url":"/home","icons":[{"src":"/pwa-icon.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"الغرف","short_name":"الغرف","url":"/rooms","icons":[{"src":"/pwa-icon.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"الرسائل","short_name":"الرسائل","url":"/messages","icons":[{"src":"/pwa-icon.svg","sizes":"any","type":"image/svg+xml"}]}
   ]
 }
