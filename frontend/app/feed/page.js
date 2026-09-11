@@ -1,3 +1,2 @@
-"use client";
-import SocialFeed from "../SocialFeed";
-export default function FeedPage(){return <SocialFeed/>}
+import {redirect} from "next/navigation";
+export default function FeedPage(){redirect("/home")}

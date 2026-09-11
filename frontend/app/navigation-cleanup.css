@@ -1,0 +1,5 @@
+/* Global navigation policy: primary destinations live in the dock/drawer, not floating duplicates. */
+.settings-fab,.admin-fab,.debug-trace-pill{display:none!important}
+.drawer-trigger{z-index:120}
+.social-drawer footer button,.social-drawer footer a{min-height:42px}
+@media(max-width:760px){.drawer-trigger{width:38px!important;height:38px!important;border-radius:12px!important}}
