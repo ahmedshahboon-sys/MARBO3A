@@ -17,7 +17,7 @@ services:
     volumes: [redis_data:/data]
 
   turn:
-    image: coturn/coturn:latest
+    image: coturn/coturn:4.18.0-r0
     restart: unless-stopped
     env_file: [.env]
     ports:
@@ -27,18 +27,16 @@ services:
       - "49160-49200:49160-49200/tcp"
     command:
       - -n
-      - --no-cli
       - --fingerprint
       - --use-auth-secret
-      - --static-auth-secret=${TURN_SECRET}
-      - --realm=${TURN_REALM:-marbo3a.ly}
-      - --server-name=${TURN_REALM:-marbo3a.ly}
-      - --external-ip=${TURN_EXTERNAL_IP}
+      - --static-auth-secret=$${TURN_SECRET}
+      - --realm=$${TURN_REALM:-marbo3a.ly}
+      - --server-name=$${TURN_REALM:-marbo3a.ly}
+      - --external-ip=$${TURN_EXTERNAL_IP}
       - --listening-port=3478
       - --min-port=49160
       - --max-port=49200
       - --no-tls
-      - --no-dtls
       - --no-multicast-peers
       - --log-file=stdout
     healthcheck:
