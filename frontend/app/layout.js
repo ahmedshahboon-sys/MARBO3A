@@ -10,6 +10,7 @@ import "./voice.css";
 import "./room-voice.css";
 import "./calls.css";
 import "./system.css";
+import "./design-system.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
