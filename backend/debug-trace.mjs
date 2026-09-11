@@ -39,6 +39,7 @@ async function init(){
       payload JSONB NOT NULL DEFAULT '{}'::jsonb
     )`);
     await pool.query(`CREATE INDEX IF NOT EXISTS debug_session_events_session_idx ON debug_session_events(session_id,id DESC)`);
+    await pool.query(`DELETE FROM debug_sessions WHERE started_at<NOW()-INTERVAL '14 days'`);
   })().catch(e=>{ready=null;throw e});
   return ready;
 }
