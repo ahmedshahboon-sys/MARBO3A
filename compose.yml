@@ -26,6 +26,7 @@ services:
       - "49160-49200:49160-49200/udp"
       - "49160-49200:49160-49200/tcp"
     command:
+      - -n
       - --no-cli
       - --fingerprint
       - --lt-cred-mech
@@ -58,8 +59,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      turn:
-        condition: service_healthy
     volumes: [uploads_data:/app/uploads]
     ports: ["127.0.0.1:4000:4000"]
     healthcheck:
