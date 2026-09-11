@@ -168,7 +168,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE --include='*.js' '(window\.)?(alert|confirm|prompt)\(' app; then
+          if grep -RPIn --include='*.js' '(^|[^.[:alnum:]_$])(window\.)?(alert|confirm|prompt)\(' app; then
             echo "Use AppDialog/toasts instead of browser-native dialogs" >&2
             exit 1
           fi
@@ -181,4 +181,4 @@ jobs:
           test -s public/pwa-512.png
           test -s public/pwa-maskable-512.png
           test -s public/apple-touch-icon.png
-          node -e "const m=require('./public/manifest.webmanifest'); const i=m.icons||[]; if(!i.some(x=>x.src==='/pwa-192.png')||!i.some(x=>x.src==='/pwa-512.png')||!i.some(x=>x.purpose==='maskable')) process.exit(1)"
+          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('./public/manifest.webmanifest','utf8')); const i=m.icons||[]; if(!i.some(x=>x.src==='/pwa-192.png')||!i.some(x=>x.src==='/pwa-512.png')||!i.some(x=>x.purpose==='maskable')) process.exit(1)"
