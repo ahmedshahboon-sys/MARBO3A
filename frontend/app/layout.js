@@ -12,6 +12,7 @@ import "./calls.css";
 import "./system.css";
 import "./design-system.css";
 import "./navigation-cleanup.css";
+import "./safety.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
