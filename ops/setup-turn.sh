@@ -8,6 +8,12 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+# Reuse the existing production values instead of silently rotating TURN_SECRET.
+set -a
+# shellcheck disable=SC1091
+. ./.env
+set +a
+
 PUBLIC_IP="${TURN_EXTERNAL_IP:-}"
 if [ -z "$PUBLIC_IP" ]; then
   PUBLIC_IP="$(curl -4 -fsS https://api.ipify.org || true)"
@@ -32,30 +38,54 @@ set_env(){
 }
 
 set_env TURN_EXTERNAL_IP "$PUBLIC_IP"
-set_env TURN_HOST "$PUBLIC_IP"
-set_env TURN_REALM "marbo3a.ly"
+set_env TURN_HOST "${TURN_HOST:-$PUBLIC_IP}"
+set_env TURN_REALM "${TURN_REALM:-marbo3a.ly}"
 set_env TURN_SECRET "$SECRET"
 
-echo "TURN configuration written to .env"
+echo "TURN configuration ready"
 echo "Public IP: $PUBLIC_IP"
-echo "Relay UDP range: 49160-49200"
 echo "Listening: 3478/udp and 3478/tcp"
-echo
+echo "Relay: 49160-49200/udp and tcp"
+if [ -n "${TURN_TLS_HOST:-}" ]; then
+  echo "TLS fallback advertised by API: turns:${TURN_TLS_HOST}:${TURN_TLS_PORT:-443}?transport=tcp"
+else
+  echo "TLS fallback: not configured (optional TURN_TLS_HOST / TURN_TLS_PORT)"
+fi
 
-echo "Starting TURN + API..."
+echo
+echo "Starting TURN + API + web..."
 docker compose up -d --build turn api web
-sleep 8
+
+for _ in $(seq 1 18); do
+  status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$(docker compose ps -q turn)" 2>/dev/null || true)"
+  [ "$status" = "healthy" ] && break
+  [ "$status" = "unhealthy" ] && break
+  sleep 2
+done
 
 echo
 printf '%s\n' "===== TURN STATUS ====="
 docker compose ps turn
 printf '%s\n' "===== TURN LOGS ====="
-docker compose logs --tail=40 turn
+docker compose logs --tail=80 turn
 printf '%s\n' "===== API HEALTH ====="
-curl -fsS http://127.0.0.1:4000/api/health || true
+curl -fsS http://127.0.0.1:4000/api/health
 echo
 
-echo "If UFW is enabled, allow:"
+status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$(docker compose ps -q turn)" 2>/dev/null || true)"
+if [ "$status" != "healthy" ]; then
+  echo "ERROR: TURN is not healthy (status=$status). Do not test calls until this is fixed." >&2
+  exit 2
+fi
+
+echo "TURN is healthy."
+echo "If UFW is enabled, allow all of these:"
 echo "  3478/tcp"
 echo "  3478/udp"
+echo "  49160:49200/tcp"
 echo "  49160:49200/udp"
+echo
+echo "For a relay-only browser test run in DevTools:"
+echo "  localStorage.setItem('marbo3a_force_relay','1'); location.reload();"
+echo "After testing:"
+echo "  localStorage.removeItem('marbo3a_force_relay'); location.reload();"
