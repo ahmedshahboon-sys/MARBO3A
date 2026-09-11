@@ -19,15 +19,9 @@ jobs:
           SSH_HOST: ${{ secrets.MARBO3A_DEPLOY_HOST }}
         run: |
           set -euo pipefail
-          test -n "$SSH_PRIVATE_KEY"
-          test -n "$SSH_HOST"
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/marbo3a_deploy
-          chmod 600 ~/.ssh/marbo3a_deploy
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
+          test -n "$SSH_PRIVATE_KEY"; test -n "$SSH_HOST"; mkdir -p ~/.ssh; chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/marbo3a_deploy; chmod 600 ~/.ssh/marbo3a_deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/known_hosts
       - name: Deploy MARBO3A
         shell: bash
         env:
@@ -36,12 +30,8 @@ jobs:
           DEPLOY_PATH: ${{ secrets.MARBO3A_DEPLOY_PATH }}
         run: |
           set -euo pipefail
-          test -n "$SSH_HOST"
-          test -n "$SSH_USER"
           DEPLOY_PATH="${DEPLOY_PATH:-/opt/marbo3a}"
-          ssh -i ~/.ssh/marbo3a_deploy -o BatchMode=yes -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" \
-            "set -euo pipefail; cd '$DEPLOY_PATH'; git fetch origin main; git checkout main; git reset --hard origin/main; docker compose up -d --build; sleep 8; docker compose ps; curl -fsS http://127.0.0.1:4000/api/health"
-
+          ssh -i ~/.ssh/marbo3a_deploy -o BatchMode=yes -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" "set -euo pipefail; cd '$DEPLOY_PATH'; PREV=\$(git rev-parse HEAD); git fetch origin main; git checkout main; git reset --hard origin/main; chmod +x ops/deploy-production.sh; ./ops/deploy-production.sh '$DEPLOY_PATH' \"\$PREV\""
       - name: Cleanup key
         if: always()
         run: rm -f ~/.ssh/marbo3a_deploy
