@@ -27,7 +27,7 @@ services:
       - "49160-49200:49160-49200/tcp"
     command:
       - -n
-      - --cli
+      - --no-cli
       - --fingerprint
       - --use-auth-secret
       - --static-auth-secret=${TURN_SECRET}
