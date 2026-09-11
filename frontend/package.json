@@ -3,5 +3,5 @@
   "version":"0.2.0",
   "private":true,
   "scripts":{"dev":"next dev","build":"next build","start":"next start -H 0.0.0.0"},
-  "dependencies":{"next":"latest","react":"latest","react-dom":"latest","qrcode":"^1.5.4"}
+  "dependencies":{"heic2any":"^0.0.4","next":"latest","react":"latest","react-dom":"latest","qrcode":"^1.5.4"}
 }
