@@ -1,120 +1,20 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-
 const tok=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-const safe=s=>String(s||"")
-  .replace(/([?&](?:token|code|password|otp|secret|key)=)[^&]+/gi,"$1[redacted]")
-  .replace(/bearer\s+[a-z0-9._-]+/ig,"Bearer [redacted]")
-  .slice(0,240);
-const isTraceEndpoint=url=>String(url||"").startsWith("/api/debug/session/");
-const cleanRtc=v=>{
-  if(v==null||typeof v==="number"||typeof v==="boolean")return v;
-  if(typeof v==="string")return safe(v);
-  if(Array.isArray(v))return v.slice(0,10).map(cleanRtc);
-  if(typeof v==="object"){const out={};for(const[k,val]of Object.entries(v)){if(/credential|secret|sdp|candidate$/i.test(k))continue;out[safe(k)]=cleanRtc(val)}return out}
-  return safe(v);
-};
-
+const safe=s=>String(s||"").replace(/([?&](?:token|code|password|otp|secret|key)=)[^&]+/gi,"$1[redacted]").replace(/bearer\s+[a-z0-9._-]+/ig,"Bearer [redacted]").slice(0,300);
+const isTrace=url=>String(url||"").startsWith("/api/debug/session/");
+const clean=v=>{if(v==null||typeof v==="number"||typeof v==="boolean")return v;if(typeof v==="string")return safe(v);if(Array.isArray(v))return v.slice(0,15).map(clean);if(typeof v==="object"){const out={};for(const[k,val]of Object.entries(v)){if(/credential|secret|authorization|token|password|sdp|candidate$/i.test(k))continue;out[safe(k)]=clean(val)}return out}return safe(v)};
 export default function DebugTrace(){
-  const[on,setOn]=useState(false);
-  const[counts,setCounts]=useState({error:0,api:0,ui:0,rtc:0});
-  const sid=useRef("");
-
-  useEffect(()=>{
-    const token=tok();
-    if(!token)return;
-    let dead=false;
-    fetch("/api/debug/session/start",{
-      method:"POST",
-      headers:{authorization:`Bearer ${token}`,"content-type":"application/json"},
-      body:JSON.stringify({viewport:`${innerWidth}x${innerHeight}`})
-    }).then(async r=>{
-      const d=await r.json().catch(()=>({}));
-      if(dead||!r.ok||!d.ok)return;
-      sid.current=d.sessionId;
-      setOn(true);
-    }).catch(()=>{});
-    return()=>{dead=true};
-  },[]);
-
-  useEffect(()=>{
-    if(!on)return;
-    let batch=[];
-    let timer;
-    let lastPath=location.pathname+location.search;
-
-    const add=(type,data={})=>{
-      batch.push({type,path:location.pathname,ts:new Date().toISOString(),...data});
-      if(type.includes("error"))setCounts(x=>({...x,error:x.error+1}));
-      if(type==="api_error")setCounts(x=>({...x,api:x.api+1}));
-      if(type==="ui_overlap"||type==="ui_overflow")setCounts(x=>({...x,ui:x.ui+1}));
-      if(type.startsWith("rtc_"))setCounts(x=>({...x,rtc:x.rtc+1}));
-      clearTimeout(timer);
-      timer=setTimeout(flush,700);
-    };
-
-    const flush=()=>{
-      if(!batch.length||!sid.current)return;
-      const events=batch.splice(0,50);
-      originalFetch(`/api/debug/session/${sid.current}/events`,{
-        method:"POST",
-        headers:{authorization:`Bearer ${tok()}`,"content-type":"application/json"},
-        body:JSON.stringify({events}),
-        keepalive:true
-      }).catch(()=>{});
-    };
-
-    const click=e=>{
-      const el=e.target?.closest?.("button,a,input,label,summary,[role=button]");
-      if(!el)return;
-      add("click",{target:safe(el.getAttribute("aria-label")||el.getAttribute("title")||el.name||el.id||el.innerText||el.tagName),href:safe(el.getAttribute("href"))});
-    };
-    const err=e=>add("js_error",{message:safe(e.message),source:safe(e.filename),line:e.lineno});
-    const rej=e=>add("promise_error",{message:safe(e.reason?.message||e.reason)});
-    const rtc=e=>{const d=cleanRtc(e.detail||{}),type=String(d.type||"rtc_event");delete d.type;add(type.startsWith("rtc_")?type:"rtc_event",d)};
-
-    const originalFetch=window.fetch.bind(window);
-    window.fetch=async(...args)=>{
-      const raw=typeof args[0]==="string"?args[0]:args[0]?.url;
-      const url=safe(raw);
-      const start=performance.now();
-      try{
-        const r=await originalFetch(...args);
-        if(!r.ok&&url.startsWith("/api/")&&!isTraceEndpoint(url))add("api_error",{url,status:r.status,duration:Math.round(performance.now()-start)});
-        return r;
-      }catch(e){
-        if(url.startsWith("/api/")&&!isTraceEndpoint(url))add("api_error",{url,status:0,message:safe(e.message),duration:Math.round(performance.now()-start)});
-        throw e;
-      }
-    };
-
-    const scan=()=>{
-      const nowPath=location.pathname+location.search;
-      if(nowPath!==lastPath){add("navigation",{from:safe(lastPath),to:safe(nowPath),title:safe(document.title)});lastPath=nowPath}
-      if(document.documentElement.scrollWidth>innerWidth+8)add("ui_overflow",{width:document.documentElement.scrollWidth,viewport:innerWidth});
-      const dock=document.querySelector(".social-dock"),compose=document.querySelector(".chat-compose,.room-compose,.sf-composer");
-      if(dock&&compose){const a=dock.getBoundingClientRect(),b=compose.getBoundingClientRect();if(a.top<b.bottom&&a.bottom>b.top)add("ui_overlap",{target:"social-dock/composer"})}
-    };
-
-    document.addEventListener("click",click,true);
-    window.addEventListener("error",err);
-    window.addEventListener("unhandledrejection",rej);
-    window.addEventListener("marbo3a:rtc-debug",rtc);
-    add("page_view",{title:safe(document.title),viewport:`${innerWidth}x${innerHeight}`});
-    const iv=setInterval(scan,2500);
-
-    return()=>{
-      document.removeEventListener("click",click,true);
-      window.removeEventListener("error",err);
-      window.removeEventListener("unhandledrejection",rej);
-      window.removeEventListener("marbo3a:rtc-debug",rtc);
-      window.fetch=originalFetch;
-      clearInterval(iv);
-      clearTimeout(timer);
-      flush();
-    };
-  },[on]);
-
-  if(!on)return null;
-  return <a href="/admin/debug" className="debug-trace-pill" title="فتح سجل الديباق" aria-label={`ديباق: ${counts.error} خطأ، ${counts.api} API، ${counts.ui} واجهة، ${counts.rtc} WebRTC`}><i/> <span className="debug-rec-label">REC</span> <b>{counts.error}</b><span>API {counts.api}</span><span>UI {counts.ui}</span><span>RTC {counts.rtc}</span></a>;
+ const[on,setOn]=useState(false),[counts,setCounts]=useState({error:0,api:0,ui:0,rtc:0});const sid=useRef("");
+ useEffect(()=>{const t=tok();if(!t)return;let dead=false;fetch("/api/debug/session/start",{method:"POST",headers:{authorization:`Bearer ${t}`,"content-type":"application/json"},body:JSON.stringify({viewport:`${innerWidth}x${innerHeight}`})}).then(async r=>{const d=await r.json().catch(()=>({}));if(!dead&&r.ok&&d.ok){sid.current=d.sessionId;setOn(true)}}).catch(()=>{});return()=>{dead=true}},[]);
+ useEffect(()=>{if(!on)return;let batch=[],timer;const originalFetch=window.fetch.bind(window);const add=(type,data={})=>{batch.push({type,path:location.pathname,ts:new Date().toISOString(),...clean(data)});if(/error/.test(type))setCounts(x=>({...x,error:x.error+1}));if(type==="api_error"||type==="api_slow")setCounts(x=>({...x,api:x.api+1}));if(type.startsWith("ui_"))setCounts(x=>({...x,ui:x.ui+1}));if(type.startsWith("rtc_"))setCounts(x=>({...x,rtc:x.rtc+1}));clearTimeout(timer);timer=setTimeout(flush,550)};const flush=()=>{if(!batch.length||!sid.current)return;const events=batch.splice(0,50);originalFetch(`/api/debug/session/${sid.current}/events`,{method:"POST",headers:{authorization:`Bearer ${tok()}`,"content-type":"application/json"},body:JSON.stringify({events}),keepalive:true}).catch(()=>{})};
+ const click=e=>{const el=e.target?.closest?.("button,a,input,label,summary,[role=button]");if(el)add("click",{target:safe(el.getAttribute("aria-label")||el.getAttribute("title")||el.name||el.id||el.innerText||el.tagName),href:safe(el.getAttribute("href"))})};
+ const err=e=>add("js_error",{message:safe(e.message),source:safe(e.filename),line:e.lineno});const rej=e=>add("promise_error",{message:safe(e.reason?.message||e.reason)});const rtc=e=>{const d=clean(e.detail||{}),type=String(d.type||"rtc_event");delete d.type;add(type.startsWith("rtc_")?type:"rtc_event",d)};const media=e=>{const d=clean(e.detail||{}),type=String(d.type||"media_event");delete d.type;add(type,d)};const navStart=e=>add("navigation_start",clean(e.detail||{}));const navRender=e=>add("navigation_render",clean(e.detail||{}));const apiTiming=e=>{const d=clean(e.detail||{});if(Number(d.duration)>=800)add("api_slow",d)};
+ const mediaError=e=>{const el=e.target;if(!(el instanceof HTMLMediaElement||el instanceof HTMLImageElement))return;add("media_error",{tag:el.tagName,src:safe(el.currentSrc||el.src),code:el.error?.code||0,message:safe(el.error?.message||"LOAD_FAILED")})};
+ window.fetch=async(...args)=>{const raw=typeof args[0]==="string"?args[0]:args[0]?.url,url=safe(raw),start=performance.now();try{const r=await originalFetch(...args);const ms=Math.round(performance.now()-start);if(url.startsWith("/api/")&&!isTrace(url)){if(!r.ok)add("api_error",{url,status:r.status,duration:ms});else if(ms>=1000)add("api_slow",{url,status:r.status,duration:ms})}return r}catch(e){if(url.startsWith("/api/")&&!isTrace(url))add("api_error",{url,status:0,message:safe(e.message),duration:Math.round(performance.now()-start)});throw e}};
+ const scan=()=>{if(document.documentElement.scrollWidth>innerWidth+8)add("ui_overflow",{width:document.documentElement.scrollWidth,viewport:innerWidth});const dock=document.querySelector(".social-dock"),compose=document.querySelector(".chat-compose,.room-compose");if(dock&&compose){const a=dock.getBoundingClientRect(),b=compose.getBoundingClientRect();if(a.top<b.bottom&&a.bottom>b.top)add("ui_overlap",{target:"dock/composer"})}};
+ document.addEventListener("click",click,true);window.addEventListener("error",err);window.addEventListener("unhandledrejection",rej);window.addEventListener("marbo3a:rtc-debug",rtc);window.addEventListener("marbo3a:media-debug",media);window.addEventListener("marbo3a:navigation-start",navStart);window.addEventListener("marbo3a:navigation-render",navRender);window.addEventListener("marbo3a:api-timing",apiTiming);document.addEventListener("error",mediaError,true);add("page_view",{title:safe(document.title),viewport:`${innerWidth}x${innerHeight}`,ua:safe(navigator.userAgent)});const iv=setInterval(scan,3500);
+ return()=>{document.removeEventListener("click",click,true);window.removeEventListener("error",err);window.removeEventListener("unhandledrejection",rej);window.removeEventListener("marbo3a:rtc-debug",rtc);window.removeEventListener("marbo3a:media-debug",media);window.removeEventListener("marbo3a:navigation-start",navStart);window.removeEventListener("marbo3a:navigation-render",navRender);window.removeEventListener("marbo3a:api-timing",apiTiming);document.removeEventListener("error",mediaError,true);window.fetch=originalFetch;clearInterval(iv);clearTimeout(timer);flush()}
+ },[on]);
+ if(!on)return null;return <a href="/admin/debug" className="debug-trace-pill" title="فتح الديباق" aria-label={`ديباق: ${counts.error} خطأ، ${counts.api} API، ${counts.ui} واجهة، ${counts.rtc} WebRTC`}><i/><span>REC</span><b>{counts.error}</b></a>
 }

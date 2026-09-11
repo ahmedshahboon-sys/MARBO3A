@@ -1,41 +1,17 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
 import Icon from "./Icon";
-
 const MAX_SECONDS=120;
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
-const supportedType=()=>{
-  if(typeof MediaRecorder==="undefined")return "";
-  for(const t of ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/mp4"]){if(MediaRecorder.isTypeSupported?.(t))return t}
-  return "";
-};
-
+const trace=(type,data={})=>{try{window.dispatchEvent(new CustomEvent("marbo3a:media-debug",{detail:{type,...data}}))}catch{}};
+function supportedType(){if(typeof MediaRecorder==="undefined")return"";const safari=/Safari/i.test(navigator.userAgent)&&!/Chrome|CriOS|Android/i.test(navigator.userAgent);const types=safari?["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"]:["audio/webm;codecs=opus","audio/ogg;codecs=opus","audio/webm","audio/mp4"];return types.find(t=>MediaRecorder.isTypeSupported?.(t))||""}
 export default function VoiceRecorder({disabled=false,onRecorded,onError}){
-  const[state,setState]=useState("idle"),[seconds,setSeconds]=useState(0);
-  const recorder=useRef(null),stream=useRef(null),chunks=useRef([]),timer=useRef(null),cancelled=useRef(false);
-  const cleanup=()=>{clearInterval(timer.current);timer.current=null;stream.current?.getTracks?.().forEach(t=>t.stop());stream.current=null;recorder.current=null};
-  useEffect(()=>()=>cleanup(),[]);
-  async function start(){
-    if(disabled||state!=="idle")return;
-    try{
-      if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined")throw new Error("VOICE_UNSUPPORTED");
-      const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-      stream.current=s;chunks.current=[];cancelled.current=false;setSeconds(0);
-      const type=supportedType();const r=new MediaRecorder(s,type?{mimeType:type}:undefined);recorder.current=r;
-      r.ondataavailable=e=>{if(e.data?.size)chunks.current.push(e.data)};
-      r.onerror=()=>{cleanup();setState("idle");onError?.("تعذر تسجيل المقطع الصوتي")};
-      r.onstop=()=>{
-        const mime=r.mimeType||type||"audio/webm";const blob=new Blob(chunks.current,{type:mime});const ext=mime.includes("ogg")?"ogg":mime.includes("mp4")?"m4a":"webm";
-        cleanup();setState("idle");
-        if(cancelled.current||blob.size<1000)return;
-        onRecorded?.(new File([blob],`voice-${Date.now()}.${ext}`,{type:mime,lastModified:Date.now()}),seconds);
-      };
-      r.start(250);setState("recording");
-      timer.current=setInterval(()=>setSeconds(v=>{const n=v+1;if(n>=MAX_SECONDS){setTimeout(()=>stop(),0);return MAX_SECONDS}return n}),1000);
-    }catch(e){cleanup();setState("idle");onError?.(e?.name==="NotAllowedError"?"اسمح لمربوعة باستخدام المايكروفون لتسجيل رسالة صوتية":"التسجيل الصوتي غير مدعوم على هذا الجهاز")}
-  }
-  function stop(){if(recorder.current&&recorder.current.state!=="inactive")recorder.current.stop()}
-  function cancel(){cancelled.current=true;stop()}
-  if(state==="recording")return <div className="voice-recorder recording"><button type="button" className="voice-cancel" onClick={cancel}>إلغاء</button><span className="voice-dot"/><b>{fmt(seconds)}</b><span>يسجل...</span><button type="button" className="voice-stop" onClick={stop} aria-label="إيقاف التسجيل"><span/></button></div>;
-  return <button type="button" className="voice-record-btn" onClick={start} disabled={disabled} aria-label="تسجيل رسالة صوتية"><Icon name="mic"/></button>;
+ const[state,setState]=useState("idle"),[seconds,setSeconds]=useState(0);const recorder=useRef(null),stream=useRef(null),chunks=useRef([]),timer=useRef(null),cancelled=useRef(false),startedAt=useRef(0),elapsed=useRef(0);
+ const cleanup=()=>{clearInterval(timer.current);timer.current=null;stream.current?.getTracks?.().forEach(t=>t.stop());stream.current=null;recorder.current=null};
+ useEffect(()=>()=>cleanup(),[]);
+ async function start(){if(disabled||state!=="idle")return;try{if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined")throw new Error("VOICE_UNSUPPORTED");const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});stream.current=s;chunks.current=[];cancelled.current=false;startedAt.current=Date.now();elapsed.current=0;setSeconds(0);const type=supportedType(),r=new MediaRecorder(s,type?{mimeType:type}:undefined);recorder.current=r;r.ondataavailable=e=>{if(e.data?.size)chunks.current.push(e.data)};r.onerror=e=>{trace("voice_recorder_error",{name:e?.error?.name||"MediaRecorderError"});cleanup();setState("idle");onError?.("تعذر تسجيل المقطع الصوتي")};r.onstop=()=>{const ms=Math.max(elapsed.current,Date.now()-startedAt.current),duration=Math.max(1,Math.round(ms/1000)),mime=r.mimeType||type||"audio/webm",blob=new Blob(chunks.current,{type:mime}),ext=mime.includes("ogg")?"ogg":mime.includes("mp4")?"m4a":"webm";trace("voice_recorded",{mime,size:blob.size,duration,chunks:chunks.current.length});cleanup();setState("idle");if(cancelled.current||blob.size<700)return;onRecorded?.(new File([blob],`voice-${Date.now()}.${ext}`,{type:mime,lastModified:Date.now()}),duration)};r.start(500);setState("recording");trace("voice_recorder_start",{mime:type||r.mimeType||"default"});timer.current=setInterval(()=>{elapsed.current=Date.now()-startedAt.current;const sec=Math.min(MAX_SECONDS,Math.floor(elapsed.current/1000));setSeconds(sec);if(sec>=MAX_SECONDS)stop()},250)}catch(e){cleanup();setState("idle");trace("voice_recorder_error",{name:e?.name||"Error",message:e?.message||"VOICE_UNSUPPORTED"});onError?.(e?.name==="NotAllowedError"?"اسمح لمربوعة باستخدام المايكروفون":"التسجيل الصوتي غير مدعوم على هذا الجهاز")}}
+ function stop(){const r=recorder.current;if(!r||r.state==="inactive")return;elapsed.current=Math.max(elapsed.current,Date.now()-startedAt.current);try{r.requestData?.()}catch{};setTimeout(()=>{try{if(r.state!=="inactive")r.stop()}catch{}},30)}
+ function cancel(){cancelled.current=true;stop()}
+ if(state==="recording")return <div className="voice-recorder recording"><button type="button" className="voice-cancel" onClick={cancel}>إلغاء</button><span className="voice-dot"/><b>{fmt(seconds)}</b><span>يسجل...</span><button type="button" className="voice-stop" onClick={stop} aria-label="إيقاف التسجيل"><span/></button></div>;
+ return <button type="button" className="voice-record-btn" onClick={start} disabled={disabled} aria-label="تسجيل رسالة صوتية"><Icon name="mic"/></button>
 }

@@ -1,12 +1,9 @@
 services:
-
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file:
-      - .env
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    env_file: [.env]
+    volumes: [postgres_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U marbo3a -d marbo3a"]
       interval: 10s
@@ -17,18 +14,17 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
+    volumes: [redis_data:/data]
 
   turn:
     image: coturn/coturn:latest
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: [.env]
     ports:
       - "3478:3478/tcp"
       - "3478:3478/udp"
       - "49160-49200:49160-49200/udp"
+      - "49160-49200:49160-49200/tcp"
     command:
       - --no-cli
       - --fingerprint
@@ -45,24 +41,27 @@ services:
       - --no-dtls
       - --no-multicast-peers
       - --log-file=stdout
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q ':0D96 ' /proc/net/udp /proc/net/udp6 /proc/net/tcp /proc/net/tcp6 2>/dev/null"]
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 12s
 
   api:
     build:
       context: ./backend
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: [.env]
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
       turn:
-        condition: service_started
-    volumes:
-      - uploads_data:/app/uploads
-    ports:
-      - "127.0.0.1:4000:4000"
+        condition: service_healthy
+    volumes: [uploads_data:/app/uploads]
+    ports: ["127.0.0.1:4000:4000"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 10s
@@ -77,19 +76,16 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "127.0.0.1:3000:3000"
+    ports: ["127.0.0.1:3000:3000"]
 
   backup:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: [.env]
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - postgres_backups:/backups
+    volumes: [postgres_backups:/backups]
     entrypoint: ["/bin/sh", "-c"]
     command: >-
       'while true; do
