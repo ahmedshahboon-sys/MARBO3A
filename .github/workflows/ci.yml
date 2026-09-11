@@ -44,6 +44,33 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lockfiles]
     if: always() && (needs.lockfiles.result == 'success' || needs.lockfiles.result == 'skipped')
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: marbo3a
+          POSTGRES_USER: marbo3a
+          POSTGRES_PASSWORD: marbo3a_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U marbo3a -d marbo3a"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://marbo3a:marbo3a_ci@127.0.0.1:5432/marbo3a
+      REDIS_URL: redis://127.0.0.1:6379
+      APP_ORIGIN: http://127.0.0.1:4000
+      TURN_HOST: 127.0.0.1
+      TURN_SECRET: ci_turn_secret_not_for_production
     defaults:
       run:
         working-directory: backend
@@ -66,6 +93,22 @@ jobs:
           set -euo pipefail
           for file in *.mjs; do echo "checking $file"; node --check "$file"; done
       - run: npm test
+      - name: API integration smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm start >/tmp/marbo3a-api.log 2>&1 &
+          PID=$!
+          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          for _ in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4000/api/health
+          test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401"
+          test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200"
+          node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)"
 
   frontend:
     runs-on: ubuntu-latest
