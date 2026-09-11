@@ -6,56 +6,85 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
+  lockfiles:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate deterministic lockfiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd backend && npm install --package-lock-only --ignore-scripts --no-audit --no-fund)
+          (cd frontend && npm install --package-lock-only --ignore-scripts --no-audit --no-fund)
+      - name: Commit lockfiles when changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add backend/package-lock.json frontend/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lockfiles already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Lock production dependency graph"
+          git push origin HEAD:main
+
   backend:
     runs-on: ubuntu-latest
+    needs: [lockfiles]
+    if: always() && (needs.lockfiles.result == 'success' || needs.lockfiles.result == 'skipped')
     defaults:
       run:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use latest validated main
+        working-directory: .
+        run: git fetch origin main && git reset --hard origin/main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: backend/package.json
-      - run: npm install --no-audit --no-fund
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
       - name: Syntax check every backend module
         shell: bash
         run: |
           set -euo pipefail
           for file in *.mjs; do echo "checking $file"; node --check "$file"; done
       - run: npm test
-      - name: Lockfile capture
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f package-lock.json
-          echo "BACKEND_LOCK_BEGIN"
-          base64 -w0 package-lock.json
-          echo
-          echo "BACKEND_LOCK_END"
 
   frontend:
     runs-on: ubuntu-latest
+    needs: [lockfiles]
+    if: always() && (needs.lockfiles.result == 'success' || needs.lockfiles.result == 'skipped')
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use latest validated main
+        working-directory: .
+        run: git fetch origin main && git reset --hard origin/main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: frontend/package.json
-      - run: npm install --no-audit --no-fund
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
       - run: npm run build
-      - name: Lockfile capture
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f package-lock.json
-          echo "FRONTEND_LOCK_BEGIN"
-          base64 -w0 package-lock.json
-          echo
-          echo "FRONTEND_LOCK_END"
