@@ -97,18 +97,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm start >/tmp/marbo3a-api.log 2>&1 &
+          LOG=/tmp/marbo3a-api.log
+          : >"$LOG"
+          npm start >"$LOG" 2>&1 &
           PID=$!
           cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          dump_log(){ echo "=== MARBO3A API STARTUP LOG ==="; cat "$LOG" || true; echo "=== END API STARTUP LOG ==="; }
           trap cleanup EXIT
-          for _ in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null 2>&1; then break; fi
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null 2>&1; then READY=1; break; fi
+            if ! kill -0 "$PID" >/dev/null 2>&1; then dump_log; echo "API process exited before becoming healthy" >&2; exit 1; fi
             sleep 1
           done
+          if [ "$READY" != "1" ]; then dump_log; echo "API did not become healthy in time" >&2; exit 1; fi
           curl -fsS http://127.0.0.1:4000/api/health
-          test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401"
-          test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200"
-          node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)"
+          test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401" || { dump_log; cat /tmp/me.json || true; exit 1; }
+          test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200" || { dump_log; cat /tmp/push.json || true; exit 1; }
+          node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)" || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
