@@ -69,6 +69,10 @@ jobs:
       DATABASE_URL: postgresql://marbo3a:marbo3a_ci@127.0.0.1:5432/marbo3a
       REDIS_URL: redis://127.0.0.1:6379
       APP_ORIGIN: http://127.0.0.1:4000
+      UPLOAD_DIR: /tmp/marbo3a-uploads
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /tmp/marbo3a-uploads
+      STORAGE_PUBLIC_PREFIX: /api/uploads
       TURN_HOST: 127.0.0.1
       TURN_SECRET: ci_turn_secret_not_for_production
     defaults:
