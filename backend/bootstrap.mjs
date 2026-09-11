@@ -25,6 +25,7 @@ const modules=[
   "./product-v2.mjs",
   "./experience-v2.mjs",
   "./session-control.mjs",
+  "./security-completion.mjs",
   "./audit-completion.mjs",
   "./cookie-auth.mjs"
 ];
