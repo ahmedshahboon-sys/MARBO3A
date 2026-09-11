@@ -13,6 +13,7 @@
   "background_color":"#111318",
   "theme_color":"#FF7A00",
   "categories":["social","communication"],
+  "prefer_related_applications":false,
   "icons":[
     {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
     {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
