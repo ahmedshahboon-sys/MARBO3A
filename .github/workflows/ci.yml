@@ -103,7 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run migrate
-          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM schema_migrations WHERE name='009_audit_closure.sql'")" = "1"
+          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM schema_migrations WHERE name IN ('009_core_runtime_schema.sql','010_social_membership_schema.sql','011_release_indexes.sql')")" = "3"
       - name: API integration smoke test
         shell: bash
         run: |
