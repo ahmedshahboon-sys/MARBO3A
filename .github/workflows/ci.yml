@@ -101,6 +101,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # A few compatibility modules still expose the production Docker upload path.
+          # Give the bare GitHub runner a writable equivalent without changing production defaults.
+          sudo mkdir -p /app/uploads
+          sudo chown -R "$(id -u):$(id -g)" /app/uploads
+          mkdir -p "$UPLOAD_DIR" "$STORAGE_LOCAL_DIR"
           LOG=/tmp/marbo3a-api.log
           : >"$LOG"
           npm start >"$LOG" 2>&1 &
