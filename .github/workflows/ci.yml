@@ -98,10 +98,15 @@ jobs:
           set -euo pipefail
           for file in *.mjs; do echo "checking $file"; node --check "$file"; done
       - run: npm test
-      - name: Verify migrations on a clean database
+      - name: Verify migration naming and clean database
         shell: bash
         run: |
           set -euo pipefail
+          duplicates="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sed -E 's/^([0-9]+)_.*/\1/' | sort | uniq -d)"
+          if [ -n "$duplicates" ]; then
+            echo "Duplicate migration prefixes: $duplicates" >&2
+            exit 1
+          fi
           npm run migrate
           expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)"
           actual="$(psql "$DATABASE_URL" -Atc 'SELECT name FROM schema_migrations ORDER BY name')"
@@ -159,4 +164,21 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci --no-audit --no-fund
+      - name: Reject browser-native dialogs in product UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE --include='*.js' '(window\.)?(alert|confirm|prompt)\(' app; then
+            echo "Use AppDialog/toasts instead of browser-native dialogs" >&2
+            exit 1
+          fi
       - run: npm run build
+      - name: Verify generated PWA assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/pwa-192.png
+          test -s public/pwa-512.png
+          test -s public/pwa-maskable-512.png
+          test -s public/apple-touch-icon.png
+          node -e "const m=require('./public/manifest.webmanifest'); const i=m.icons||[]; if(!i.some(x=>x.src==='/pwa-192.png')||!i.some(x=>x.src==='/pwa-512.png')||!i.some(x=>x.purpose==='maskable')) process.exit(1)"
