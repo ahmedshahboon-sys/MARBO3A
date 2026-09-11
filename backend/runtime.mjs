@@ -8,7 +8,7 @@ if(!state.redis.__marbo3aErrorHook){state.redis.on("error",e=>console.error("Run
 export const pool=state.pool;export const redis=state.redis;
 export async function ensureRedis(){if(redis.isOpen)return redis;if(!state.redisReady)state.redisReady=redis.connect().catch(e=>{state.redisReady=null;throw e});await state.redisReady;return redis}
 export const tokenFrom=req=>String(req?.headers?.authorization||"").match(/^Bearer\s+([a-f0-9]{64})$/i)?.[1]||"";
-export const isAdmin=u=>String(u?.role||"").toLowerCase()==="admin"||String(u?.username||"").toLowerCase()==="ahmed";
+export const isAdmin=u=>String(u?.role||"").toLowerCase()==="admin";
 export async function sessionUser(req){await ensureRedis();const t=tokenFrom(req);if(!t)return null;const id=await redis.get(`session:${t}`);if(!id)return null;return (await pool.query(`SELECT id,email,username,display_name,gender,bio,avatar_url,account_status,ban_reason,role,two_factor_enabled,onboarding_completed,created_at FROM users WHERE id=$1`,[id])).rows[0]||null}
 export async function requireAuth(req,res){const u=await sessionUser(req);if(!u){res.status(401).json({ok:false,error:"UNAUTHORIZED"});return null}if(!isAdmin(u)&&u.account_status!=="active"){res.status(403).json({ok:false,error:u.account_status==="banned"?"ACCOUNT_BANNED":"ACCOUNT_RESTRICTED",reason:u.ban_reason||""});return null}return u}
 export async function requireAdmin(req,res){const u=await requireAuth(req,res);if(!u)return null;if(!isAdmin(u)){res.status(403).json({ok:false,error:"ADMIN_ONLY"});return null}return u}
