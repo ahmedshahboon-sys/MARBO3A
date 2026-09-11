@@ -15,11 +15,11 @@ import "./navigation-cleanup.css";
 import "./safety.css";
 import "./room-chat.css";
 import "./product-components.css";
+import "./auth.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
 import SettingsPanel from "./SettingsPanel";
-import AdminConsole from "./AdminConsole";
 import SocialDock from "./SocialDock";
 import SocialHomeRedirect from "./SocialHomeRedirect";
 import SideDrawer from "./SideDrawer";
@@ -28,7 +28,8 @@ import CallCenter from "./CallCenter";
 import RoomVoiceStage from "./RoomVoiceStage";
 import NavigationRuntime from "./NavigationRuntime";
 import RealtimeClient from "./RealtimeClient";
+import SessionGuard from "./SessionGuard";
 const cairo=Cairo({subsets:["arabic","latin"],weight:["400","500","600","700","800","900"],display:"swap",variable:"--font-cairo"});
 export const metadata={metadataBase:new URL("https://marbo3a.ly"),title:{default:"مربوعة | MARBO3A",template:"%s | مربوعة"},description:"مربوعة منصة تواصل اجتماعي عربية للتواصل، الغرف، الأصحاب والمجتمع.",applicationName:"مربوعة",keywords:["مربوعة","MARBO3A","تواصل اجتماعي","غرف دردشة","أصدقاء","ليبيا"],alternates:{canonical:"/"},robots:{index:true,follow:true},openGraph:{type:"website",locale:"ar_LY",url:"https://marbo3a.ly/",siteName:"مربوعة",title:"مربوعة | MARBO3A",description:"مكانك للتواصل، الغرف، الأصحاب والمجتمع."},manifest:"/manifest.webmanifest",icons:{icon:"/logo.svg",apple:"/logo.svg"},appleWebApp:{capable:true,title:"مربوعة",statusBarStyle:"black-translucent"}};
 export const viewport={themeColor:"#FF7A00",width:"device-width",initialScale:1,viewportFit:"cover"};
-export default function RootLayout({children}){const structuredData={"@context":"https://schema.org","@type":"WebSite",name:"مربوعة",alternateName:"MARBO3A",url:"https://marbo3a.ly/",inLanguage:"ar"};return <html lang="ar" dir="rtl" className={cairo.variable}><body className={cairo.className}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/><AppBootstrap/><PlatformClient/><NavigationRuntime/><RealtimeClient/><SocialHomeRedirect/><DebugTrace/><CallCenter/><RoomVoiceStage/>{children}<SideDrawer/><SocialDock/><SettingsPanel/><AdminConsole/></body></html>}
+export default function RootLayout({children}){const structuredData={"@context":"https://schema.org","@type":"WebSite",name:"مربوعة",alternateName:"MARBO3A",url:"https://marbo3a.ly/",inLanguage:"ar"};return <html lang="ar" dir="rtl" className={cairo.variable}><body className={cairo.className}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/><AppBootstrap/><PlatformClient/><NavigationRuntime/><SessionGuard/><RealtimeClient/><SocialHomeRedirect/><DebugTrace/><CallCenter/><RoomVoiceStage/>{children}<SideDrawer/><SocialDock/><SettingsPanel/></body></html>}
