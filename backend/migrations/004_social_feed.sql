@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS posts(
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL DEFAULT '',
+  image_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS posts_feed_idx ON posts(id DESC) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS posts_user_id_idx ON posts(user_id,id DESC) WHERE deleted_at IS NULL;
+
+CREATE TABLE IF NOT EXISTS post_likes(
+  post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY(post_id,user_id)
+);
+
+CREATE TABLE IF NOT EXISTS post_comments(
+  id BIGSERIAL PRIMARY KEY,
+  post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  edited_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS post_comments_post_idx ON post_comments(post_id,id ASC);
