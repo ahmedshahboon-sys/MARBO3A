@@ -26,11 +26,15 @@ jobs:
           set -euo pipefail
           for file in *.mjs; do echo "checking $file"; node --check "$file"; done
       - run: npm test
-      - uses: actions/upload-artifact@v4
-        with:
-          name: backend-lock
-          path: backend/package-lock.json
-          if-no-files-found: error
+      - name: Lockfile capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f package-lock.json
+          echo "BACKEND_LOCK_BEGIN"
+          base64 -w0 package-lock.json
+          echo
+          echo "BACKEND_LOCK_END"
 
   frontend:
     runs-on: ubuntu-latest
@@ -46,8 +50,12 @@ jobs:
           cache-dependency-path: frontend/package.json
       - run: npm install --no-audit --no-fund
       - run: npm run build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: frontend-lock
-          path: frontend/package-lock.json
-          if-no-files-found: error
+      - name: Lockfile capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f package-lock.json
+          echo "FRONTEND_LOCK_BEGIN"
+          base64 -w0 package-lock.json
+          echo
+          echo "FRONTEND_LOCK_END"
