@@ -82,7 +82,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use latest validated main
+      - name: Refresh main only for direct main pushes
+        if: github.event_name == 'push'
         working-directory: .
         run: git fetch origin main && git reset --hard origin/main
       - uses: actions/setup-node@v4
@@ -97,12 +98,29 @@ jobs:
           set -euo pipefail
           for file in *.mjs; do echo "checking $file"; node --check "$file"; done
       - run: npm test
+      - name: Verify migration naming and clean database
+        shell: bash
+        run: |
+          set -euo pipefail
+          duplicates="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sed -E 's/^([0-9]+)_.*/\1/' | sort | uniq -d)"
+          if [ -n "$duplicates" ]; then
+            echo "Duplicate migration prefixes: $duplicates" >&2
+            exit 1
+          fi
+          npm run migrate
+          expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)"
+          actual="$(psql "$DATABASE_URL" -Atc 'SELECT name FROM schema_migrations ORDER BY name')"
+          if [ "$actual" != "$expected" ]; then
+            echo "=== EXPECTED MIGRATIONS ==="
+            printf '%s\n' "$expected"
+            echo "=== APPLIED MIGRATIONS ==="
+            printf '%s\n' "$actual"
+            exit 1
+          fi
       - name: API integration smoke test
         shell: bash
         run: |
           set -euo pipefail
-          # A few compatibility modules still expose the production Docker upload path.
-          # Give the bare GitHub runner a writable equivalent without changing production defaults.
           sudo mkdir -p /app/uploads
           sudo chown -R "$(id -u):$(id -g)" /app/uploads
           mkdir -p "$UPLOAD_DIR" "$STORAGE_LOCAL_DIR"
@@ -136,7 +154,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use latest validated main
+      - name: Refresh main only for direct main pushes
+        if: github.event_name == 'push'
         working-directory: .
         run: git fetch origin main && git reset --hard origin/main
       - uses: actions/setup-node@v4
@@ -145,4 +164,21 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci --no-audit --no-fund
+      - name: Reject browser-native dialogs in product UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RPIn --include='*.js' '(^|[^.[:alnum:]_$])(window\.)?(alert|confirm|prompt)\(' app; then
+            echo "Use AppDialog/toasts instead of browser-native dialogs" >&2
+            exit 1
+          fi
       - run: npm run build
+      - name: Verify generated PWA assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/pwa-192.png
+          test -s public/pwa-512.png
+          test -s public/pwa-maskable-512.png
+          test -s public/apple-touch-icon.png
+          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('./public/manifest.webmanifest','utf8')); const i=m.icons||[]; if(!i.some(x=>x.src==='/pwa-192.png')||!i.some(x=>x.src==='/pwa-512.png')||!i.some(x=>x.purpose==='maskable')) process.exit(1)"

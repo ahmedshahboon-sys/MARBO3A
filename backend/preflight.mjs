@@ -1,22 +1,15 @@
 import http from "http";
 import express from "express";
 import crypto from "crypto";
-import pg from "pg";
-import {createClient} from "redis";
+import {pool,redis,ensureRedis,tokenFrom} from "./runtime.mjs";
 
 /*
  * MARBO3A extension modules register routes from patched http.createServer().
- * This module is intentionally imported LAST so it is the outermost wrapper:
- * parsers and session recovery are registered before every extension route.
+ * This compatibility layer installs body parsers and restores durable sessions
+ * before the legacy server handles authenticated API traffic.
  */
 const previous=http.createServer.bind(http);
-const pool=new pg.Pool({connectionString:process.env.DATABASE_URL});
-const redis=createClient({url:process.env.REDIS_URL});
-redis.on("error",e=>console.error("Preflight Redis:",e));
-let redisReady;
-const bearer=req=>String(req.headers.authorization||"").match(/^Bearer\s+([a-f0-9]{64})$/i)?.[1]||"";
 const tokenHash=t=>crypto.createHash("sha256").update(String(t)).digest("hex");
-async function ensureRedis(){if(redis.isOpen)return;if(!redisReady)redisReady=redis.connect().catch(e=>{redisReady=null;throw e});await redisReady}
 
 http.createServer=function preflightCreateServer(app,...args){
   if(typeof app==="function"&&app?.use){
@@ -26,10 +19,9 @@ http.createServer=function preflightCreateServer(app,...args){
     app.use(express.urlencoded({extended:false,limit:"128kb"}));
 
     // Redis is the fast session store, while durable_sessions survives Redis/container restarts.
-    // Recover the Redis mapping before feature modules authenticate the request so a valid
-    // logged-in browser never gets a false 401 merely because Redis restarted.
+    // Restore the Redis mapping when possible; authentication modules still make the final decision.
     app.use("/api",async(req,_res,next)=>{
-      const t=bearer(req);if(!t)return next();
+      const t=tokenFrom(req);if(!t)return next();
       try{
         await ensureRedis();
         const key=`session:${t}`;
@@ -40,7 +32,6 @@ http.createServer=function preflightCreateServer(app,...args){
           await redis.set(key,String(row.user_id),{EX:ttl});
         }
       }catch(e){
-        // Authentication modules still make the final decision; recovery must never take the API down.
         if(process.env.NODE_ENV!=="test")console.error("session recovery",e?.message||e);
       }
       next();
