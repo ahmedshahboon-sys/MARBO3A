@@ -13,6 +13,8 @@ import "./system.css";
 import "./design-system.css";
 import "./navigation-cleanup.css";
 import "./safety.css";
+import "./room-chat.css";
+import "./product-components.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
