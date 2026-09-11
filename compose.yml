@@ -27,9 +27,8 @@ services:
       - "49160-49200:49160-49200/tcp"
     command:
       - -n
-      - --no-cli
+      - --cli
       - --fingerprint
-      - --lt-cred-mech
       - --use-auth-secret
       - --static-auth-secret=${TURN_SECRET}
       - --realm=${TURN_REALM:-marbo3a.ly}
