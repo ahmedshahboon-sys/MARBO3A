@@ -7,6 +7,7 @@ const modules=[
   "./debug-trace.mjs",
   "./platform-extra.mjs",
   "./core-extensions.mjs",
+  "./post-media.mjs",
   "./feed-extensions.mjs",
   "./direct-extensions.mjs",
   "./social-extensions.mjs",

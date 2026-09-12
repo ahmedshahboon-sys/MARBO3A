@@ -1,0 +1,63 @@
+/* MARBO3A V3 feature components.
+   Functional UI for the approved composer/media/room-filter reference.
+   This file owns feature-specific components only; global sizing stays in ui-v3-reference.css. */
+
+.ui-v3 .composer-tools-v3{align-items:center!important;gap:8px!important}
+.ui-v3 .composer-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-width:0}
+.ui-v3 .composer-actions>label,.ui-v3 .composer-tool-button{
+  min-height:34px!important;
+  height:34px!important;
+  padding:0 8px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:var(--v3-muted)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  cursor:pointer;
+}
+.ui-v3 .composer-actions>label:hover,.ui-v3 .composer-tool-button:hover,.ui-v3 .composer-tool-button.active{background:rgba(255,255,255,.05)!important;color:#fff!important}
+.ui-v3 .composer-actions>label.disabled{opacity:.38;cursor:not-allowed}
+.ui-v3 .composer-actions svg{width:17px!important;height:17px!important}
+.ui-v3 .composer-actions>label:first-child svg{color:#d9dde3}
+.ui-v3 .composer-actions>label:nth-child(2) svg{color:#ff8a27}
+.ui-v3 .composer-tool-button:nth-of-type(1) svg{color:#62c88b}
+.ui-v3 .composer-extra-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:7px 8px;border-top:1px solid rgba(255,255,255,.06);color:var(--v3-muted);font-size:10px}
+.ui-v3 .composer-extra-row>div{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.ui-v3 .composer-extra-row button{min-height:28px!important;padding:0 8px!important;border-radius:9px!important;border:1px solid rgba(255,255,255,.09)!important;background:#111820!important;color:#d6dbe1!important;font-size:9.5px!important}
+.ui-v3 .composer-location-chip{width:max-content;max-width:100%;display:flex;align-items:center;gap:5px;margin:7px 48px 0 0;padding:5px 8px;border:1px solid rgba(255,122,0,.22);border-radius:10px;background:rgba(255,122,0,.07);color:#ffad69;font-size:10.5px}
+.ui-v3 .composer-location-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui-v3 .composer-location-chip button{width:22px!important;height:22px!important;min-width:22px!important;padding:0!important;border:0!important;background:transparent!important;color:#c8ced5!important;display:grid!important;place-items:center!important}
+
+.ui-v3 .sf-multi-preview>div{position:relative;overflow:hidden;background:#090d12}
+.ui-v3 .sf-multi-preview :is(img,video){width:100%;height:100%;min-height:90px;max-height:190px;display:block;object-fit:cover}
+.ui-v3 .sf-multi-preview .video-preview::after{content:"فيديو";position:absolute;right:7px;bottom:7px;padding:3px 6px;border-radius:7px;background:rgba(0,0,0,.68);color:#fff;font-size:9px;pointer-events:none}
+
+.ui-v3 .sf-post-location{display:flex!important;align-items:center!important;gap:3px!important;margin-top:2px!important;color:#8f99a5!important;font-size:9.5px!important;line-height:1.2!important}
+.ui-v3 .sf-post-location svg{width:12px!important;height:12px!important;color:#aab2bc!important}
+
+.ui-v3 .media-grid button{position:relative;overflow:hidden}
+.ui-v3 .media-grid video{width:100%;height:100%;display:block;object-fit:cover;background:#05080b}
+.ui-v3 .media-video-play{position:absolute;inset:0;margin:auto;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.58);color:#fff;border:1px solid rgba(255,255,255,.18);pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.ui-v3 .media-video-play svg{width:25px;height:25px;margin-left:2px}
+.ui-v3 .media-viewer-video{max-width:min(94vw,1080px);max-height:88dvh;border-radius:14px;background:#000;box-shadow:0 20px 70px rgba(0,0,0,.55)}
+
+.ui-v3 .rooms-filter-button.active{border-color:rgba(255,122,0,.42)!important;color:#ff9a4a!important;background:rgba(255,122,0,.08)!important}
+.ui-v3 .rooms-filter-panel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:-1px 0 8px;padding:4px;border:1px solid var(--v3-border);border-radius:13px;background:#0d1319;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.ui-v3 .rooms-filter-panel button{height:34px!important;min-height:34px!important;padding:0 6px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:var(--v3-muted)!important;font-size:10.5px!important;font-weight:700!important}
+.ui-v3 .rooms-filter-panel button.active{background:linear-gradient(105deg,#c65300,var(--v3-orange))!important;color:#fff!important}
+
+@media(max-width:520px){
+  .ui-v3 .composer-tools-v3{align-items:flex-end!important}
+  .ui-v3 .composer-actions{gap:1px;flex:1 1 auto}
+  .ui-v3 .composer-actions>label,.ui-v3 .composer-tool-button{width:38px!important;min-width:38px!important;padding:0!important}
+  .ui-v3 .composer-actions>label span,.ui-v3 .composer-tool-button span{display:none!important}
+  .ui-v3 .composer-location-chip{margin-right:0}
+  .ui-v3 .composer-extra-row{align-items:flex-start;flex-direction:column}
+  .ui-v3 .composer-extra-row>div{width:100%;justify-content:flex-start}
+  .ui-v3 .media-video-play{width:42px;height:42px}
+}
