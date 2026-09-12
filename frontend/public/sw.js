@@ -1,4 +1,4 @@
-const VERSION="marbo3a-shell-v13-room-community";
+const VERSION="marbo3a-shell-v14-unified-scale";
 const OFFLINE="/offline.html";
 const SHELL=[OFFLINE,"/manifest.webmanifest","/favicon.svg","/logo.svg","/pwa-icon.svg","/pwa-maskable.svg","/pwa-192.png","/pwa-512.png","/pwa-maskable-512.png","/apple-touch-icon.png","/brand/marbo3a-app-icon.svg","/brand/marbo3a-symbol-orange.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)));});
