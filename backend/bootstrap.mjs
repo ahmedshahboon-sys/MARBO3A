@@ -1,4 +1,8 @@
-const patches=[
+// MARBO3A backend bootstrap.
+// New code should use runtime.mjs and migrations. Legacy extension modules stay
+// behind this explicit compatibility boundary until their routes are folded
+// into domain routers. Sequential imports preserve the verified production order.
+const modules=[
   "./instrumentation.mjs",
   "./debug-trace.mjs",
   "./platform-extra.mjs",
@@ -35,4 +39,4 @@ const patches=[
   "./social-experience.mjs",
   "./cookie-auth.mjs"
 ];
-for(const patch of patches)await import(patch);
+for(const module of modules)await import(module);
