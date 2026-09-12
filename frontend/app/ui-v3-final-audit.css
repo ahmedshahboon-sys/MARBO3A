@@ -1,0 +1,145 @@
+/* MARBO3A V3 final reference audit.
+   Loaded last. This layer closes the remaining approved-reference parity gaps
+   without changing feature behavior or returning to oversized legacy controls. */
+
+/* Keep the official global brand chrome visible on conversations, as in the
+   approved reference, while keeping both conversation headers compact. */
+body.ui-v3:has(.chat-social) .v3-global-header,
+body.ui-v3:has(.room-chat-page) .v3-global-header{display:flex!important}
+body.ui-v3:has(.chat-social) .v3-global-header,
+body.ui-v3:has(.room-chat-page) .v3-global-header{margin-bottom:2px!important}
+.ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{
+  min-height:calc(100dvh - var(--v3-header-h))!important;
+  padding-top:2px!important;
+}
+.ui-v3 .chat-social-head{top:0!important}
+
+/* Room voice belongs visually between the room header and room tools. The
+   runtime stays global for call continuity, but its fixed surface is anchored
+   to the approved room-chat geometry and the tools reserve its footprint. */
+body.ui-v3:has(.room-chat-page) .room-voice-entry,
+body.ui-v3:has(.room-chat-page) .room-voice-stage{
+  top:calc(var(--v3-header-h) + 66px)!important;
+  left:50%!important;
+  width:min(744px,calc(100% - 20px))!important;
+  max-width:calc(100vw - 20px)!important;
+  transform:translateX(-50%)!important;
+  z-index:78!important;
+}
+body.ui-v3:has(.room-chat-page):has(.room-voice-entry) .room-chat-tools{margin-top:50px!important}
+body.ui-v3:has(.room-chat-page):has(.room-voice-stage.collapsed) .room-chat-tools{margin-top:45px!important}
+body.ui-v3:has(.room-chat-page):has(.room-voice-stage.open) .room-chat-tools{margin-top:174px!important}
+body.ui-v3:has(.room-chat-page) .room-voice-stage.open{max-height:166px!important;overflow-y:auto!important;overscroll-behavior:contain}
+body.ui-v3:has(.room-chat-page) .room-voice-entry>button{min-height:38px!important;border-radius:12px!important;font-size:11px!important;padding:6px 12px!important}
+body.ui-v3:has(.room-chat-page) .room-voice-stage>header{height:38px!important}
+
+/* Profile: the More tab is now a real compact action surface. */
+.ui-v3 .profile-more-panel{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important;
+  gap:6px!important;
+  margin:-2px 0 9px!important;
+  padding:7px!important;
+  border:1px solid var(--v3-border)!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,#11171e,#0d1218)!important;
+  box-shadow:0 12px 26px rgba(0,0,0,.18)!important;
+}
+.ui-v3 .profile-more-panel :is(a,button){
+  min-height:36px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 9px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:10px!important;
+  background:#141b22!important;
+  color:#dce1e7!important;
+  text-decoration:none!important;
+  font:inherit!important;
+  font-size:10.5px!important;
+  font-weight:800!important;
+}
+.ui-v3 .profile-more-panel :is(a,button):active{transform:translateY(1px)}
+
+/* Settings: keep the route and panel dense and prevent modal geometry from
+   looking like a desktop dialog on a phone. */
+body.ui-v3:has(.settings-route-marker) .settings-overlay{
+  padding:calc(var(--v3-header-h) + 4px) 10px calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 10px)!important;
+  align-items:flex-start!important;
+  overflow-y:auto!important;
+}
+body.ui-v3:has(.settings-route-marker) .settings-card{
+  max-height:none!important;
+  border-radius:17px!important;
+}
+body.ui-v3:has(.settings-route-marker) .settings-card>header{min-height:50px!important;padding:8px 10px!important}
+body.ui-v3:has(.settings-route-marker) .settings-tabs{top:0!important;z-index:2!important;background:#0d1218!important}
+body.ui-v3:has(.settings-route-marker) .setting-row{min-height:64px!important}
+
+/* Admin stays data-first, but uses the same compact family on every width. */
+.ui-v3 .admin-route-page{width:min(880px,calc(100% - 20px))!important;overflow-x:hidden!important}
+.ui-v3 .admin-route-page>header{min-height:92px!important;padding:12px 14px!important;border-radius:17px!important}
+.ui-v3 .admin-route-page>header h1{font-size:24px!important;line-height:1.2!important}
+.ui-v3 .admin-route-page>header p{font-size:10.5px!important;line-height:1.5!important}
+.ui-v3 .admin-route-page>header>a{min-height:36px!important;padding-inline:10px!important;font-size:10px!important}
+.ui-v3 .admin-tabs{padding:3px!important;gap:3px!important;border-radius:13px!important}
+.ui-v3 .admin-tabs button{height:38px!important;min-width:76px!important;padding-inline:8px!important;font-size:10px!important;border-radius:10px!important}
+.ui-v3 .admin-route-stats{gap:6px!important}
+.ui-v3 .admin-route-stats>div{min-height:92px!important;padding:8px!important;border-radius:14px!important}
+.ui-v3 .admin-route-stats>div b{font-size:22px!important}
+.ui-v3 .admin-route-stats>div span{font-size:9.5px!important}
+.ui-v3 :is(.admin-user-card,.admin-room-list>article,.admin-log,.feature-list>article){border-radius:14px!important}
+.ui-v3 :is(.admin-user-actions,.feature-actions) button{min-height:34px!important;padding:0 8px!important;font-size:9.5px!important;border-radius:9px!important}
+
+/* Authentication: keep the official icon crisp and avoid the oversized square
+   that appeared in production screenshots. */
+.ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img{
+  width:82px!important;
+  height:82px!important;
+  max-width:82px!important;
+  object-fit:contain!important;
+  border-radius:20px!important;
+  background:transparent!important;
+  box-shadow:0 12px 32px rgba(255,122,0,.12)!important;
+}
+.ui-v3 .auth-v1-card>header h1{font-size:24px!important;line-height:1.15!important}
+.ui-v3 .auth-v1-card>header p{font-size:11px!important}
+.ui-v3 .auth-v1-tabs{min-height:44px!important;padding:3px!important;border-radius:14px!important}
+.ui-v3 .auth-v1-tabs button{height:38px!important;font-size:12px!important;border-radius:11px!important}
+.ui-v3 .auth-v1-form{gap:9px!important}
+.ui-v3 .auth-v1-form label{font-size:11px!important;gap:5px!important}
+.ui-v3 .auth-v1-form :is(input,select){min-height:45px!important;height:45px!important;font-size:16px!important;border-radius:13px!important}
+.ui-v3 .auth-v1-form>button{min-height:42px!important;border-radius:12px!important;font-size:13px!important}
+
+/* Final small-screen contract: no horizontal escape and no oversized route
+   chrome. 16px input text is intentional to prevent iOS Safari auto-zoom. */
+@media(max-width:520px){
+  body.ui-v3{--v3-header-h:68px}
+  .ui-v3 .v3-global-header{width:calc(100% - 12px)!important;min-height:68px!important}
+  .ui-v3 .v3-brand-lockup>img{width:34px!important;height:34px!important;flex-basis:34px!important}
+  .ui-v3 .v3-brand-copy>b{font-size:18px!important}
+  .ui-v3 .v3-brand-copy>em{font-size:6.5px!important}
+  .ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{width:calc(100% - 8px)!important;padding-inline:4px!important}
+  .ui-v3 .chat-social-head,.ui-v3 .room-chat-head{border-radius:14px!important}
+  body.ui-v3:has(.room-chat-page) .room-voice-entry,
+  body.ui-v3:has(.room-chat-page) .room-voice-stage{top:calc(var(--v3-header-h) + 62px)!important;width:calc(100% - 12px)!important;max-width:calc(100vw - 12px)!important}
+  body.ui-v3:has(.room-chat-page):has(.room-voice-entry) .room-chat-tools{margin-top:48px!important}
+  body.ui-v3:has(.room-chat-page):has(.room-voice-stage.open) .room-chat-tools{margin-top:166px!important}
+  .ui-v3 .profile-more-panel{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .ui-v3 .admin-route-page{width:calc(100% - 12px)!important}
+  .ui-v3 .admin-route-page>header{min-height:82px!important;padding:10px!important}
+  .ui-v3 .admin-route-page>header h1{font-size:21px!important}
+  .ui-v3 .admin-tabs{overflow-x:auto!important;scrollbar-width:none!important}
+  .ui-v3 .admin-route-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .ui-v3 .admin-route-stats>div{min-height:84px!important}
+  body.ui-v3:has(.settings-route-marker) .settings-overlay{padding-inline:6px!important}
+  body.ui-v3:has(.settings-route-marker) .settings-card{width:100%!important}
+}
+
+@media(max-width:360px){
+  .ui-v3 .v3-brand-copy>em{display:none!important}
+  .ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}
+  .ui-v3 .profile-more-panel{grid-template-columns:1fr!important}
+  .ui-v3 .admin-route-stats{grid-template-columns:1fr 1fr!important}
+}
