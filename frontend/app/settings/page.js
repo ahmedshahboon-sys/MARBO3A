@@ -7,11 +7,10 @@ export default function SettingsPage(){
   useEffect(()=>{
     window.scrollTo({top:0,left:0,behavior:"auto"});
     const open=()=>window.dispatchEvent(new CustomEvent("marbo3a:open-settings"));
-    const a=setTimeout(open,60);
-    const b=setTimeout(open,320);
+    const frame=requestAnimationFrame(open);
     window.addEventListener("pageshow",open);
     return()=>{
-      clearTimeout(a);clearTimeout(b);window.removeEventListener("pageshow",open);
+      cancelAnimationFrame(frame);window.removeEventListener("pageshow",open);
       document.querySelector(".settings-card>header button")?.click();
     };
   },[]);
