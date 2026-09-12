@@ -1,0 +1,56 @@
+/* Component-level mobile corrections after the general V3 parity layer. */
+.ui-v3 .profile-v3-route .sf-top,
+.ui-v3 .messages-v3-page .sf-top,
+.ui-v3 .rooms-v3-page .sf-top{display:none!important}
+
+.ui-v3 .settings-route-marker{display:block!important;min-height:0!important;place-items:initial!important}
+body.ui-v3:has(.settings-route-marker) .v3-global-header,
+body.ui-v3:has(.chat-social) .v3-global-header,
+body.ui-v3:has(.profile-v3-route) .v3-global-header{display:flex!important}
+
+/* Direct chat header: peer on the right, call controls and back on the left. */
+.ui-v3 .chat-social-head{
+  grid-template-columns:minmax(0,1fr) auto 50px!important;
+  grid-template-rows:1fr!important;
+}
+.ui-v3 .chat-peer{
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  text-align:right!important;
+}
+.ui-v3 .chat-peer-avatar{
+  width:52px!important;height:52px!important;flex:0 0 52px!important;
+  border-radius:50%!important;object-fit:cover!important;
+  border:2px solid rgba(255,255,255,.2)!important;
+  box-shadow:0 0 0 3px rgba(255,122,0,.08)!important;
+}
+.ui-v3 .chat-peer-avatar-fallback{display:grid!important;place-items:center!important;background:linear-gradient(145deg,#ff8c1c,#ff6500)!important;color:#fff!important;font-weight:900!important}
+.ui-v3 .chat-peer-copy{min-width:0!important;display:flex!important;flex-direction:column!important;gap:1px!important}
+.ui-v3 .chat-peer-copy h1{order:1!important;margin:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.ui-v3 .chat-peer-copy small{order:2!important;direction:ltr!important;unicode-bidi:isolate!important;text-align:right!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.ui-v3 .chat-peer-more{width:36px!important;height:36px!important;flex:0 0 36px!important;border:0!important;border-radius:12px!important;background:transparent!important;color:var(--v3-muted)!important;display:grid!important;place-items:center!important}
+.ui-v3 .chat-head-actions{grid-column:auto!important;grid-row:auto!important;display:flex!important;align-items:center!important;gap:7px!important}
+.ui-v3 .chat-back{grid-column:auto!important;grid-row:auto!important}
+
+@media(max-width:720px){
+  .ui-v3 .chat-social-head{grid-template-columns:minmax(0,1fr) auto 42px!important;min-height:70px!important;padding:8px!important;gap:6px!important}
+  .ui-v3 .chat-peer{gap:8px!important}
+  .ui-v3 .chat-peer-avatar{width:44px!important;height:44px!important;flex-basis:44px!important}
+  .ui-v3 .chat-peer-copy h1{font-size:19px!important}
+  .ui-v3 .chat-peer-copy small{font-size:10px!important}
+  .ui-v3 .chat-peer-more{width:32px!important;height:32px!important;flex-basis:32px!important}
+  .ui-v3 .chat-head-actions{gap:4px!important}
+  .ui-v3 .chat-head-actions .chat-icon-btn,.ui-v3 .chat-back{width:40px!important;height:40px!important;min-width:40px!important}
+  .ui-v3 .profile-tabs-v3{grid-template-columns:repeat(auto-fit,minmax(78px,1fr))!important}
+}
+
+@media(max-width:430px){
+  /* The approved mobile mockup keeps the tagline visible. */
+  .ui-v3 .v3-brand-copy>em{display:block!important;font-size:7.5px!important;margin-top:4px!important}
+  .ui-v3 .chat-social-head{grid-template-columns:minmax(0,1fr) auto 38px!important}
+  .ui-v3 .chat-head-actions .chat-icon-btn,.ui-v3 .chat-back{width:36px!important;height:36px!important;min-width:36px!important}
+  .ui-v3 .chat-peer-avatar{width:40px!important;height:40px!important;flex-basis:40px!important}
+  .ui-v3 .chat-peer-more{display:none!important}
+}
