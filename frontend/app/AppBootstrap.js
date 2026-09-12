@@ -23,26 +23,33 @@ export default function AppBootstrap() {
       if (stopped || document.visibilityState === "hidden") return;
       const auth = token();
       try {
-        await fetch("/api/telemetry/ping", {
+        const response=await fetch("/api/telemetry/ping", {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            ...(auth ? { authorization: `Bearer ${auth}` } : {})
+            ...(auth&&auth!=="cookie" ? { authorization: `Bearer ${auth}` } : {})
           },
+          credentials:"same-origin",
           body: JSON.stringify({ visitorId: visitorId() }),
           keepalive: true
         });
+        if(response.ok){
+          const data=await response.json().catch(()=>({}));
+          window.dispatchEvent(new CustomEvent("marbo3a:presence",{detail:{onlineUsers:Number(data.online||0),at:Date.now()}}));
+        }
       } catch {}
     }
 
     ping();
-    const timer = setInterval(ping, 45000);
+    const timer = setInterval(ping, 30000);
     const onVisible = () => document.visibilityState === "visible" && ping();
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus",ping);
     return () => {
       stopped = true;
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus",ping);
     };
   }, []);
 
