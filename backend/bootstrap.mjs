@@ -20,6 +20,7 @@ const modules=[
   "./v1-social-extra.mjs",
   "./v1-completion.mjs",
   "./closure-routes.mjs",
+  "./experience-stage1.mjs",
   "./message-media-fix.mjs",
   "./preflight.mjs",
   "./security-p0.mjs",
