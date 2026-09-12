@@ -24,6 +24,7 @@ import "./ui-components.css";
 import "./ui-v3.css";
 import "./ui-v3-screens.css";
 import "./ui-v3-settings.css";
+import "./ui-v3-brand.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
@@ -43,6 +44,6 @@ import TypingRuntime from "./TypingRuntime";
 import PremiumChrome from "./PremiumChrome";
 import {UI_BODY_CLASS} from "./ui-mode";
 const cairo=Cairo({subsets:["arabic","latin"],weight:["400","500","600","700","800","900"],display:"swap",variable:"--font-cairo"});
-export const metadata={metadataBase:new URL("https://marbo3a.ly"),title:{default:"مربوعة | MARBO3A",template:"%s | مربوعة"},description:"مربوعة منصة تواصل اجتماعي عربية للتواصل، الغرف، الأصحاب والمجتمع.",applicationName:"مربوعة",keywords:["مربوعة","MARBO3A","تواصل اجتماعي","غرف دردشة","أصدقاء","ليبيا"],alternates:{canonical:"/"},robots:{index:true,follow:true},openGraph:{type:"website",locale:"ar_LY",url:"https://marbo3a.ly/",siteName:"مربوعة",title:"مربوعة | MARBO3A",description:"مكانك للتواصل، الغرف، الأصحاب والمجتمع."},manifest:"/manifest.webmanifest",icons:{icon:[{url:"/pwa-192.png",sizes:"192x192",type:"image/png"},{url:"/brand/marbo3a-app-icon.svg",type:"image/svg+xml"}],apple:{url:"/apple-touch-icon.png",sizes:"180x180",type:"image/png"}},appleWebApp:{capable:true,title:"مربوعة",statusBarStyle:"black-translucent"}};
+export const metadata={metadataBase:new URL("https://marbo3a.ly"),title:{default:"مربوعة | MARBO3A",template:"%s | مربوعة"},description:"مربوعة منصة تواصل اجتماعي عربية للتواصل، الغرف، الأصحاب والمجتمع.",applicationName:"مربوعة",keywords:["مربوعة","MARBO3A","تواصل اجتماعي","غرف دردشة","أصدقاء","ليبيا"],alternates:{canonical:"/"},robots:{index:true,follow:true},openGraph:{type:"website",locale:"ar_LY",url:"https://marbo3a.ly/",siteName:"مربوعة",title:"مربوعة | MARBO3A",description:"مكانك للتواصل، الغرف، الأصحاب والمجتمع."},manifest:"/manifest.webmanifest",icons:{icon:[{url:"/pwa-192.png",sizes:"192x192",type:"image/png"},{url:"/favicon.svg",type:"image/svg+xml"}],apple:{url:"/apple-touch-icon.png",sizes:"180x180",type:"image/png"}},appleWebApp:{capable:true,title:"مربوعة",statusBarStyle:"black-translucent"}};
 export const viewport={themeColor:"#FF7A00",width:"device-width",initialScale:1,viewportFit:"cover"};
 export default function RootLayout({children}){const structuredData={"@context":"https://schema.org","@type":"WebSite",name:"مربوعة",alternateName:"MARBO3A",url:"https://marbo3a.ly/",inLanguage:"ar"};return <html lang="ar" dir="rtl" className={cairo.variable}><body className={`${cairo.className} ${UI_BODY_CLASS}`}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/><AppBootstrap/><PlatformClient/><NavigationRuntime/><SessionGuard/><RealtimeClient/><TypingRuntime/><SocialHomeRedirect/><DebugTrace/><CallCenter/><RoomVoiceStage/><OnboardingGate/><ContextSafety/><PremiumChrome/>{children}<SideDrawer/><SocialDock/><SettingsPanel/></body></html>}
