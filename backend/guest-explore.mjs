@@ -1,0 +1,8 @@
+import http from "http";
+import {pool} from "./runtime.mjs";
+const prior=http.createServer.bind(http);
+http.createServer=function guestExploreCreateServer(app,...args){if(typeof app==="function"&&app?.use){
+ app.get("/api/public/feed",async(req,res)=>{try{const cursor=Math.max(0,Number(req.query.cursor)||0),limit=Math.min(30,Math.max(5,Number(req.query.limit)||15)),params=[];let cursorSql="";if(cursor){params.push(cursor);cursorSql=`AND p.id<$${params.length}`}params.push(limit);const rows=(await pool.query(`SELECT p.id,p.body,p.image_url,p.location_label,p.created_at,u.id user_id,u.username,u.display_name,u.avatar_url,(SELECT COUNT(*)::int FROM post_likes l WHERE l.post_id=p.id) likes_count,(SELECT COUNT(*)::int FROM post_comments c WHERE c.post_id=p.id AND c.deleted_at IS NULL) comments_count,COALESCE((SELECT jsonb_agg(jsonb_build_object('url',pm.url,'type',pm.media_type,'position',pm.position) ORDER BY pm.position,pm.id) FROM post_media pm WHERE pm.post_id=p.id),CASE WHEN p.image_url IS NOT NULL AND p.image_url<>'' THEN jsonb_build_array(jsonb_build_object('url',p.image_url,'type','image','position',0)) ELSE '[]'::jsonb END) media FROM posts p JOIN users u ON u.id=p.user_id WHERE p.deleted_at IS NULL AND u.account_status='active' ${cursorSql} ORDER BY p.id DESC LIMIT $${params.length}`,params)).rows;res.setHeader("Cache-Control","public,max-age=15,stale-while-revalidate=30");res.json({ok:true,posts:rows,nextCursor:rows.length===limit?rows.at(-1).id:null})}catch(e){console.error("public feed",e);res.status(500).json({ok:false,error:"PUBLIC_FEED_FAILED"})}});
+ }
+ return prior(app,...args);
+};
