@@ -38,7 +38,10 @@ export default function Icon({name,size=20,strokeWidth=1.9,className=""}){
     more:<><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>,
     search:<><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>,
     sparkles:<><path d="m12 3 1.2 3.2L16 8l-2.8 1.8L12 13l-1.2-3.2L8 8l2.8-1.8L12 3Z"/><path d="m5 14 .8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14Z"/><path d="m19 12 .6 1.4L21 14l-1.4.6L19 16l-.6-1.4L17 14l1.4-.6L19 12Z"/></>,
+    plus:<><path d="M12 5v14M5 12h14"/></>,
     plusCircle:<><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></>,
+    eye:<><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.5"/></>,
+    trash:<><path d="M4 7h16"/><path d="M9 3h6l1 4H8l1-4Z"/><path d="m6 7 1 14h10l1-14"/><path d="M10 11v6M14 11v6"/></>,
     menu:<><path d="M4 6h16M4 12h16M4 18h16"/></>,
     logout:<><path d="M10 17l5-5-5-5M15 12H3"/><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></>
   };
