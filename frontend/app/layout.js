@@ -22,6 +22,7 @@ import "./accessibility.css";
 import "./ui-coherence.css";
 import "./ui-components.css";
 import "./ui-v3.css";
+import "./ui-v3-screens.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
