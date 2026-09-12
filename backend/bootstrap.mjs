@@ -36,6 +36,7 @@ const modules=[
   "./session-control.mjs",
   "./security-completion.mjs",
   "./audit-completion.mjs",
+  "./social-experience.mjs",
   "./cookie-auth.mjs"
 ];
 for(const module of modules)await import(module);
