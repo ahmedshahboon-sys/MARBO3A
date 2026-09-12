@@ -1,5 +1,6 @@
 /* Page-specific UI components that sit on top of the shared coherence contract. */
 body:has(.pwa-install) .sf-top{padding-left:98px!important}
+body:has(>main.feature-page) .drawer-trigger{position:absolute!important}
 .sf-chat-row.unread{border-color:#303a48!important;box-shadow:inset -3px 0 #ff7a00!important}
 .sf-chat-row.unread:hover{border-color:#3b4655!important}
 
@@ -14,9 +15,9 @@ body:has(.pwa-install) .sf-top{padding-left:98px!important}
 /* Public handles are LTR islands inside Arabic pages. */
 .sf-profile-main>.sf-muted,.sf-chat-row small,.drawer-user small,.chat-peer small,.room-member>div>span,.public-username{direction:ltr!important;unicode-bidi:isolate!important}
 
-/* Keep room header simple on phones: the global drawer owns the right rail. */
+/* Keep chat headers simple on phones: the global drawer owns the right rail. */
 @media(max-width:760px){
-  .room-chat-head>a:first-child{visibility:hidden!important;pointer-events:none!important}
+  .room-chat-head>a:first-child,.chat-social-head>a:first-child{visibility:hidden!important;pointer-events:none!important}
   .room-chat-head{padding-right:10px!important}
   body:has(.drawer-trigger) .room-chat-head{padding-right:10px!important}
   .room-voice-entry{max-width:calc(100vw - 20px)!important}
