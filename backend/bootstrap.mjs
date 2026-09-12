@@ -19,6 +19,7 @@ const modules=[
   "./launch-completion.mjs",
   "./v1-social-extra.mjs",
   "./v1-completion.mjs",
+  "./closure-routes.mjs",
   "./message-media-fix.mjs",
   "./preflight.mjs",
   "./security-p0.mjs",
