@@ -2,31 +2,60 @@
 import {useEffect} from "react";
 
 const HOLD_MS=420;
+const reactions=["❤️","😂","😡","😢"];
 
 export default function ReactionHoldBridge(){
   useEffect(()=>{
     let timer=null;
     let active=null;
+    let palette=null;
 
-    function closeAll(except=null){
-      document.querySelectorAll(".sf-reaction-picker.is-open").forEach(el=>{if(el!==except)el.classList.remove("is-open")});
+    function closePalette(){
+      palette?.remove();
+      palette=null;
+      document.querySelectorAll(".sf-reaction-picker.is-open").forEach(el=>el.classList.remove("is-open"));
+    }
+
+    function openPalette(picker,anchor){
+      closePalette();
+      const originals=[...picker.querySelectorAll(":scope > button")];
+      if(!originals.length)return;
+      picker.classList.add("is-open");
+      palette=document.createElement("div");
+      palette.className="reaction-hold-palette";
+      palette.setAttribute("role","menu");
+      reactions.forEach((emoji,index)=>{
+        const b=document.createElement("button");
+        b.type="button";
+        b.textContent=emoji;
+        b.setAttribute("aria-label",originals[index]?.getAttribute("aria-label")||"تفاعل");
+        b.addEventListener("pointerdown",ev=>ev.stopPropagation());
+        b.addEventListener("click",ev=>{
+          ev.preventDefault();
+          ev.stopPropagation();
+          originals[index]?.click();
+          closePalette();
+        });
+        palette.appendChild(b);
+      });
+      anchor.appendChild(palette);
+      picker.dataset.suppressNextLike="1";
     }
 
     function onPointerDown(e){
-      const button=e.target.closest?.(".sf-reaction-picker button");
-      if(!button)return closeAll();
-      const picker=button.closest(".sf-reaction-picker");
-      if(!picker)return;
-      closeAll(picker);
-      if(button!==picker.querySelector("button"))return;
-      active={picker,button,pointerId:e.pointerId,long:false};
+      const first=e.target.closest?.(".sf-reaction-picker > button:first-child");
+      if(!first){
+        if(!e.target.closest?.(".reaction-hold-palette"))closePalette();
+        return;
+      }
+      const picker=first.closest(".sf-reaction-picker");
+      active={picker,button:first,pointerId:e.pointerId,long:false};
       clearTimeout(timer);
       timer=setTimeout(()=>{
-        if(!active||active.button!==button)return;
+        if(!active||active.button!==first)return;
         active.long=true;
-        picker.classList.add("is-open");
-        picker.dataset.suppressNextLike="1";
-        try{button.setPointerCapture?.(e.pointerId)}catch{}
+        openPalette(picker,picker);
+        try{first.setPointerCapture?.(e.pointerId)}catch{}
       },HOLD_MS);
     }
 
@@ -40,7 +69,7 @@ export default function ReactionHoldBridge(){
       if(long){
         e.preventDefault();
         e.stopPropagation();
-        setTimeout(()=>{if(picker.dataset.suppressNextLike==="1")delete picker.dataset.suppressNextLike},450);
+        setTimeout(()=>{if(picker.dataset.suppressNextLike==="1")delete picker.dataset.suppressNextLike},500);
       }
       try{button.releasePointerCapture?.(e.pointerId)}catch{}
     }
@@ -48,30 +77,30 @@ export default function ReactionHoldBridge(){
     function onPointerCancel(){clearTimeout(timer);timer=null;active=null}
 
     function onClick(e){
-      const button=e.target.closest?.(".sf-reaction-picker button");
-      if(!button)return;
-      const picker=button.closest(".sf-reaction-picker");
-      if(!picker)return;
-      const first=picker.querySelector("button");
-      if(button===first&&picker.dataset.suppressNextLike==="1"){
+      const first=e.target.closest?.(".sf-reaction-picker > button:first-child");
+      if(!first)return;
+      const picker=first.closest(".sf-reaction-picker");
+      if(picker?.dataset.suppressNextLike==="1"){
         e.preventDefault();
         e.stopPropagation();
         delete picker.dataset.suppressNextLike;
-        return;
       }
-      if(picker.classList.contains("is-open"))setTimeout(()=>picker.classList.remove("is-open"),80);
     }
 
+    function onScroll(){closePalette()}
     document.addEventListener("pointerdown",onPointerDown,true);
     document.addEventListener("pointerup",onPointerUp,true);
     document.addEventListener("pointercancel",onPointerCancel,true);
     document.addEventListener("click",onClick,true);
+    window.addEventListener("scroll",onScroll,true);
     return()=>{
       clearTimeout(timer);
+      closePalette();
       document.removeEventListener("pointerdown",onPointerDown,true);
       document.removeEventListener("pointerup",onPointerUp,true);
       document.removeEventListener("pointercancel",onPointerCancel,true);
       document.removeEventListener("click",onClick,true);
+      window.removeEventListener("scroll",onScroll,true);
     };
   },[]);
   return null;
