@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect,useRef,useState } from "react";
+import {createPortal} from "react-dom";
 import {usePathname} from "next/navigation";
 import Icon from "./Icon";
 import {UiButton,UiIconButton,UiLinkButton} from "./Ui";
-import {UI_MODE} from "./ui-mode";
 
 function isStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true;}
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
@@ -19,7 +19,15 @@ export default function PlatformClient(){
   const [updateReady,setUpdateReady]=useState(false);
   const [offline,setOffline]=useState(false);
   const [broadcast,setBroadcast]=useState(null);
+  const [headerHost,setHeaderHost]=useState(null);
   const registrationRef=useRef(null);
+
+  useEffect(()=>{
+    const syncHost=()=>setHeaderHost(document.querySelector(".v3-header-actions"));
+    syncHost();
+    const raf=requestAnimationFrame(syncHost);
+    return()=>cancelAnimationFrame(raf);
+  },[pathname]);
 
   useEffect(()=>{
     setInstalled(isStandalone()); setOffline(!navigator.onLine);
@@ -32,6 +40,7 @@ export default function PlatformClient(){
     if("serviceWorker" in navigator){
       navigator.serviceWorker.register("/sw.js").then(reg=>{
         registrationRef.current=reg;
+        reg.update().catch(()=>{});
         if(reg.waiting)setUpdateReady(true);
         reg.addEventListener("updatefound",()=>{const worker=reg.installing;if(worker)worker.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller)setUpdateReady(true);});});
       }).catch(err=>report("service-worker",err));
@@ -56,14 +65,15 @@ export default function PlatformClient(){
   async function install(){if(installPrompt){await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==="accepted"){setInstalled(true);setInstallPrompt(null);}}else if(isIOS())setShowIOS(true);}
   function applyUpdate(){registrationRef.current?.waiting?.postMessage({type:"SKIP_WAITING"});}
   const primarySurface=pathname==="/home"||pathname==="/feed";
+  const installAvailable=primarySurface&&!installed&&(installPrompt||isIOS());
   const broadcastAction=typeof window!=="undefined"?safeActionUrl(broadcast?.action_url):"";
-  const installLogo=UI_MODE==="v3"?"/brand/marbo3a-app-icon.svg":"/logo.svg";
+  const installButton=installAvailable?<button type="button" className="pwa-install v3-header-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>:null;
 
   return <>
-    {primarySurface&&!installed&&(installPrompt||isIOS())&&<button type="button" className="pwa-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>}
+    {installButton&&headerHost?createPortal(installButton,headerHost):null}
     {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><UiButton variant="secondary" size="compact" onClick={()=>location.reload()}>إعادة المحاولة</UiButton></div>}
     {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><UiButton size="compact" onClick={applyUpdate}>تحديث</UiButton></div>}
     {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcastAction&&<UiLinkButton href={broadcastAction} size="compact">{broadcast.action_label||"فتح"}</UiLinkButton>}<UiIconButton icon="close" label="إغلاق" size="compact" className="broadcast-close" onClick={()=>setBroadcast(null)}/></div>}
-    {showIOS&&<div className="pwa-modal" onMouseDown={e=>e.currentTarget===e.target&&setShowIOS(false)}><div><UiIconButton icon="close" label="إغلاق" size="compact" className="pwa-modal-close" onClick={()=>setShowIOS(false)}/><img src={installLogo} alt="مربوعة"/><h3>ثبّت مربوعة على iPhone/iPad</h3><p>من Safari اضغط زر المشاركة، وبعدها اختار <b>إضافة إلى الشاشة الرئيسية</b> ثم «إضافة».</p><UiButton className="pwa-done" onClick={()=>setShowIOS(false)}>تمام</UiButton></div></div>}
+    {showIOS&&<div className="pwa-modal" onMouseDown={e=>e.currentTarget===e.target&&setShowIOS(false)}><div><UiIconButton icon="close" label="إغلاق" size="compact" className="pwa-modal-close" onClick={()=>setShowIOS(false)}/><img src="/brand/marbo3a-app-icon.svg" alt="مربوعة"/><h3>ثبّت مربوعة على iPhone/iPad</h3><p>من Safari اضغط زر المشاركة، وبعدها اختار <b>إضافة إلى الشاشة الرئيسية</b> ثم «إضافة».</p><UiButton className="pwa-done" onClick={()=>setShowIOS(false)}>تمام</UiButton></div></div>}
   </>;
 }

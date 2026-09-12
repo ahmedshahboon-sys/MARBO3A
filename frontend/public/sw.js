@@ -1,6 +1,6 @@
-const VERSION="marbo3a-shell-v9-ui-v3";
+const VERSION="marbo3a-shell-v10-reference";
 const OFFLINE="/offline.html";
-const SHELL=[OFFLINE,"/manifest.webmanifest","/favicon.svg","/pwa-icon.svg","/pwa-maskable.svg","/pwa-192.png","/pwa-512.png","/pwa-maskable-512.png","/apple-touch-icon.png","/brand/marbo3a-app-icon.svg","/brand/marbo3a-symbol-orange.svg","/brand/brand-lockup-horizontal.png","/brand/brand-lockup-vertical.png"];
+const SHELL=[OFFLINE,"/manifest.webmanifest","/favicon.svg","/logo.svg","/pwa-icon.svg","/pwa-maskable.svg","/pwa-192.png","/pwa-512.png","/pwa-maskable-512.png","/apple-touch-icon.png","/brand/marbo3a-app-icon.svg","/brand/marbo3a-symbol-orange.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
