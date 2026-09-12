@@ -5,11 +5,15 @@ import Icon from "../Icon";
 
 export default function SettingsPage(){
   useEffect(()=>{
+    window.scrollTo({top:0,left:0,behavior:"auto"});
     const open=()=>window.dispatchEvent(new CustomEvent("marbo3a:open-settings"));
     const a=setTimeout(open,60);
     const b=setTimeout(open,320);
     window.addEventListener("pageshow",open);
-    return()=>{clearTimeout(a);clearTimeout(b);window.removeEventListener("pageshow",open)};
+    return()=>{
+      clearTimeout(a);clearTimeout(b);window.removeEventListener("pageshow",open);
+      document.querySelector(".settings-card>header button")?.click();
+    };
   },[]);
   return <main className="settings-route-marker" dir="rtl">
     <header className="settings-route-head">
