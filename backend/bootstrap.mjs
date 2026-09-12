@@ -28,6 +28,7 @@ const modules=[
   "./security-p0.mjs",
   "./real-map.mjs",
   "./realtime-v2.mjs",
+  "./social-auth-config.mjs",
   "./social-auth.mjs",
   "./product-v2.mjs",
   "./experience-v2.mjs",
