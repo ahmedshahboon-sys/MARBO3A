@@ -33,6 +33,7 @@ export default function ReactionHoldBridge(){
         b.addEventListener("click",ev=>{
           ev.preventDefault();
           ev.stopPropagation();
+          delete picker.dataset.suppressNextLike;
           originals[index]?.click();
           closePalette();
         });
