@@ -3,6 +3,7 @@
 import { useEffect,useRef,useState } from "react";
 import {usePathname} from "next/navigation";
 import Icon from "./Icon";
+import {UiButton,UiIconButton,UiLinkButton} from "./Ui";
 import {UI_MODE} from "./ui-mode";
 
 function isStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true;}
@@ -60,9 +61,9 @@ export default function PlatformClient(){
 
   return <>
     {primarySurface&&!installed&&(installPrompt||isIOS())&&<button className="pwa-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>}
-    {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><button onClick={()=>location.reload()}>إعادة المحاولة</button></div>}
-    {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><button onClick={applyUpdate}>تحديث</button></div>}
-    {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcastAction&&<a href={broadcastAction}>{broadcast.action_label||"فتح"}</a>}<button className="broadcast-close" onClick={()=>setBroadcast(null)} aria-label="إغلاق"><Icon name="close" size={16}/></button></div>}
-    {showIOS&&<div className="pwa-modal" onMouseDown={e=>e.currentTarget===e.target&&setShowIOS(false)}><div><button className="pwa-modal-close" onClick={()=>setShowIOS(false)} aria-label="إغلاق"><Icon name="close"/></button><img src={installLogo} alt="مربوعة"/><h3>ثبّت مربوعة على iPhone/iPad</h3><p>من Safari اضغط زر المشاركة، وبعدها اختار <b>إضافة إلى الشاشة الرئيسية</b> ثم «إضافة».</p><button className="pwa-done" onClick={()=>setShowIOS(false)}>تمام</button></div></div>}
+    {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><UiButton variant="secondary" size="compact" onClick={()=>location.reload()}>إعادة المحاولة</UiButton></div>}
+    {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><UiButton size="compact" onClick={applyUpdate}>تحديث</UiButton></div>}
+    {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcastAction&&<UiLinkButton href={broadcastAction} size="compact">{broadcast.action_label||"فتح"}</UiLinkButton>}<UiIconButton icon="close" label="إغلاق" size="compact" className="broadcast-close" onClick={()=>setBroadcast(null)}/></div>}
+    {showIOS&&<div className="pwa-modal" onMouseDown={e=>e.currentTarget===e.target&&setShowIOS(false)}><div><UiIconButton icon="close" label="إغلاق" size="compact" className="pwa-modal-close" onClick={()=>setShowIOS(false)}/><img src={installLogo} alt="مربوعة"/><h3>ثبّت مربوعة على iPhone/iPad</h3><p>من Safari اضغط زر المشاركة، وبعدها اختار <b>إضافة إلى الشاشة الرئيسية</b> ثم «إضافة».</p><UiButton className="pwa-done" onClick={()=>setShowIOS(false)}>تمام</UiButton></div></div>}
   </>;
 }
