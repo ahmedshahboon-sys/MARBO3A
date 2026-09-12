@@ -8,8 +8,8 @@ const checks=[
   ["app/VoiceRecorder.js",["document.addEventListener(\"pointerup\"","voice-record-panel locked","voice-record-panel active","onRecorded?."]],
   ["app/StoryRail.js",["story-overlay-open","/viewers","story-viewers-panel","viewers!==null"]],
   ["app/ReactionHoldBridge.js",["MOVE_TOLERANCE","document.body.appendChild(palette)","HOLD_MS=420"]],
-  ["app/RoomVoiceStage.js",["recvonly","scheduleJoinRetry","أنت تستمع الآن","ROOM_VOICE"]],
-  ["app/notifications/page.js",["/api/notifications/unread-count"].filter(Boolean)],
+  ["app/RoomVoiceStage.js",["recvonly","scheduleJoinRetry","أنت تستمع الآن","room-voice-remote-audio"]],
+  ["app/notifications/page.js",["friend_action:\"expired\"","notification-actions","respond(n,\"accept\")"]],
   ["app/PremiumChrome.js",["/api/notifications/unread-count","v3-unread-badge"]],
   ["app/SocialFeed.js",["comments/preview","/reactions","const previous=post,next=","reaction-people"]],
   ["app/profile/edit/page.js",["USERNAME_COOLDOWN","7 أيام","usernameNextChangeAt"]],
@@ -19,7 +19,7 @@ const checks=[
 let failed=false;
 for(const [file,needles] of checks){
   let text="";
-  try{text=await read(file)}catch(e){console.error(`Missing interaction contract file: ${file}`);failed=true;continue}
+  try{text=await read(file)}catch{console.error(`Missing interaction contract file: ${file}`);failed=true;continue}
   for(const needle of needles){if(!text.includes(needle)){console.error(`Missing interaction contract in ${file}: ${needle}`);failed=true}}
 }
 
