@@ -10,11 +10,12 @@ export default function PremiumChrome(){
   const openDrawer=()=>window.dispatchEvent(new CustomEvent("marbo3a:open-drawer"));
   return <header className="v3-global-header" dir="rtl">
     <button className="v3-brand-lockup" type="button" onClick={openDrawer} aria-label="فتح قائمة مربوعة">
-      <img className="v3-brand-lockup-image" src="/brand/brand-lockup-horizontal.png" alt="مربوعة MARBO3A"/>
+      <img src="/brand/marbo3a-symbol-orange.svg" alt="" aria-hidden="true"/>
+      <span className="v3-brand-copy"><b>مربوعة</b><small>MARBO3A</small><em>ناسنا .. حكاياتنا .. دايمًا مع بعض</em></span>
     </button>
     <nav className="v3-header-actions" aria-label="اختصارات">
       <Link prefetch href="/notifications" aria-label="الإشعارات" className="v3-header-icon v3-bell"><Icon name="bell"/></Link>
       <Link prefetch href="/search" aria-label="البحث" className="v3-header-icon"><Icon name="search"/></Link>
     </nav>
-  </header>
+  </header>;
 }
