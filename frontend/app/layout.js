@@ -30,6 +30,8 @@ import "./ui-v3-profile.css";
 import "./ui-v3-chat.css";
 import "./ui-v3-admin.css";
 import "./ui-v3-brand.css";
+import "./ui-v3-mobile-parity.css";
+import "./ui-v3-mobile-components.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
