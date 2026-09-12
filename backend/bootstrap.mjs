@@ -16,6 +16,7 @@ const modules=[
   "./media-social.mjs",
   "./calls.mjs",
   "./room-voice.mjs",
+  "./room-voice-discovery.mjs",
   "./launch-completion.mjs",
   "./v1-social-extra.mjs",
   "./v1-completion.mjs",
