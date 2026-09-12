@@ -6,6 +6,7 @@ body:has(.pwa-install) .sf-top{padding-left:98px!important}
 /* Profile edit media and fields */
 .profile-media-empty,.profile-cover-empty{display:grid;place-items:center;gap:6px;color:#8994a3;border:1px dashed #394454;background:#0b1118;border-radius:14px;margin:6px 0 9px}
 .profile-media-empty{width:76px;height:76px;border-radius:20px}.profile-cover-empty{width:100%;height:100px}.profile-media-empty span,.profile-cover-empty span{font-size:10px}.profile-upload-note{display:block;color:#9aa4b3!important;line-height:1.6}.profile-field-label{display:grid;gap:6px;color:#cfd5dd;font-size:11px;font-weight:700}.profile-field-label textarea,.profile-field-label input{font-weight:400}.upload-box h3{margin:4px 0 6px!important}.upload-box h3:not(:first-child){margin-top:10px!important}
+.location-choice>label::after{content:"غير مفعل";font-size:9px;color:#8994a3;grid-column:1;grid-row:2}.location-choice>label:has(input:checked)::after{content:"مفعل";color:#ffad67}
 
 /* Admin labels stay Arabic without requiring another page implementation. */
 .admin-route-page>header small{font-size:0!important}.admin-route-page>header small::after{content:"مركز الإدارة";font-size:10px;color:#ff9a42}.admin-tabs button:last-child{font-size:0!important}.admin-tabs button:last-child::after{content:"السجل";font-size:11px}
@@ -42,3 +43,4 @@ a.feature-back,a.public-open,.feature-head a,.settings-links a{color:inherit!imp
 
 /* Clear selected/disabled states across product surfaces. */
 button:disabled{cursor:not-allowed!important}.feed-tabs button:disabled,.inbox-tabs button:disabled{color:#657080!important}.feature-actions button:disabled,.setting-action:disabled{opacity:.62!important}
+.chat-send:disabled,.room-compose>button:disabled{background:#222a34!important;color:#727e8d!important;border-color:#303a48!important;opacity:1!important}
