@@ -3,6 +3,7 @@ body:has(.pwa-install) .sf-top{padding-left:98px!important}
 body:has(>main.feature-page) .drawer-trigger{position:absolute!important}
 .sf-chat-row.unread{border-color:#303a48!important;box-shadow:inset -3px 0 #ff7a00!important}
 .sf-chat-row.unread:hover{border-color:#3b4655!important}
+.sf-meta-line{display:inline-flex!important;align-items:center!important;gap:3px!important;direction:rtl!important;unicode-bidi:isolate!important}.sf-meta-line bdi{direction:ltr!important;unicode-bidi:isolate!important}.sf-meta-line span{direction:rtl!important;unicode-bidi:isolate!important}
 
 /* Profile edit media and fields */
 .profile-media-empty,.profile-cover-empty{display:grid;place-items:center;gap:6px;color:#8994a3;border:1px dashed #394454;background:#0b1118;border-radius:14px;margin:6px 0 9px}
