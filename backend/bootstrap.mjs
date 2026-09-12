@@ -22,6 +22,7 @@ const modules=[
   "./closure-routes.mjs",
   "./experience-stage1.mjs",
   "./stories.mjs",
+  "./guest-explore.mjs",
   "./message-media-fix.mjs",
   "./preflight.mjs",
   "./security-p0.mjs",
