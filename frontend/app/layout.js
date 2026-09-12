@@ -44,6 +44,7 @@ import "./ui-v3-experience-stage1.css";
 import "./ui-v3-stories.css";
 import "./guest-entry.css";
 import "./ui-v3-social-experience.css";
+import "./ui-v3-unified-scale.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
