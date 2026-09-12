@@ -20,6 +20,7 @@ import "./navigation-cleanup.css";
 import "./design-system.css";
 import "./accessibility.css";
 import "./ui-coherence.css";
+import "./ui-components.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
