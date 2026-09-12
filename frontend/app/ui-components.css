@@ -1,0 +1,48 @@
+/* Page-specific UI components that sit on top of the shared coherence contract. */
+body:has(.pwa-install) .sf-top{padding-left:98px!important}
+body:has(>main.feature-page) .drawer-trigger{position:absolute!important}
+.sf-chat-row.unread{border-color:#303a48!important;box-shadow:inset -3px 0 #ff7a00!important}
+.sf-chat-row.unread:hover{border-color:#3b4655!important}
+.sf-meta-line{display:inline-flex!important;align-items:center!important;gap:3px!important;direction:rtl!important;unicode-bidi:isolate!important}.sf-meta-line bdi{direction:ltr!important;unicode-bidi:isolate!important}.sf-meta-line span{direction:rtl!important;unicode-bidi:isolate!important}
+
+/* Profile edit media and fields */
+.profile-media-empty,.profile-cover-empty{display:grid;place-items:center;gap:6px;color:#8994a3;border:1px dashed #394454;background:#0b1118;border-radius:14px;margin:6px 0 9px}
+.profile-media-empty{width:76px;height:76px;border-radius:20px}.profile-cover-empty{width:100%;height:100px}.profile-media-empty span,.profile-cover-empty span{font-size:10px}.profile-upload-note{display:block;color:#9aa4b3!important;line-height:1.6}.profile-field-label{display:grid;gap:6px;color:#cfd5dd;font-size:11px;font-weight:700}.profile-field-label textarea,.profile-field-label input{font-weight:400}.upload-box h3{margin:4px 0 6px!important}.upload-box h3:not(:first-child){margin-top:10px!important}
+.location-choice>label::after{content:"غير مفعل";font-size:9px;color:#8994a3;grid-column:1;grid-row:2}.location-choice>label:has(input:checked)::after{content:"مفعل";color:#ffad67}
+
+/* Admin labels stay Arabic without requiring another page implementation. */
+.admin-route-page>header small{font-size:0!important}.admin-route-page>header small::after{content:"مركز الإدارة";font-size:10px;color:#ff9a42}.admin-tabs button:last-child{font-size:0!important}.admin-tabs button:last-child::after{content:"السجل";font-size:11px}
+
+/* Public handles are LTR islands inside Arabic pages. */
+.sf-profile-main>.sf-muted,.sf-chat-row small,.drawer-user small,.chat-peer small,.room-member>div>span,.public-username{direction:ltr!important;unicode-bidi:isolate!important}
+
+/* Keep chat headers simple on phones: the global drawer owns the right rail. */
+@media(max-width:760px){
+  .room-chat-head>a:first-child,.chat-social-head>a:first-child{visibility:hidden!important;pointer-events:none!important}
+  .room-chat-head{padding-right:10px!important}
+  body:has(.drawer-trigger) .room-chat-head{padding-right:10px!important}
+  .room-voice-entry{max-width:calc(100vw - 20px)!important}
+  .room-voice-entry>button{white-space:nowrap!important}
+  .feed-page .sf-top-actions>a{display:grid!important}
+  .feed-page .sf-top-actions>a:last-child{display:none!important}
+  .feed-page .sf-top-actions>.sf-avatar-loading{display:none!important}
+}
+
+/* Empty privacy page is intentionally compact rather than a full-height card. */
+main.feature-page>.feature-card>.feature-list:has(>article:only-child){min-height:0!important}
+main.feature-page>.feature-card>.feature-list>article:only-child{min-height:58px!important}
+
+/* Mobile header and install control never overlap. */
+@media(max-width:430px){
+  body:has(.pwa-install) .sf-top{padding-left:92px!important}
+  .pwa-install{max-width:80px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .sf-top-actions{gap:3px!important}.sf-top-actions>a{width:36px!important;height:36px!important;min-width:36px!important}
+  .sf-top-actions .sf-avatar{width:34px!important;height:34px!important}
+}
+
+/* Links never fall back to browser purple/blue. */
+a.feature-back,a.public-open,.feature-head a,.settings-links a{color:inherit!important}.feature-head a{color:#ffad67!important}
+
+/* Clear selected/disabled states across product surfaces. */
+button:disabled{cursor:not-allowed!important}.feed-tabs button:disabled,.inbox-tabs button:disabled{color:#657080!important}.feature-actions button:disabled,.setting-action:disabled{opacity:.62!important}
+.chat-send:disabled,.room-compose>button:disabled{background:#222a34!important;color:#727e8d!important;border-color:#303a48!important;opacity:1!important}
