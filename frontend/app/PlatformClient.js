@@ -60,7 +60,7 @@ export default function PlatformClient(){
   const installLogo=UI_MODE==="v3"?"/brand/marbo3a-app-icon.svg":"/logo.svg";
 
   return <>
-    {primarySurface&&!installed&&(installPrompt||isIOS())&&<button className="pwa-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>}
+    {primarySurface&&!installed&&(installPrompt||isIOS())&&<button type="button" className="pwa-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>}
     {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><UiButton variant="secondary" size="compact" onClick={()=>location.reload()}>إعادة المحاولة</UiButton></div>}
     {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><UiButton size="compact" onClick={applyUpdate}>تحديث</UiButton></div>}
     {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcastAction&&<UiLinkButton href={broadcastAction} size="compact">{broadcast.action_label||"فتح"}</UiLinkButton>}<UiIconButton icon="close" label="إغلاق" size="compact" className="broadcast-close" onClick={()=>setBroadcast(null)}/></div>}
