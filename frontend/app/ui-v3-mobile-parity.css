@@ -1,0 +1,219 @@
+/* MARBO3A V3 mobile parity layer.
+   Focused fixes for the approved mockup layout without deleting the legacy UI. */
+body.ui-v3{overflow-x:hidden}
+
+/* The legacy dock leaves right/height/grid properties behind on mobile.
+   Reset the container completely before applying the V3 track. */
+.ui-v3 .social-dock{
+  right:auto!important;
+  top:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  display:block!important;
+  grid-template-columns:none!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  overflow:visible!important;
+}
+.ui-v3 .social-dock-track{
+  width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+.ui-v3 .social-dock a{min-width:0!important;overflow:visible!important}
+
+/* Keep the install affordance, but never let it collide with the approved header. */
+.ui-v3 .pwa-install{
+  top:auto!important;
+  left:14px!important;
+  right:auto!important;
+  bottom:calc(var(--v3-dock-h,106px) + env(safe-area-inset-bottom) + 14px)!important;
+  z-index:118!important;
+  min-height:38px!important;
+  padding:0 11px!important;
+  border-radius:13px!important;
+  font-size:12px!important;
+}
+
+/* Explicitly suppress legacy inner headers on V3 screens. */
+.ui-v3 .feed-page .sf-top,
+.ui-v3 .profile-v3-route .sf-top,
+.ui-v3 .messages-v3-route .sf-top,
+.ui-v3 .rooms-v3-route .sf-top{display:none!important}
+
+@media(max-width:720px){
+  body.ui-v3{--v3-header-h:82px;--v3-dock-h:94px}
+
+  /* Global header */
+  .ui-v3 .v3-global-header{
+    width:100%!important;
+    min-height:82px!important;
+    padding:calc(9px + env(safe-area-inset-top)) 16px 8px!important;
+    gap:8px!important;
+  }
+  .ui-v3 .v3-brand-lockup{gap:9px!important}
+  .ui-v3 .v3-brand-lockup>img{width:42px!important;height:42px!important}
+  .ui-v3 .v3-brand-copy>b{font-size:23px!important;line-height:1!important}
+  .ui-v3 .v3-brand-copy>small{font-size:9px!important;letter-spacing:.22em!important;margin-top:4px!important}
+  .ui-v3 .v3-brand-copy>em{font-size:8px!important;margin-top:5px!important}
+  .ui-v3 .v3-header-actions{gap:4px!important}
+  .ui-v3 .v3-header-icon{width:42px!important;height:42px!important}
+  .ui-v3 .v3-header-icon svg{width:25px!important;height:25px!important}
+
+  /* Shared canvas */
+  .ui-v3 .social-shell,
+  .ui-v3 .chat-social-shell,
+  .ui-v3 .room-chat-shell{width:calc(100% - 16px)!important;max-width:none!important}
+  .ui-v3 .social-shell,.ui-v3 .sf-simple-page,.ui-v3 .sf-profile-page{padding-bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 22px)!important}
+
+  /* Home/feed */
+  .ui-v3 .feed-shell{padding-top:2px!important}
+  .ui-v3 .feed-center{gap:12px!important}
+  .ui-v3 .sf-composer.compact{padding:13px!important;border-radius:20px!important}
+  .ui-v3 .sf-composer-row{gap:10px!important;align-items:center!important}
+  .ui-v3 .sf-composer-row>.sf-avatar{width:42px!important;height:42px!important}
+  .ui-v3 .sf-composer textarea{
+    min-height:54px!important;
+    max-height:110px!important;
+    padding:14px 15px!important;
+    border-radius:17px!important;
+    font-size:16px!important;
+  }
+  .ui-v3 .sf-composer-tools{margin-top:10px!important;padding-top:10px!important}
+  .ui-v3 .sf-composer-tools label{padding:8px 10px!important;font-size:14px!important}
+  .ui-v3 .sf-composer-tools .primary{min-width:84px!important;height:44px!important;padding:0 18px!important;border-radius:14px!important}
+  .ui-v3 .feed-tabs{border-radius:19px!important}
+  .ui-v3 .feed-tabs button{height:52px!important;font-size:16px!important}
+  .ui-v3 .sf-post{border-radius:20px!important}
+  .ui-v3 .sf-post-head{padding:14px 14px 8px!important}
+  .ui-v3 .sf-body{font-size:16px!important;line-height:1.75!important;padding:0 14px 10px!important}
+  .ui-v3 .sf-post-stats{padding:10px 14px!important}
+
+  /* Dock: exact five-slot mobile bar, no clipping. */
+  .ui-v3 .social-dock{
+    left:8px!important;
+    right:8px!important;
+    width:auto!important;
+    transform:none!important;
+    bottom:calc(7px + env(safe-area-inset-bottom))!important;
+  }
+  .ui-v3 .social-dock-track{
+    height:78px!important;
+    padding:5px 7px!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    border-radius:25px!important;
+  }
+  .ui-v3 .social-dock a{height:64px!important;font-size:11px!important;gap:3px!important}
+  .ui-v3 .social-dock a svg{width:23px!important;height:23px!important}
+  .ui-v3 .social-dock .dock-create{
+    width:60px!important;
+    height:60px!important;
+    margin-top:-14px!important;
+    border-radius:50%!important;
+    font-size:10px!important;
+  }
+  .ui-v3 .social-dock .dock-create svg{width:27px!important;height:27px!important}
+
+  /* Profile */
+  .ui-v3 .profile-v3-route .sf-profile-page{margin-top:0!important}
+  .ui-v3 .profile-v3-route .sf-profile-card{border-radius:22px!important}
+  .ui-v3 .profile-v3-route .sf-cover{height:188px!important}
+  .ui-v3 .profile-cover-edit{left:10px!important;top:10px!important;min-height:40px!important;padding-inline:12px!important;font-size:13px!important}
+  .ui-v3 .profile-v3-route .sf-profile-body{padding:0 14px 18px!important}
+  .ui-v3 .profile-v3-route .sf-profile-avatar{margin:-58px auto 7px!important}
+  .ui-v3 .profile-v3-route .sf-profile-avatar .sf-avatar{width:116px!important;height:116px!important;border-width:4px!important}
+  .ui-v3 .profile-v3-route .sf-profile-main h1{font-size:28px!important;margin-top:6px!important}
+  .ui-v3 .profile-v3-route .sf-profile-main>.sf-muted{font-size:16px!important}
+  .ui-v3 .profile-v3-route .sf-profile-bio{font-size:15px!important;margin:11px auto 5px!important}
+  .ui-v3 .profile-meta-v3{gap:10px!important;font-size:13px!important}
+  .ui-v3 .profile-v3-route .sf-profile-counts{margin:15px auto!important;padding:11px 0!important}
+  .ui-v3 .profile-v3-route .sf-profile-counts b{font-size:22px!important}
+  .ui-v3 .profile-v3-route .sf-profile-actions{gap:8px!important}
+  .ui-v3 .profile-v3-route .sf-profile-actions>*{min-height:46px!important;padding-inline:14px!important;flex:1 1 140px!important}
+  .ui-v3 .profile-v3-route .sf-profile-actions>.sf-primary{min-width:0!important}
+  .ui-v3 .profile-tabs-v3{margin:11px 0 10px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .ui-v3 .profile-tabs-v3>*{min-width:0!important;height:52px!important;font-size:12px!important;gap:5px!important}
+  .ui-v3 .profile-tabs-v3 svg{width:20px!important;height:20px!important}
+
+  /* Settings route: render the real settings panel as a page, not an empty marker. */
+  .ui-v3 .settings-route-marker{width:calc(100% - 16px)!important;padding:0!important}
+  .ui-v3 .settings-route-head{padding:2px 2px 12px!important;gap:12px!important;align-items:center!important}
+  .ui-v3 .settings-route-head>a{width:44px!important;height:44px!important;border-radius:14px!important}
+  .ui-v3 .settings-route-head h1{font-size:28px!important;margin:3px 0!important}
+  .ui-v3 .settings-route-head p{font-size:13px!important}
+  body.ui-v3:has(.settings-route-marker) .settings-card{width:calc(100% - 16px)!important}
+  body.ui-v3:has(.settings-route-marker) .settings-tabs{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    overflow:visible!important;
+    gap:3px!important;
+    padding:4px!important;
+    border-radius:18px!important;
+  }
+  body.ui-v3:has(.settings-route-marker) .settings-tabs button{min-width:0!important;height:46px!important;padding:0 6px!important;font-size:12px!important}
+  body.ui-v3:has(.settings-route-marker) .setting-row{min-height:82px!important;padding:13px!important;border-radius:18px!important}
+  body.ui-v3:has(.settings-route-marker) .setting-row b{font-size:16px!important}
+  body.ui-v3:has(.settings-route-marker) .setting-row span{font-size:11px!important}
+  body.ui-v3:has(.settings-route-marker) .setting-row select,
+  body.ui-v3:has(.settings-route-marker) .setting-action{min-height:43px!important;max-width:145px!important;font-size:12px!important}
+
+  /* Direct chat: one compact header row instead of the two-row oversized card. */
+  .ui-v3 .chat-social-shell{padding-inline:0!important;padding-bottom:calc(var(--v3-dock-h) + 94px)!important}
+  .ui-v3 .chat-social-head{
+    min-height:76px!important;
+    padding:9px 10px!important;
+    grid-template-columns:44px minmax(0,1fr) auto!important;
+    gap:8px!important;
+    border-radius:20px!important;
+  }
+  .ui-v3 .chat-social-head>a.chat-icon-btn:first-child{grid-column:auto!important;grid-row:auto!important}
+  .ui-v3 .chat-peer{min-width:0!important;text-align:right!important}
+  .ui-v3 .chat-peer h1{font-size:21px!important;margin:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .ui-v3 .chat-peer small{font-size:11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .ui-v3 .chat-head-actions{grid-column:auto!important;display:flex!important;justify-content:flex-start!important;gap:5px!important}
+  .ui-v3 .chat-icon-btn{width:42px!important;height:42px!important}
+  .ui-v3 .chat-head-actions .chat-icon-btn{width:42px!important;height:42px!important}
+  .ui-v3 .chat-stream{min-height:calc(100dvh - var(--v3-header-h) - var(--v3-dock-h) - 172px)!important;padding:18px 6px 14px!important}
+  .ui-v3 .chat-bubble{max-width:82%!important;padding:10px 12px!important;border-radius:19px!important;font-size:15px!important}
+  .ui-v3 .chat-call-event{max-width:330px!important;padding:10px 14px!important;border-radius:17px!important}
+  .ui-v3 .chat-compose{
+    width:calc(100% - 16px)!important;
+    min-height:62px!important;
+    padding:7px!important;
+    gap:6px!important;
+    border-radius:22px!important;
+    bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 4px)!important;
+  }
+  .ui-v3 .chat-compose input{height:44px!important;padding-inline:13px!important}
+  .ui-v3 .chat-compose label{width:44px!important;height:44px!important;border-radius:14px!important}
+  .ui-v3 .chat-compose>button:last-child{width:46px!important;height:46px!important}
+
+  /* Room chat follows the same compact mobile language. */
+  .ui-v3 .room-chat-shell{padding-inline:0!important;padding-bottom:calc(var(--v3-dock-h) + 94px)!important}
+  .ui-v3 .room-chat-head{min-height:72px!important;padding:9px 10px!important;border-radius:20px!important}
+  .ui-v3 .room-chat-head h1{font-size:21px!important}
+  .ui-v3 .room-chat-stream{min-height:calc(100dvh - var(--v3-header-h) - var(--v3-dock-h) - 188px)!important;padding:16px 6px!important}
+  .ui-v3 .room-bubble{max-width:84%!important;padding:10px 12px!important;font-size:15px!important}
+  .ui-v3 .room-compose{width:calc(100% - 16px)!important;min-height:62px!important;padding:7px!important;gap:6px!important;border-radius:22px!important;bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 4px)!important}
+
+  /* Discovery/messages cards */
+  .ui-v3 .sf-simple-page>.sf-panel,.ui-v3 .sf-inbox{padding:13px!important;border-radius:20px!important}
+  .ui-v3 .sf-section-head h1{font-size:28px!important}
+  .ui-v3 .sf-room-card{min-height:126px!important;padding:13px!important;border-radius:19px!important}
+  .ui-v3 .sf-chat-row{min-height:88px!important;padding:11px!important;border-radius:18px!important}
+}
+
+@media(max-width:430px){
+  .ui-v3 .v3-brand-copy>em{display:none!important}
+  .ui-v3 .v3-brand-lockup>img{width:40px!important;height:40px!important}
+  .ui-v3 .v3-brand-copy>b{font-size:21px!important}
+  .ui-v3 .v3-header-icon{width:40px!important;height:40px!important}
+  .ui-v3 .social-dock{left:6px!important;right:6px!important}
+  .ui-v3 .social-dock-track{padding-inline:4px!important}
+  .ui-v3 .social-dock .dock-create{width:56px!important;height:56px!important}
+  .ui-v3 .chat-social-head{grid-template-columns:40px minmax(0,1fr) auto!important;padding-inline:7px!important}
+  .ui-v3 .chat-icon-btn,.ui-v3 .chat-head-actions .chat-icon-btn{width:39px!important;height:39px!important}
+  .ui-v3 .profile-v3-route .sf-cover{height:174px!important}
+  .ui-v3 .profile-v3-route .sf-profile-avatar .sf-avatar{width:110px!important;height:110px!important}
+}
