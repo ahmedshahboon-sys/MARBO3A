@@ -1,0 +1,227 @@
+/* MARBO3A global density pass.
+   Final cascade layer: every product route uses one compact mobile-first scale.
+   Keep layout/native behavior intact; normalize width, spacing, typography, controls,
+   cards, docks, messages, notifications, rooms, profile/settings/admin and dialogs. */
+
+:root{
+  --app-max:640px;
+  --app-gutter:12px;
+  --app-header-h:64px;
+  --app-dock-h:72px;
+  --app-safe-bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 14px);
+  --app-r-lg:16px;
+  --app-r-md:13px;
+  --app-space-1:4px;
+  --app-space-2:7px;
+  --app-space-3:10px;
+  --app-space-4:14px;
+}
+
+/* One width system for every signed-in surface. */
+.ui-v3 :where(
+  .social-shell,.feed-shell,.sf-main,.sf-simple-page,.feature-page,.messages-v3-page>.social-shell,
+  .inbox-wide,.room-community-shell,.chat-shell,.profile-shell,.settings-shell,.admin-shell,
+  .friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,
+  .safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell
+){
+  width:min(100%,var(--app-max))!important;
+  max-width:var(--app-max)!important;
+  margin-inline:auto!important;
+  box-sizing:border-box!important;
+}
+
+.ui-v3 :where(.social-shell,.feed-shell,.sf-simple-page,.feature-page,.profile-shell,.settings-shell,.admin-shell,.friends-shell,.search-shell,.more-shell,.rooms-shell,.calls-shell,.safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell){
+  padding-inline:var(--app-gutter)!important;
+}
+
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page){
+  min-height:100dvh!important;
+  padding-bottom:var(--app-safe-bottom)!important;
+}
+
+/* Typography scale shared across product pages. */
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h1{
+  font-size:clamp(22px,6vw,28px)!important;
+  line-height:1.18!important;
+  margin-block:0!important;
+}
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h2{
+  font-size:clamp(17px,4.8vw,21px)!important;
+  line-height:1.25!important;
+}
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h3{
+  font-size:15px!important;
+  line-height:1.3!important;
+}
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) :is(p,label,li){
+  line-height:1.45;
+}
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) small{
+  line-height:1.35;
+}
+
+/* Generic card/control density. */
+.ui-v3 :where(.sf-card,.settings-card,.profile-card,.feature-card,.admin-card,.room-card,.friend-card,.search-card,.privacy-card,.security-card,.more-card,.panel-card){
+  border-radius:var(--app-r-lg)!important;
+}
+.ui-v3 :where(.sf-card,.settings-card,.profile-card,.feature-card,.admin-card,.room-card,.friend-card,.search-card,.privacy-card,.security-card,.more-card,.panel-card){
+  padding:var(--app-space-3)!important;
+}
+.ui-v3 :where(button,.btn,.button,[role="button"]){
+  min-height:36px;
+}
+.ui-v3 :where(input:not([type="checkbox"]):not([type="radio"]),textarea,select){
+  min-height:40px;
+  font-size:14px;
+}
+.ui-v3 textarea{line-height:1.45}
+
+/* Header and dock stay compact and identical route-to-route. */
+.ui-v3 .v3-global-header{
+  min-height:var(--app-header-h)!important;
+  height:var(--app-header-h)!important;
+  padding-top:max(6px,env(safe-area-inset-top,0px))!important;
+  padding-inline:var(--app-gutter)!important;
+  box-sizing:border-box!important;
+}
+.ui-v3 .v3-global-header :where(.v3-header-icon,button,a){min-width:36px!important;min-height:36px!important}
+.ui-v3 .v3-global-header :where(svg){max-width:25px!important;max-height:25px!important}
+.ui-v3 .v3-unread-badge{min-width:17px!important;height:17px!important;font-size:9px!important;padding-inline:4px!important}
+
+.ui-v3 :where(.social-dock,.v3-bottom-dock,.bottom-dock){
+  min-height:var(--app-dock-h)!important;
+  height:var(--app-dock-h)!important;
+}
+.ui-v3 :where(.social-dock,.v3-bottom-dock,.bottom-dock) :where(a,button){
+  min-height:54px!important;
+  font-size:10px!important;
+}
+.ui-v3 :where(.social-dock,.v3-bottom-dock,.bottom-dock) svg{width:25px!important;height:25px!important}
+
+/* Home/feed stays the visual reference. */
+.ui-v3 .feed-center{max-width:var(--app-max)!important}
+.ui-v3 :where(.sf-composer,.feed-composer){padding:10px!important;border-radius:17px!important}
+.ui-v3 :where(.sf-post,.post-card){border-radius:17px!important;margin-bottom:10px!important}
+.ui-v3 .sf-post-header{padding:10px!important}
+.ui-v3 .sf-post-body{padding:0 10px 9px!important;font-size:14px!important;line-height:1.55!important}
+.ui-v3 .sf-post-stats{min-height:34px!important;padding:5px 10px!important;font-size:10px!important}
+.ui-v3 .sf-actions-reactions{min-height:42px!important;padding:3px 7px!important}
+.ui-v3 .sf-comment-preview{padding:5px 10px 8px!important}
+.ui-v3 .sf-comment-preview-item{padding-block:4px!important;font-size:11px!important}
+
+/* Messages: remove the oversized title/whitespace and use feed density. */
+.ui-v3 .messages-v3-page>.social-shell{padding-top:4px!important}
+.ui-v3 .messages-v3-page .inbox-wide{padding:0!important;max-width:var(--app-max)!important}
+.ui-v3 .messages-v3-title{
+  min-height:48px!important;
+  margin:0 0 6px!important;
+  padding:3px 2px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.ui-v3 .messages-v3-title h1{font-size:24px!important}
+.ui-v3 .messages-v3-title>div{gap:6px!important}
+.ui-v3 .messages-v3-title>div>svg{width:22px!important;height:22px!important}
+.ui-v3 .messages-v3-page .sf-inbox{padding:8px!important;border-radius:16px!important}
+.ui-v3 .messages-v3-page .inbox-tabs{height:44px!important;min-height:44px!important;margin-bottom:8px!important;border-radius:14px!important}
+.ui-v3 .messages-v3-page .inbox-tabs button{min-height:36px!important;font-size:11px!important;padding-inline:8px!important}
+.ui-v3 .messages-v3-page .sf-inbox-title{margin:2px 2px 7px!important}
+.ui-v3 .messages-v3-page .sf-inbox-title h2{font-size:18px!important}
+.ui-v3 .messages-v3-page .sf-new-chat{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}
+.ui-v3 .messages-v3-page .sf-search{height:40px!important;min-height:40px!important;margin:5px 0 8px!important;border-radius:13px!important}
+.ui-v3 .messages-v3-page .sf-chat-row{min-height:62px!important;padding:7px 8px!important;margin-bottom:6px!important;border-radius:13px!important;gap:8px!important}
+.ui-v3 .messages-v3-page .sf-chat-row .sf-avatar{width:38px!important;height:38px!important;min-width:38px!important}
+.ui-v3 .messages-v3-page .sf-chat-row-head b{font-size:12px!important}
+.ui-v3 .messages-v3-page .sf-chat-row-head time,.ui-v3 .messages-v3-page .chat-peer-presence{font-size:8px!important}
+.ui-v3 .messages-v3-page .sf-chat-row p{font-size:10px!important;line-height:1.3!important;margin-top:2px!important}
+
+/* Notifications: one heading only, compact rows/actions. */
+body.ui-v3:has(.notifications-panel) .social-page>.social-shell{max-width:var(--app-max)!important;padding-inline:var(--app-gutter)!important}
+body.ui-v3:has(.notifications-panel) .social-page .sf-top{display:none!important}
+body.ui-v3:has(.notifications-panel) .sf-simple-page{padding-top:4px!important;max-width:var(--app-max)!important}
+body.ui-v3:has(.notifications-panel) .notifications-panel{padding:8px!important;border-radius:16px!important;margin:0!important}
+.ui-v3 .notif-head{padding:2px 2px 8px!important;gap:6px!important}
+.ui-v3 .notif-head h1{font-size:23px!important}
+.ui-v3 .notif-head p{font-size:9px!important;margin:1px 0!important}
+.ui-v3 .notif-head>button{min-height:30px!important;padding:0 8px!important;font-size:8px!important}
+.ui-v3 .notification-list{gap:6px!important}
+.ui-v3 .notification-row{min-height:62px!important;border-radius:13px!important}
+.ui-v3 .notification-main{padding:7px!important;grid-template-columns:34px minmax(0,1fr) auto!important;gap:7px!important}
+.ui-v3 .notification-main .notif-icon{width:32px!important;height:32px!important;min-width:32px!important;border-radius:10px!important}
+.ui-v3 .notification-main .notif-icon svg{width:17px!important;height:17px!important}
+.ui-v3 .notification-main b{font-size:11px!important}
+.ui-v3 .notification-main p{font-size:9px!important;line-height:1.35!important;margin:1px 0!important}
+.ui-v3 .notification-main small{font-size:7px!important}
+.ui-v3 .notification-actions{padding-inline-end:6px!important;gap:3px!important}
+.ui-v3 .notification-actions button{height:28px!important;min-height:28px!important;padding:0 7px!important;font-size:8px!important}
+
+/* Rooms: voice is a compact module, chat owns the remaining page flow. */
+body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!important;overflow:auto!important}
+.ui-v3 .room-community-page{height:auto!important;min-height:calc(100dvh - var(--app-header-h))!important;overflow:visible!important;padding-bottom:var(--app-safe-bottom)!important}
+.ui-v3 .room-community-shell{width:min(var(--app-max),calc(100% - 20px))!important;max-width:var(--app-max)!important;min-height:0!important;height:auto!important;padding:4px 0 8px!important;gap:6px!important;overflow:visible!important}
+.ui-v3 .room-community-head{min-height:58px!important;padding:6px 7px!important;border-radius:14px!important;grid-template-columns:32px minmax(0,1fr) auto!important}
+.ui-v3 .room-community-title h1{font-size:15px!important}
+.ui-v3 .room-community-title p{font-size:7px!important}
+.ui-v3 .room-community-actions>:is(a,button),.ui-v3 .room-community-icon{width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important}
+.ui-v3 .room-live-card{min-height:0!important;margin:0!important;padding:5px!important;border-radius:14px!important}
+.ui-v3 .room-live-card:has(.room-voice-stage) .room-live-copy{display:none!important}
+.ui-v3 .room-voice-host .room-voice-stage{border-radius:11px!important}
+.ui-v3 .room-voice-host .room-voice-stage>header{height:34px!important;min-height:34px!important;padding:0 7px!important}
+.ui-v3 .room-voice-host .room-voice-stage>header b{font-size:9px!important}
+.ui-v3 .room-voice-host .room-voice-stage>header span{font-size:7px!important}
+.ui-v3 .room-voice-host .room-voice-body{max-height:94px!important;padding:4px!important;overflow:auto!important}
+.ui-v3 .room-voice-host .voice-people{gap:3px!important;flex-wrap:nowrap!important;overflow-x:auto!important}
+.ui-v3 .room-voice-host .voice-people>button{min-width:50px!important;flex:0 0 50px!important;font-size:8px!important}
+.ui-v3 .room-voice-host .voice-people :is(img,i){width:27px!important;height:27px!important}
+.ui-v3 .room-voice-host .room-voice-actions{gap:3px!important;padding-top:3px!important}
+.ui-v3 .room-voice-host .room-voice-actions button{min-height:30px!important;padding:0 8px!important;font-size:8px!important}
+.ui-v3 .room-community-stream{padding:0 2px!important;margin:0!important}
+.ui-v3 .room-community-message{gap:7px!important;padding-block:5px!important}
+.ui-v3 .room-community-avatar{width:33px!important;height:33px!important;min-width:33px!important}
+.ui-v3 .room-community-message :where(b,strong){font-size:10px!important}
+.ui-v3 .room-community-message :where(p,.message-text){font-size:10px!important;line-height:1.45!important}
+.ui-v3 .room-community-compose{position:sticky!important;bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 6px)!important;z-index:20!important;min-height:48px!important;gap:5px!important;padding:5px!important;border-radius:14px!important}
+.ui-v3 .room-community-compose>input{height:38px!important;min-height:38px!important;font-size:11px!important}
+.ui-v3 .room-community-compose>button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;padding:0!important}
+.ui-v3 .room-community-compose svg{width:20px!important;height:20px!important}
+
+/* Direct chat follows the same scale. */
+.ui-v3 :where(.chat-page,.direct-chat-page) :where(.chat-head,.direct-chat-head){min-height:54px!important;padding:6px 8px!important}
+.ui-v3 :where(.chat-page,.direct-chat-page) :where(.chat-avatar,.peer-avatar){width:36px!important;height:36px!important}
+.ui-v3 :where(.chat-page,.direct-chat-page) :where(.chat-message,.message-bubble){font-size:11px!important;line-height:1.45!important;border-radius:13px!important;padding:7px 9px!important}
+.ui-v3 :where(.chat-page,.direct-chat-page) :where(.chat-composer,.direct-chat-compose){min-height:48px!important;padding:5px!important;gap:5px!important}
+
+/* Profile, friends, search, more/settings/admin: shared compact rhythm. */
+.ui-v3 :where(.profile-page,.friends-page,.search-page,.more-page,.settings-page,.admin-page,.privacy-page,.security-page,.account-page) :where(.page-head,.section-head,.profile-head){
+  margin-block:4px 8px!important;
+  padding-block:4px!important;
+}
+.ui-v3 :where(.profile-page,.friends-page,.search-page,.more-page,.settings-page,.admin-page,.privacy-page,.security-page,.account-page) :where(.page-head,.section-head,.profile-head) h1{font-size:24px!important}
+.ui-v3 :where(.settings-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result){min-height:52px!important;padding:7px 9px!important;border-radius:13px!important}
+.ui-v3 :where(.settings-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) :where(svg){width:20px!important;height:20px!important}
+.ui-v3 :where(.settings-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) :where(b,strong){font-size:11px!important}
+.ui-v3 :where(.settings-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) :where(p,small){font-size:9px!important}
+
+/* Dialogs/sheets should not look like desktop panels on phones. */
+.ui-v3 :where(.app-dialog,.modal-panel,.sheet-panel,.dialog-card){max-width:min(420px,calc(100vw - 24px))!important;border-radius:17px!important;padding:12px!important}
+.ui-v3 :where(.app-dialog,.modal-panel,.sheet-panel,.dialog-card) h2{font-size:18px!important}
+
+/* Recording UI: compact WhatsApp-like state, always visible above dock. */
+.ui-v3 .voice-record-panel{min-width:0!important;width:100%!important;max-width:330px!important;min-height:44px!important;padding:5px!important;gap:6px!important;border-radius:13px!important}
+.ui-v3 .voice-record-panel button{min-height:34px!important;height:34px!important;padding-inline:8px!important;font-size:9px!important}
+.ui-v3 .voice-record-time{font-size:11px!important}.ui-v3 .voice-record-hint{font-size:9px!important}
+
+/* Loading remains subtle: never let a spinner dominate the brand. */
+.ui-v3 :where(.spinner,.loading-spinner,.sf-spinner){max-width:28px!important;max-height:28px!important}
+.ui-v3 :where(.auth-loading-logo,.oauth-loading){gap:10px!important}
+.ui-v3 :where(.auth-loading-logo,.oauth-loading) img{max-width:112px!important;max-height:62px!important}
+
+/* Small phones get an extra density step without browser zoom. */
+@media (max-width:430px){
+  :root{--app-gutter:10px;--app-header-h:60px;--app-dock-h:68px}
+  .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h1{font-size:23px!important}
+  .ui-v3 .messages-v3-title h1{font-size:22px!important}
+  .ui-v3 .messages-v3-page .sf-chat-row{min-height:58px!important}
+  .ui-v3 .notification-row{min-height:58px!important}
+  .ui-v3 .room-community-shell{width:calc(100% - 16px)!important}
+}
