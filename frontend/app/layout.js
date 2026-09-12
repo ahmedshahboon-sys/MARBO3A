@@ -26,6 +26,7 @@ import "./ui-v3-screens.css";
 import "./ui-v3-settings.css";
 import "./ui-v3-rooms.css";
 import "./ui-v3-messages.css";
+import "./ui-v3-profile.css";
 import "./ui-v3-brand.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
