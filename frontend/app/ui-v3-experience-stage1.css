@@ -1,0 +1,76 @@
+/* MARBO3A current-experience closure.
+   Canonical small sticky feed filters, scrollable settings, presence and control polish. */
+
+.ui-v3 .feed-tabs{
+  position:sticky!important;
+  top:calc(var(--v3-header-h) + 5px)!important;
+  z-index:70!important;
+  height:36px!important;
+  min-height:36px!important;
+  margin:4px 0 8px!important;
+  padding:2px!important;
+  border-radius:12px!important;
+  background:rgba(12,17,23,.92)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  backdrop-filter:blur(14px)!important;
+  -webkit-backdrop-filter:blur(14px)!important;
+  box-shadow:0 7px 22px rgba(0,0,0,.18)!important;
+}
+.ui-v3 .feed-tabs button{
+  height:30px!important;
+  min-height:30px!important;
+  padding:0 12px!important;
+  border-radius:9px!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
+.ui-v3 .feed-tabs button.active{
+  background:linear-gradient(110deg,#d95f00,#ff7a00)!important;
+  box-shadow:0 4px 12px rgba(255,122,0,.18)!important;
+}
+
+.ui-v3 .settings-overlay{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  align-items:flex-start!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.ui-v3 .settings-card{
+  max-height:none!important;
+  overflow:visible!important;
+  margin:auto!important;
+}
+.ui-v3 .settings-card.settings-large{min-height:min(640px,calc(100dvh - 32px))!important}
+.ui-v3 .settings-tabs{position:sticky!important;top:-1px!important;z-index:3!important;background:rgba(15,21,28,.96)!important;backdrop-filter:blur(12px)!important}
+
+.ui-v3 .chat-presence-avatar{position:relative;display:grid;place-items:center;width:max-content}
+.ui-v3 .chat-presence-avatar>i{position:absolute;left:0;bottom:1px;width:11px;height:11px;border-radius:50%;background:#24c76a;border:2px solid #10161e;box-shadow:0 0 0 2px rgba(36,199,106,.10)}
+.ui-v3 .chat-peer-presence{display:flex!important;align-items:center!important;gap:2px!important;min-width:0!important;color:#7f8996!important}
+.ui-v3 .chat-peer-presence.online{color:#42d77f!important}
+.ui-v3 .sf-online-dot{box-shadow:0 0 0 2px #10161e,0 0 0 4px rgba(36,199,106,.10)!important}
+
+/* Keep actionable controls in one visual family. */
+.ui-v3 :is(.sf-primary,.sf-new-chat,.setting-action,.settings-form button,.map-card-actions a,.map-card-actions button,.rooms-list-row>button,.room-community-actions button,.profile-more-panel button,.profile-more-panel a,.feed-more-button){
+  border-radius:12px!important;
+  box-shadow:0 5px 14px rgba(0,0,0,.14)!important;
+  transition:transform .14s ease,box-shadow .14s ease,background .14s ease!important;
+}
+.ui-v3 :is(.sf-primary,.sf-new-chat,.setting-action,.settings-form button,.map-card-actions a,.map-card-actions button,.rooms-list-row>button,.room-community-actions button,.profile-more-panel button,.profile-more-panel a,.feed-more-button):active{
+  transform:translateY(1px) scale(.99)!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.12)!important;
+}
+.ui-v3 :is(button,a)[class*="icon"],
+.ui-v3 .inline-more,
+.ui-v3 .chat-message-more{
+  border-radius:11px!important;
+}
+
+@media(max-width:520px){
+  .ui-v3 .feed-tabs{top:calc(var(--v3-header-h) + 3px)!important;height:34px!important;min-height:34px!important;margin:3px 0 6px!important}
+  .ui-v3 .feed-tabs button{height:28px!important;min-height:28px!important;font-size:10px!important}
+  .ui-v3 .settings-overlay{padding:calc(8px + env(safe-area-inset-top)) 7px calc(var(--v3-dock-h) + 12px + env(safe-area-inset-bottom))!important}
+  .ui-v3 .settings-card{margin:0 auto!important;border-radius:18px!important}
+}
