@@ -35,6 +35,7 @@ import "./ui-v3-mobile-components.css";
 import "./ui-v3-density.css";
 import "./ui-v3-controls.css";
 import "./ui-v3-reference.css";
+import "./ui-v3-features.css";
 import { Cairo } from "next/font/google";
 import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
