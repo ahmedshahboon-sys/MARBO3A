@@ -25,6 +25,7 @@ const modules=[
   "./message-media-fix.mjs",
   "./preflight.mjs",
   "./security-p0.mjs",
+  "./real-map.mjs",
   "./realtime-v2.mjs",
   "./product-v2.mjs",
   "./experience-v2.mjs",

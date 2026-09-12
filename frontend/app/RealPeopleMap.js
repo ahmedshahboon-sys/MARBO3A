@@ -1,0 +1,30 @@
+"use client";
+import {useEffect,useMemo,useRef,useState} from "react";
+import Icon from "./Icon";
+
+const TILE=256,MAX_LAT=85.05112878;
+const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+function project(lat,lon,z){const n=2**z,x=(lon+180)/360*TILE*n,phi=clamp(lat,-MAX_LAT,MAX_LAT)*Math.PI/180,y=(1-Math.log(Math.tan(phi)+1/Math.cos(phi))/Math.PI)/2*TILE*n;return{x,y}}
+function unproject(x,y,z){const n=2**z,lon=x/(TILE*n)*360-180,yy=Math.PI*(1-2*y/(TILE*n)),lat=180/Math.PI*Math.atan(Math.sinh(yy));return{lat,lon}}
+function lastSeen(v){const t=new Date(v).getTime();if(!Number.isFinite(t))return"";const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return"آخر ظهور الآن";if(s<3600)return`آخر ظهور منذ ${Math.floor(s/60)} د`;if(s<86400)return`آخر ظهور منذ ${Math.floor(s/3600)} س`;if(s<172800)return"آخر ظهور أمس";return`آخر ظهور ${new Date(t).toLocaleDateString("ar-LY")}`}
+
+export default function RealPeopleMap({users=[],viewerId,onSelect}){
+ const ref=useRef(null),drag=useRef(null),[size,setSize]=useState({w:800,h:560}),[zoom,setZoom]=useState(6),[center,setCenter]=useState({lat:29.8,lon:17.2}),[selected,setSelected]=useState(null);
+ useEffect(()=>{if(!ref.current)return;const ro=new ResizeObserver(([entry])=>setSize({w:entry.contentRect.width,h:entry.contentRect.height}));ro.observe(ref.current);return()=>ro.disconnect()},[]);
+ useEffect(()=>{const me=users.find(u=>String(u.id)===String(viewerId));if(me&&Number.isFinite(Number(me.latitude))&&Number.isFinite(Number(me.longitude)))setCenter({lat:Number(me.latitude),lon:Number(me.longitude)})},[viewerId,users.length]);
+ const tiles=useMemo(()=>{const c=project(center.lat,center.lon,zoom),minX=Math.floor((c.x-size.w/2)/TILE)-1,maxX=Math.floor((c.x+size.w/2)/TILE)+1,minY=Math.floor((c.y-size.h/2)/TILE)-1,maxY=Math.floor((c.y+size.h/2)/TILE)+1,n=2**zoom,out=[];for(let y=minY;y<=maxY;y++){if(y<0||y>=n)continue;for(let x=minX;x<=maxX;x++){const wrapped=((x%n)+n)%n;out.push({x,y,wrapped,left:x*TILE-(c.x-size.w/2),top:y*TILE-(c.y-size.h/2),key:`${zoom}-${x}-${y}`})}}return out},[center,zoom,size]);
+ const markers=useMemo(()=>{const c=project(center.lat,center.lon,zoom);return users.map(u=>{const p=project(Number(u.latitude),Number(u.longitude),zoom);return{...u,left:p.x-(c.x-size.w/2),top:p.y-(c.y-size.h/2)}}).filter(u=>u.left>-70&&u.left<size.w+70&&u.top>-70&&u.top<size.h+70)},[users,center,zoom,size]);
+ function start(e){if(e.button!==undefined&&e.button!==0)return;ref.current?.setPointerCapture?.(e.pointerId);const c=project(center.lat,center.lon,zoom);drag.current={x:e.clientX,y:e.clientY,cx:c.x,cy:c.y}}
+ function move(e){if(!drag.current)return;const d=drag.current,p=unproject(d.cx-(e.clientX-d.x),d.cy-(e.clientY-d.y),zoom);setCenter({lat:clamp(p.lat,-80,80),lon:p.lon})}
+ function end(e){drag.current=null;ref.current?.releasePointerCapture?.(e.pointerId)}
+ function changeZoom(delta){setZoom(z=>clamp(z+delta,3,17))}
+ function wheel(e){e.preventDefault();changeZoom(e.deltaY<0?1:-1)}
+ function myLocation(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{setCenter({lat:p.coords.latitude,lon:p.coords.longitude});setZoom(z=>Math.max(z,13))},()=>{}, {enableHighAccuracy:true,timeout:10000,maximumAge:60000})}
+ function choose(u){setSelected(u);onSelect?.(u)}
+ return <div className="real-map-wrap"><div ref={ref} className="real-map-canvas" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onWheel={wheel} aria-label="خريطة مربوعة التفاعلية">
+  <div className="real-map-tiles">{tiles.map(t=><img key={t.key} draggable="false" alt="" src={`https://tile.openstreetmap.org/${zoom}/${t.wrapped}/${t.y}.png`} style={{left:t.left,top:t.top}}/>)}</div>
+  <div className="real-map-markers">{markers.map(u=><button key={u.id} type="button" className={`real-map-marker ${u.online?"online":""} ${String(u.id)===String(viewerId)?"me":""}`} style={{left:u.left,top:u.top}} onPointerDown={e=>e.stopPropagation()} onClick={()=>choose(u)} aria-label={`${u.display_name} - ${u.city||""}`}><span>{u.avatar_url?<img src={u.avatar_url} alt=""/>:<b>{u.display_name?.[0]||"م"}</b>}</span>{u.online&&<i/>}</button>)}</div>
+  <div className="real-map-controls"><button type="button" onClick={()=>changeZoom(1)} aria-label="تكبير"><Icon name="plus"/></button><button type="button" onClick={()=>changeZoom(-1)} aria-label="تصغير"><span>−</span></button><button type="button" onClick={myLocation} aria-label="موقعي"><Icon name="map"/></button></div>
+  <div className="real-map-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a></div>
+ </div>{selected&&<article className="real-map-popover"><button type="button" className="real-map-close" onClick={()=>setSelected(null)} aria-label="إغلاق"><Icon name="close"/></button>{selected.avatar_url?<img src={selected.avatar_url} alt=""/>:<span className="real-map-pop-avatar">{selected.display_name?.[0]||"م"}</span>}<div><b>{selected.display_name}</b><small><bdi dir="ltr">@{selected.username}</bdi> · {selected.city}</small><p className={selected.online?"online":""}>{selected.online?"متصل الآن":lastSeen(selected.last_seen_at)}</p><em>{selected.precision==="precise"?"شارك موقعه الدقيق بإذنه":"الموقع تقريبي داخل المدينة"}</em></div><a href={`/u/${selected.username}`}>الملف الشخصي</a></article>}</div>
+}
