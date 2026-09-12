@@ -51,6 +51,8 @@
 .ui-v3 .chat-peer-presence{display:flex!important;align-items:center!important;gap:2px!important;min-width:0!important;color:#7f8996!important}
 .ui-v3 .chat-peer-presence.online{color:#42d77f!important}
 .ui-v3 .sf-online-dot{box-shadow:0 0 0 2px #10161e,0 0 0 4px rgba(36,199,106,.10)!important}
+.ui-v3 .profile-presence-line{margin:3px 0 5px!important;color:#85909e!important;font-size:10px!important;font-weight:700!important}
+.ui-v3 .profile-presence-line.online{color:#42d77f!important}
 
 /* Keep actionable controls in one visual family. */
 .ui-v3 :is(.sf-primary,.sf-new-chat,.setting-action,.settings-form button,.map-card-actions a,.map-card-actions button,.rooms-list-row>button,.room-community-actions button,.profile-more-panel button,.profile-more-panel a,.feed-more-button){
