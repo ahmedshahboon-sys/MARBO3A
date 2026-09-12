@@ -20,6 +20,9 @@ body:has(.pwa-install) .sf-top{padding-left:98px!important}
   body:has(.drawer-trigger) .room-chat-head{padding-right:10px!important}
   .room-voice-entry{max-width:calc(100vw - 20px)!important}
   .room-voice-entry>button{white-space:nowrap!important}
+  .feed-page .sf-top-actions>a{display:grid!important}
+  .feed-page .sf-top-actions>a:last-child{display:none!important}
+  .feed-page .sf-top-actions>.sf-avatar-loading{display:none!important}
 }
 
 /* Empty privacy page is intentionally compact rather than a full-height card. */
