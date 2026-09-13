@@ -1,7 +1,9 @@
-// MARBO3A backend bootstrap.
-// Compatibility modules still register through the historical createServer chain,
-// but one authoritative request foundation is imported LAST so its middleware is
-// registered FIRST. New code should use runtime.mjs, migrations and domain routers.
+import http from "http";
+
+// Keep the historical extension chain contained to one boot-time registration pass.
+// server-v3 restores Node's native createServer immediately after the app is built.
+const nativeCreateServer=http.createServer.bind(http);
+
 const modules=[
   "./instrumentation.mjs",
   "./debug-trace.mjs",
@@ -38,3 +40,7 @@ const modules=[
   "./request-foundation.mjs"
 ];
 for(const module of modules)await import(module);
+
+export function restoreHttpCreateServer(){
+  http.createServer=nativeCreateServer;
+}
