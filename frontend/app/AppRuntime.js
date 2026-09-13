@@ -21,7 +21,6 @@ import PremiumChrome from "./PremiumChrome";
 import SettingsPanel from "./SettingsPanel";
 import ExperienceEffects from "./ExperienceEffects";
 import EngagementViewRuntime from "./EngagementViewRuntime";
-import GuestBrowseEntry from "./GuestBrowseEntry";
 import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 
@@ -32,7 +31,6 @@ export default function AppRuntime({children}){
     {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
-    <GuestBrowseEntry/>
     {children}
     {app&&<><SideDrawer/><SocialDock/></>}
   </>;
