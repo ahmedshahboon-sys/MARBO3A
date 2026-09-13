@@ -30,7 +30,6 @@ const modules=[
   "./realtime-v2.mjs",
   "./social-auth-config.mjs",
   "./social-auth.mjs",
-  "./product-v2.mjs",
   "./experience-v2.mjs",
   "./session-control.mjs",
   "./security-completion.mjs",
