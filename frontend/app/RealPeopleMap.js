@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useMemo,useRef,useState} from "react";
 import Icon from "./Icon";
+import GenderMark from "./GenderMark";
 
 const TILE=256,MAX_LAT=85.05112878;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
@@ -26,5 +27,5 @@ export default function RealPeopleMap({users=[],viewerId,onSelect}){
   <div className="real-map-markers">{markers.map(u=><button key={u.id} type="button" className={`real-map-marker ${u.online?"online":""} ${String(u.id)===String(viewerId)?"me":""}`} style={{left:u.left,top:u.top}} onPointerDown={e=>e.stopPropagation()} onClick={()=>choose(u)} aria-label={`${u.display_name} - ${u.city||""}`}><span>{u.avatar_url?<img src={u.avatar_url} alt=""/>:<b>{u.display_name?.[0]||"م"}</b>}</span>{u.online&&<i/>}</button>)}</div>
   <div className="real-map-controls"><button type="button" onClick={()=>changeZoom(1)} aria-label="تكبير"><Icon name="plus"/></button><button type="button" onClick={()=>changeZoom(-1)} aria-label="تصغير"><span>−</span></button><button type="button" onClick={myLocation} aria-label="موقعي"><Icon name="map"/></button></div>
   <div className="real-map-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a></div>
- </div>{selected&&<article className="real-map-popover"><button type="button" className="real-map-close" onClick={()=>setSelected(null)} aria-label="إغلاق"><Icon name="close"/></button>{selected.avatar_url?<img src={selected.avatar_url} alt=""/>:<span className="real-map-pop-avatar">{selected.display_name?.[0]||"م"}</span>}<div><b>{selected.display_name}</b><small><bdi dir="ltr">@{selected.username}</bdi> · {selected.city}</small><p className={selected.online?"online":""}>{selected.online?"متصل الآن":lastSeen(selected.last_seen_at)}</p><em>{selected.precision==="precise"?"شارك موقعه الدقيق بإذنه":"الموقع تقريبي داخل المدينة"}</em></div><a href={`/u/${selected.username}`}>الملف الشخصي</a></article>}</div>
+ </div>{selected&&<article className="real-map-popover"><button type="button" className="real-map-close" onClick={()=>setSelected(null)} aria-label="إغلاق"><Icon name="close"/></button>{selected.avatar_url?<img src={selected.avatar_url} alt=""/>:<span className="real-map-pop-avatar">{selected.display_name?.[0]||"م"}</span>}<div><b>{selected.display_name} <GenderMark gender={selected.gender}/></b><small><bdi dir="ltr">@{selected.username}</bdi> · {selected.city}</small><p className={selected.online?"online":""}>{selected.online?"متصل الآن":lastSeen(selected.last_seen_at)}</p><em>{selected.precision==="precise"?"شارك موقعه الدقيق بإذنه":"الموقع تقريبي داخل المدينة"}</em></div><a href={`/u/${selected.username}`}>الملف الشخصي</a></article>}</div>
 }
