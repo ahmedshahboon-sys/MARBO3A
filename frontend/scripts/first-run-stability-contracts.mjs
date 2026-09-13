@@ -6,9 +6,9 @@ const request=read("app/request.js");
 for(const t of ["AbortController","REQUEST_TIMEOUT","fetchWithTimeout","fetchJson"])must(request,t,"bounded requests");
 
 const onboarding=read("app/onboarding/page.js");
-for(const t of ["fetchJson","/api/onboarding","/api/onboarding/complete","marbo3a_permissions_intro_pending","إعادة المحاولة","استكشف كزائر","8000","12000"])must(onboarding,t,"self-contained onboarding");
+for(const t of ["fetchJson","/api/onboarding","/api/onboarding/complete","marbo3a_permissions_intro_pending","إعادة المحاولة","استكشف كزائر","8000","12000","t&&t!==\"cookie\""])must(onboarding,t,"self-contained onboarding");
 reject(onboarding,"كمّل الخطوات الظاهرة باش تبدأ في مربوعة","onboarding cannot depend on hidden global wizard");
-reject(onboarding,"authorization:`Bearer ${t}`}","onboarding cookie sentinel must not become bearer token");
+reject(onboarding,'headers:{authorization:`Bearer ${t}`}',"onboarding cannot blindly send cookie sentinel as bearer token");
 
 const gate=read("app/OnboardingGate.js");
 for(const t of ["location.replace(\"/onboarding\")","fetchJson","7000","t!==\"cookie\""])must(gate,t,"onboarding gate redirect");
