@@ -46,6 +46,7 @@ const modules=[
   "./fgh-regression-hotfix.mjs",
   // I/J/K/L surfaces wrap older room/story/map/guest handlers.
   "./ijkl-experience.mjs",
+  "./ijkl-room-guard.mjs",
   // Request foundation must remain the outermost compatibility wrapper.
   "./request-foundation.mjs"
 ];
