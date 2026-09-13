@@ -20,6 +20,13 @@ test("streak requires bilateral activity with an accepted friend",()=>{
   assert.match(src,/milestone100:count>=100/);
 });
 
+test("streak SQL uses an explicit non-keyword date alias",()=>{
+  const src=read("routes/group-mn-engagement.mjs");
+  assert.doesNotMatch(src,/::date\s+day\b/);
+  assert.match(src,/::date AS activity_day/);
+  assert.match(src,/rows\.map\(r=>r\.activity_day\)/);
+});
+
 test("trending and suggestions protect privacy and block relations",()=>{
   const src=read("routes/group-mn-engagement.mjs");
   assert.match(src,/who_can_see_posts,'everyone'/);
