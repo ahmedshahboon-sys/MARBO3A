@@ -21,12 +21,14 @@ export default function ExperienceEffects(){
    const vibrate=(pattern=8)=>{if(!prefs.current.haptics_enabled||reduced()||document.hidden)return;try{navigator.vibrate?.(pattern)}catch{}};
    const tone=(kind="notification")=>{if(!prefs.current.sound_enabled||document.hidden||!unlocked.current)return;if(kind==="notification"&&prefs.current.notification_sounds===false)return;try{const ctx=audio.current;if(!ctx)return;const map={like:[660,0.035],send:[520,0.03],notification:[740,0.05],friendAccepted:[620,0.04],story:[580,0.035]},[freq,duration]=map[kind]||map.notification,osc=ctx.createOscillator(),gain=ctx.createGain(),now=ctx.currentTime;osc.type="sine";osc.frequency.setValueAtTime(freq,now);gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(0.025,now+0.006);gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+duration+0.01)}catch{}};
    const effect=e=>{const type=e?.detail?.type||"notification";tone(type);vibrate(type==="friendAccepted"?[8,28,8]:type==="notification"?6:8)};
+   const haptic=e=>vibrate(e?.detail?.pattern??8);
    const notification=e=>{const type=String(e?.detail?.type||e?.detail?.notification?.type||"");effect({detail:{type:/friend.*accept/i.test(type)?"friendAccepted":"notification"}})};
    const update=e=>{prefs.current={...prefs.current,...(e?.detail||{})}};
    window.addEventListener("marbo3a:effect",effect);
+   window.addEventListener("marbo3a:haptic",haptic);
    window.addEventListener("marbo3a:notification:new",notification);
    window.addEventListener("marbo3a:experience-preferences",update);
-   return()=>{window.removeEventListener("pointerdown",unlock);window.removeEventListener("marbo3a:effect",effect);window.removeEventListener("marbo3a:notification:new",notification);window.removeEventListener("marbo3a:experience-preferences",update);try{audio.current?.close?.()}catch{}};
+   return()=>{window.removeEventListener("pointerdown",unlock);window.removeEventListener("marbo3a:effect",effect);window.removeEventListener("marbo3a:haptic",haptic);window.removeEventListener("marbo3a:notification:new",notification);window.removeEventListener("marbo3a:experience-preferences",update);try{audio.current?.close?.()}catch{}};
  },[]);
  return null;
 }
