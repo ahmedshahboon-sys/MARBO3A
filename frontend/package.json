@@ -2,6 +2,6 @@
   "name":"marbo3a-web",
   "version":"0.3.1",
   "private":true,
-  "scripts":{"dev":"next dev","prebuild":"node scripts/generate-pwa-icons.mjs && node scripts/verify-route-contracts.mjs && node scripts/verify-social-interactions.mjs && node scripts/verify-style-ownership.mjs && node scripts/group-d-contracts.mjs && node scripts/group-e-contracts.mjs && node scripts/fgh-contracts.mjs","build":"next build","start":"next start -H 0.0.0.0","test:contracts":"node scripts/verify-route-contracts.mjs && node scripts/verify-social-interactions.mjs && node scripts/verify-style-ownership.mjs && node scripts/group-d-contracts.mjs && node scripts/group-e-contracts.mjs && node scripts/fgh-contracts.mjs"},
+  "scripts":{"dev":"next dev","prebuild":"node scripts/generate-pwa-icons.mjs && node scripts/verify-route-contracts.mjs && node scripts/verify-social-interactions.mjs && node scripts/verify-style-ownership.mjs && node scripts/group-d-contracts.mjs && node scripts/group-e-contracts.mjs && node scripts/fgh-contracts.mjs && node scripts/ijkl-contracts.mjs","build":"next build","start":"next start -H 0.0.0.0","test:contracts":"node scripts/verify-route-contracts.mjs && node scripts/verify-social-interactions.mjs && node scripts/verify-style-ownership.mjs && node scripts/group-d-contracts.mjs && node scripts/group-e-contracts.mjs && node scripts/fgh-contracts.mjs && node scripts/ijkl-contracts.mjs"},
   "dependencies":{"heic2any":"0.0.4","next":"16.3.4","react":"19.3.0","react-dom":"19.3.0","qrcode":"1.5.4","socket.io-client":"4.8.1"}
 }
