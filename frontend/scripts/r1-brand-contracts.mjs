@@ -8,10 +8,10 @@ try{
   if(svg.length<2500||required.some(token=>!svg.includes(token))||svg.includes("data:image/"))throw new Error("invalid canonical vector SVG");
 }catch(e){console.error(`Invalid canonical brand SVG: ${e.message}`);failed=true}
 await must("app/brand-source.js",["/brand/official/marbo3a-mark.svg","أقرب الناس .. دايمًا معك"]);
-await must("app/PremiumChrome.js",["/brand/official/marbo3a-mark.svg"]);
+await must("app/PremiumChrome.js",["/pwa-512.png"]);
 await must("app/opengraph-image.js",["/brand/official/marbo3a-mark.svg"]);
 await must("app/ui-v3-brand.css",["/brand/official/marbo3a-mark.svg"]);
-await must("app/r1-brand-override.css",["/brand/official/marbo3a-mark.svg","marbo3a-app-icon.svg","marbo3a-symbol-orange.svg"]);
+await must("app/r1-brand-override.css",["/pwa-512.png","marbo3a-app-icon.svg","marbo3a-symbol-orange.svg"]);
 await must("app/layout.js",["/brand/official/marbo3a-mark.svg",'import "./r1-brand-override.css"']);
 await must("app/onboarding/page.js",["/brand/official/marbo3a-mark.svg"]);
 await must("app/PlatformClient.js",["/brand/official/marbo3a-mark.svg"]);
