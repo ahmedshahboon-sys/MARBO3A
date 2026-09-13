@@ -8,7 +8,9 @@ import {UiButton,UiIconButton,UiLinkButton} from "./Ui";
 
 function isStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true;}
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function isSocialBrowser(){return /FBAN|FBAV|FB_IAB|FB4A|Instagram/i.test(navigator.userAgent||"");}
 function token(){return localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";}
+function authHeader(){const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}}
 function safeActionUrl(raw){try{if(!raw)return"";const u=new URL(String(raw),location.origin);return u.origin===location.origin?`${u.pathname}${u.search}${u.hash}`:""}catch{return""}}
 
 export default function PlatformClient(){
@@ -20,6 +22,9 @@ export default function PlatformClient(){
   const [offline,setOffline]=useState(false);
   const [broadcast,setBroadcast]=useState(null);
   const [headerHost,setHeaderHost]=useState(null);
+  const [socialBrowser,setSocialBrowser]=useState(false);
+  const [socialNotice,setSocialNotice]=useState(true);
+  const [copied,setCopied]=useState(false);
   const registrationRef=useRef(null);
 
   useEffect(()=>{
@@ -30,7 +35,7 @@ export default function PlatformClient(){
   },[pathname]);
 
   useEffect(()=>{
-    setInstalled(isStandalone()); setOffline(!navigator.onLine);
+    setInstalled(isStandalone()); setOffline(!navigator.onLine);setSocialBrowser(isSocialBrowser());
     const before=e=>{e.preventDefault();setInstallPrompt(e);};
     const installedHandler=()=>{setInstalled(true);setInstallPrompt(null);setShowIOS(false);};
     const online=()=>setOffline(false), offlineHandler=()=>setOffline(true);
@@ -54,23 +59,28 @@ export default function PlatformClient(){
 
     const onError=e=>report("frontend",e.error||new Error(e.message),{url:location.href});
     const onReject=e=>report("frontend",e.reason instanceof Error?e.reason:new Error(String(e.reason)),{url:location.href});
-    window.addEventListener("error",onError);window.addEventListener("unhandledrejection",onReject);
-    return()=>{source.close();window.removeEventListener("beforeinstallprompt",before);window.removeEventListener("appinstalled",installedHandler);window.removeEventListener("online",online);window.removeEventListener("offline",offlineHandler);window.removeEventListener("error",onError);window.removeEventListener("unhandledrejection",onReject);navigator.serviceWorker?.removeEventListener?.("controllerchange",controllerChanged);};
+    const onRequestFailure=e=>{const detail=e?.detail||{};report("first-run-request",new Error(`${detail.code||"REQUEST_FAILED"} ${detail.url||""}`),{url:location.href,component:isSocialBrowser()?"social-in-app-browser":"browser"})};
+    window.addEventListener("error",onError);window.addEventListener("unhandledrejection",onReject);window.addEventListener("marbo3a:request-failure",onRequestFailure);
+    return()=>{source.close();window.removeEventListener("beforeinstallprompt",before);window.removeEventListener("appinstalled",installedHandler);window.removeEventListener("online",online);window.removeEventListener("offline",offlineHandler);window.removeEventListener("error",onError);window.removeEventListener("unhandledrejection",onReject);window.removeEventListener("marbo3a:request-failure",onRequestFailure);navigator.serviceWorker?.removeEventListener?.("controllerchange",controllerChanged);};
   },[]);
 
   async function report(source,error,extra={}){
-    try{await fetch("/api/debug/report",{method:"POST",headers:{"content-type":"application/json",...(token()?{authorization:`Bearer ${token()}`}:{})},body:JSON.stringify({source,level:"ERROR",message:String(error?.message||error).slice(0,1000),context:{...extra,stack:String(error?.stack||"").slice(0,2000)}})});}catch{}
+    try{await fetch("/api/debug/report",{method:"POST",headers:{"content-type":"application/json",...authHeader()},body:JSON.stringify({source,level:"ERROR",message:String(error?.message||error).slice(0,1000),context:{...extra,stack:String(error?.stack||"").slice(0,2000)}})});}catch{}
   }
   function playTone(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=660;g.gain.value=.035;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.12);setTimeout(()=>ctx.close().catch(()=>{}),300);}catch{}}
   async function install(){if(installPrompt){await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==="accepted"){setInstalled(true);setInstallPrompt(null);}}else if(isIOS())setShowIOS(true);}
   function applyUpdate(){registrationRef.current?.waiting?.postMessage({type:"SKIP_WAITING"});}
-  const primarySurface=pathname==="/home"||pathname==="/feed";
+  async function copyPublicUrl(){const value=`${location.origin}${location.pathname}${location.search}`;try{await navigator.clipboard.writeText(value);setCopied(true);setTimeout(()=>setCopied(false),1800)}catch{try{const input=document.createElement("textarea");input.value=value;document.body.appendChild(input);input.select();document.execCommand("copy");input.remove();setCopied(true);setTimeout(()=>setCopied(false),1800)}catch{}}}
+  const primarySurface=pathname==="/home"||pathname==="/feed"||pathname==="/explore";
   const installAvailable=primarySurface&&!installed&&(installPrompt||isIOS());
+  const firstRunSurface=pathname==="/"||pathname==="/explore"||pathname==="/onboarding";
   const broadcastAction=typeof window!=="undefined"?safeActionUrl(broadcast?.action_url):"";
   const installButton=installAvailable?<button type="button" className="pwa-install v3-header-install" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت</span></button>:null;
 
   return <>
     {installButton&&headerHost?createPortal(installButton,headerHost):null}
+    {installButton&&!headerHost&&pathname==="/explore"?<button type="button" className="pwa-install pwa-install-floating" onClick={install} aria-label="تثبيت تطبيق مربوعة"><Icon name="install" size={18}/><span>تثبيت مربوعة كتطبيق</span></button>:null}
+    {socialBrowser&&socialNotice&&firstRunSurface&&<aside className="first-run-browser-note" role="status"><Icon name="info"/><div><b>أنت فاتح مربوعة من داخل فيسبوك/إنستغرام</b><p>الموقع يشتغل هنا، لكن لو المتصفح وقف أو منع الأذونات افتح marbo3a.ly في Chrome أو Safari.</p></div><button type="button" onClick={()=>setSocialNotice(false)}>إخفاء</button><button className="copy" type="button" onClick={copyPublicUrl}>{copied?"تم نسخ الرابط ✓":"نسخ الرابط لفتحه في المتصفح"}</button></aside>}
     {offline&&<div className="network-banner"><Icon name="wifiOff" size={18}/><span>ما فيش اتصال بالإنترنت</span><UiButton variant="secondary" size="compact" onClick={()=>location.reload()}>إعادة المحاولة</UiButton></div>}
     {updateReady&&<div className="update-toast"><Icon name="refresh"/><div><b>يوجد تحديث جديد لمربوعة</b><span>حدّث للحصول على آخر نسخة.</span></div><UiButton size="compact" onClick={applyUpdate}>تحديث</UiButton></div>}
     {broadcast&&<div className={`broadcast-toast kind-${broadcast.kind||"info"}`}><Icon name={broadcast.kind==="warning"?"warning":"megaphone"}/><div><b>{broadcast.kind==="announcement"?"إعلان من مربوعة":"رسالة من الإدارة"}</b><span>{broadcast.message}</span></div>{broadcastAction&&<UiLinkButton href={broadcastAction} size="compact">{broadcast.action_label||"فتح"}</UiLinkButton>}<UiIconButton icon="close" label="إغلاق" size="compact" className="broadcast-close" onClick={()=>setBroadcast(null)}/></div>}
