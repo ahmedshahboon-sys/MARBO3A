@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import {pool,redis,ensureRedis,sessionUser,ipOf,clean} from "./runtime.mjs";
 import {registerAuthRegistration} from "./routes/auth-registration.mjs";
+import {registerAuthSession} from "./routes/auth-session.mjs";
 import {registerCoreRooms} from "./routes/core-rooms.mjs";
 import {registerCoreMessaging} from "./routes/core-messaging.mjs";
 import {registerCoreSocial} from "./routes/core-social.mjs";
@@ -12,6 +13,7 @@ const app=express();
 const server=http.createServer(app);
 
 registerAuthRegistration(app);
+registerAuthSession(app);
 registerCoreRooms(app);
 registerCoreMessaging(app);
 registerCoreSocial(app);
