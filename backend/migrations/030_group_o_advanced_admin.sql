@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS admin_system_settings(
 INSERT INTO admin_system_settings(key,value,description) VALUES
  ('registration_enabled','true'::jsonb,'Allow new account registration and registration OTP'),
  ('rooms_enabled','true'::jsonb,'Allow room discovery, creation and joining'),
- ('upload_max_mb','8'::jsonb,'Maximum uploaded file size in megabytes'),
+ ('upload_max_mb','8'::jsonb,'Maximum uploaded file size in megabytes; current upload pipeline hard cap is 8 MB'),
  ('story_lifetime_hours','24'::jsonb,'Story lifetime in hours'),
- ('pinned_post_limit','1'::jsonb,'Maximum pinned posts supported by the current profile model')
+ ('pinned_post_limit','1'::jsonb,'Maximum pinned posts supported by the current profile model (0 or 1)')
 ON CONFLICT(key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS feature_flags(
@@ -96,6 +96,25 @@ INSERT INTO platform_login_events(user_id,source,source_ref,created_at)
 SELECT user_id,'session_backfill',md5(token_hash),created_at
 FROM durable_sessions
 ON CONFLICT(source_ref) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION marbo3a_story_lifetime() RETURNS TRIGGER AS $$
+DECLARE hours_value INTEGER;
+BEGIN
+  SELECT GREATEST(1,LEAST(72,COALESCE((value #>> '{}')::INTEGER,24))) INTO hours_value
+  FROM admin_system_settings WHERE key='story_lifetime_hours';
+  hours_value:=COALESCE(hours_value,24);
+  NEW.expires_at:=COALESCE(NEW.created_at,NOW())+(hours_value::TEXT||' hours')::INTERVAL;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  NEW.expires_at:=COALESCE(NEW.expires_at,COALESCE(NEW.created_at,NOW())+INTERVAL '24 hours');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS stories_lifetime_control ON stories;
+CREATE TRIGGER stories_lifetime_control
+BEFORE INSERT ON stories
+FOR EACH ROW EXECUTE FUNCTION marbo3a_story_lifetime();
 
 CREATE TABLE IF NOT EXISTS admin_anomaly_alerts(
   id BIGSERIAL PRIMARY KEY,
