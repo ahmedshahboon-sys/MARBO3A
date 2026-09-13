@@ -5,6 +5,7 @@ import {registerCoreMessaging} from "./core-messaging.mjs";
 import {registerCoreSocial} from "./core-social.mjs";
 import {registerCoreLocation} from "./core-location.mjs";
 import {registerCoreAdminRooms} from "./core-admin-rooms.mjs";
+import {registerCoreAdminControl} from "./core-admin-control.mjs";
 import {registerCorePresence} from "./core-presence.mjs";
 
 export function registerExplicitRoutes(app){
@@ -15,5 +16,6 @@ export function registerExplicitRoutes(app){
   registerCoreSocial(app);
   registerCoreLocation(app);
   registerCoreAdminRooms(app);
+  registerCoreAdminControl(app);
   registerCorePresence(app);
 }
