@@ -49,6 +49,8 @@ const modules=[
   "./ijkl-room-guard.mjs",
   // Guest identity, room cards, guest listeners and room-seat experience.
   "./guest-rooms-v2.mjs",
+  // R1 owns smart feed ranking, sponsored posts, threaded comments/reactions and room voice recovery/moderation.
+  "./r1-core-experience.mjs",
   // Request foundation must remain the outermost compatibility wrapper.
   "./request-foundation.mjs"
 ];
