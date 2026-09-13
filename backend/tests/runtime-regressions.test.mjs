@@ -13,3 +13,13 @@ test("comment preview uses the real post_comments edit timestamp",()=>{
   assert.match(preview,/c\.edited_at/);
   assert.doesNotMatch(preview,/c\.updated_at/);
 });
+
+test("friend request notification history expires when friendship row is gone",()=>{
+  const src=read("routes/core-social.mjs");
+  const start=src.indexOf('app.get("/api/notifications"');
+  const end=src.indexOf('app.post("/api/notifications/read"',start);
+  assert.ok(start>=0&&end>start,"notifications route must exist before read route");
+  const notifications=src.slice(start,end);
+  assert.match(notifications,/f\.id IS NULL THEN 'expired'/);
+  assert.match(notifications,/friend_action/);
+});
