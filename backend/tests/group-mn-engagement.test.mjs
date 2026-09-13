@@ -33,5 +33,5 @@ test("polls collections analytics and experience preferences are routed",()=>{
   for(const route of ["/api/engagement/polls","/api/engagement/memories","/api/engagement/collections","/api/engagement/analytics","/api/experience/preferences"])assert.ok(src.includes(route),`${route} missing`);
   assert.match(index,/registerGroupMNEngagement/);
   assert.match(src,/options\.length<2/);
-  assert.match(src,/options\.length<6/);
+  assert.match(src,/slice\(0,6\)/);
 });
