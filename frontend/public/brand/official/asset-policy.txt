@@ -1,7 +1,16 @@
 MARBO3A OFFICIAL BRAND ASSET POLICY
 
-Canonical mark: /brand/official/marbo3a-mark.svg
-The canonical mark is the approved MARBO3A identity rendered as a pure vector SVG with no embedded raster/base64 payload.
-Use it for application chrome, login/onboarding, room cards, favicon/SVG fallbacks, OpenGraph artwork, offline/maintenance surfaces and browser caches.
-PWA raster icons are committed derivatives of the same approved identity: /pwa-192.png, /pwa-512.png, /pwa-maskable-512.png and /apple-touch-icon.png.
-Do not introduce independent logo artwork in components or public assets without updating this canonical source.
+Canonical runtime mark: /brand/official/marbo3a-mark.png
+Header lockup: /brand/official/marbo3a-mark.png with the existing MARBO3A text lockup.
+Application icon: /brand/official/marbo3a-app-icon.png
+Maskable icon: /brand/official/marbo3a-maskable.png
+
+PWA/browser derivatives:
+- /pwa-192.png
+- /pwa-512.png
+- /pwa-maskable-512.png
+- /apple-touch-icon.png
+- /favicon-16.png
+- /favicon-32.png
+
+The PNG identity is the production runtime source of truth because it renders reliably across Android, Chrome, Safari and PWA surfaces. Legacy SVG brand files are deprecated and must not be referenced by runtime UI.
