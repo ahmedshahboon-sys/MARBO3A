@@ -1,0 +1,5 @@
+MARBO3A OFFICIAL BRAND ASSET POLICY
+
+Canonical mark: /brand/official/marbo3a-mark.svg
+Use this mark for application chrome, PWA generation, favicon/launcher derivatives, OpenGraph artwork and maintenance mode.
+Do not introduce new independent logo artwork in components or public assets.
