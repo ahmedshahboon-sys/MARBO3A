@@ -47,6 +47,8 @@ const modules=[
   // I/J/K/L surfaces wrap older room/story/map/guest handlers.
   "./ijkl-experience.mjs",
   "./ijkl-room-guard.mjs",
+  // Guest identity, room cards, guest listeners and room-seat experience.
+  "./guest-rooms-v2.mjs",
   // Request foundation must remain the outermost compatibility wrapper.
   "./request-foundation.mjs"
 ];
