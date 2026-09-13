@@ -29,6 +29,6 @@ const chat=read("app/chat/[id]/page.js");
 for(const item of ["VoiceRecorder","VoiceMessage","/api/chats/${id}/read","/api/chats/${id}/receipt","/api/calls/history?conversationId=${id}","marbo3a:direct:new","marbo3a:direct:updated","marbo3a:direct:deleted"]){must(chat,item,`direct chat ${item}`)}
 
 const recorder=read("app/VoiceRecorder.js");
-for(const item of ["MAX_SECONDS=120","navigator.mediaDevices.getUserMedia","pointermove","pointerup","pointercancel","cancelRecording","onRecorded"]){must(recorder,item,`voice recorder ${item}`)}
+for(const item of ["MAX_SECONDS=120","navigator.mediaDevices.getUserMedia","pointermove","pointerup","pointercancel","cancelGlobal","finish(false)","onRecorded"]){must(recorder,item,`voice recorder ${item}`)}
 
 console.log("Group C/D/G/H frontend contracts OK");
