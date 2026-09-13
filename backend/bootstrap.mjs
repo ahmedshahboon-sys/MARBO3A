@@ -44,6 +44,8 @@ const modules=[
   // Corrected F/G/H routes wrap the original F/G/H compatibility layer.
   "./fgh-privacy-compat.mjs",
   "./fgh-regression-hotfix.mjs",
+  // I/J/K/L surfaces wrap older room/story/map/guest handlers.
+  "./ijkl-experience.mjs",
   // Request foundation must remain the outermost compatibility wrapper.
   "./request-foundation.mjs"
 ];
