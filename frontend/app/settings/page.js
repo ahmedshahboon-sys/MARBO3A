@@ -19,5 +19,6 @@ export default function SettingsPage(){
       <Link href="/home" aria-label="رجوع"><Icon name="arrowRight"/></Link>
       <div><small>إعدادات مربوعة</small><h1>الحساب والتطبيق</h1><p>إدارة حسابك وتخصيص تجربتك في مربوعة</p></div>
     </header>
+    <Link className="settings-permissions-entry" href="/settings/permissions"><Icon name="settings"/><span><b>أذونات الجهاز</b><small>المايكروفون، الكاميرا، الموقع والإشعارات</small></span><Icon name="arrowLeft"/></Link>
   </main>;
 }
