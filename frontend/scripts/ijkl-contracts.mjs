@@ -5,7 +5,7 @@ const checks=[
  ["app/room/manage/[id]/page.js",["ظهور الغرفة","visibility","joinPolicy"]],
  ["app/StoryRail.js",["❤️","story-social-tools","/reply","/reaction","/highlight","mutes"]],
  ["app/map/page.js",["ghostMode","visibilityMode","الأصدقاء","ذكر","أنثى"]],
- ["app/explore/page.js",["PublicRoomRail","/api/public/stats","غرف عامة"]],
+ ["app/explore/page.js",["PublicRoomRail","/api/public/stats","الغرف العامة"]],
  ["app/PublicRoomRail.js",["/api/public/rooms-v2","/guest/room/","دخول الغرفة"]],
  ["app/about/page.js",["0912992050","0922992050","0911984045","0921984045"]]
 ];
