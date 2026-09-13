@@ -9,5 +9,6 @@ for(const name of expected){
   if(!valid)throw new Error(`Invalid committed PWA icon: ${name}`);
 }
 const svg=await fs.readFile(path.join(pub,"brand","official","marbo3a-mark.svg"),"utf8");
-if(svg.length<10000||!svg.includes("<svg")||!svg.includes("data:image/webp;base64,"))throw new Error("Invalid canonical MARBO3A SVG source");
-console.log("MARBO3A committed PWA icons and canonical SVG verified");
+const required=["<svg","viewBox=\"0 0 1254 1254\"","مربوعة","#26323d","#ff6900"];
+if(svg.length<2500||required.some(token=>!svg.includes(token))||svg.includes("data:image/"))throw new Error("Invalid canonical MARBO3A vector source");
+console.log("MARBO3A committed PWA icons and canonical vector SVG verified");
