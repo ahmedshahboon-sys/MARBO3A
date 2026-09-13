@@ -51,6 +51,17 @@ test("map never bypasses block, precise opt-in, or online privacy",()=>{
   assert.match(src,/last_seen_at:lastSeenVisible&&!actualOnline/);
 });
 
+test("map city activity honors privacy and validates precise coordinates",()=>{
+  const src=read("routes/core-location.mjs");
+  assert.match(src,/l\.ghost_mode=FALSE/);
+  assert.match(src,/COALESCE\(p\.show_city,TRUE\)=TRUE/);
+  assert.match(src,/l\.visibility_mode='friends'/);
+  assert.match(src,/user_blocks/);
+  assert.match(src,/INVALID_PRECISE_LOCATION/);
+  assert.match(src,/lat>=-90&&lat<=90/);
+  assert.match(src,/lng>=-180&&lng<=180/);
+});
+
 test("chat list respects show_online independently from last seen",()=>{
   const src=read("message-media-fix.mjs");
   assert.match(src,/COALESCE\(pp\.show_online,TRUE\) show_online/);
