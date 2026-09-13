@@ -1,3 +1,5 @@
+function reportFailure(input,code){try{if(typeof window!=="undefined")window.dispatchEvent(new CustomEvent("marbo3a:request-failure",{detail:{url:String(input||"").slice(0,300),code}}))}catch{}}
+
 export async function fetchWithTimeout(input,options={},timeoutMs=12000){
   const controller=new AbortController();
   const upstream=options.signal;
@@ -6,7 +8,7 @@ export async function fetchWithTimeout(input,options={},timeoutMs=12000){
   if(upstream){if(upstream.aborted)controller.abort();else upstream.addEventListener("abort",relay,{once:true})}
   const timer=setTimeout(()=>{timedOut=true;controller.abort()},Math.max(1000,Number(timeoutMs)||12000));
   try{return await fetch(input,{...options,signal:controller.signal})}
-  catch(error){if(timedOut){const e=new Error("REQUEST_TIMEOUT");e.cause=error;throw e}throw error}
+  catch(error){if(timedOut){reportFailure(input,"REQUEST_TIMEOUT");const e=new Error("REQUEST_TIMEOUT");e.cause=error;throw e}if(!upstream?.aborted)reportFailure(input,"REQUEST_FAILED");throw error}
   finally{clearTimeout(timer);upstream?.removeEventListener?.("abort",relay)}
 }
 
