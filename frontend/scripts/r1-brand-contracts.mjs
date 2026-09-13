@@ -14,7 +14,7 @@ await must("app/PlatformClient.js",["/brand/official/marbo3a-mark.svg"]);
 await must("public/offline.html",["/brand/official/marbo3a-mark.svg"]);
 await must("public/manifest.webmanifest",["/pwa-192.png","/pwa-512.png","/pwa-maskable-512.png"]);
 await must("scripts/generate-pwa-icons.mjs",["brand","official","marbo3a-mark.svg","data:image/webp;base64,"]);
-await must("../ops/maintenance/index.html",["/brand/official/marbo3a-mark.svg"]);
-await must("../compose.yml",["./frontend/public/brand/official:/usr/share/nginx/html/brand/official:ro"]);
+// Do not inspect repository-level ops/ or compose.yml here: this script runs inside the frontend Docker build context.
+// Repository-level deployment/maintenance contracts are validated by the operations checks outside the frontend image.
 if(failed)process.exit(1);
-console.log("R1 official brand contracts OK.");
+console.log("R1 official brand frontend contracts OK.");
