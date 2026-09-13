@@ -6,7 +6,7 @@ export const size={width:1200,height:630};
 export const contentType="image/png";
 
 export default function OpenGraphImage(){
-  const symbol="https://marbo3a.ly/brand/official/marbo3a-mark.png";
+  const symbol="https://marbo3a.ly/brand/official/marbo3a-mark.svg";
   return new ImageResponse(
     <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",background:"#090d12",position:"relative",overflow:"hidden",fontFamily:"Arial, sans-serif"}}>
       <div style={{position:"absolute",width:520,height:520,borderRadius:260,background:"rgba(255,122,0,.13)",right:-120,top:-180,filter:"blur(8px)"}}/>
