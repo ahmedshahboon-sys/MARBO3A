@@ -7,7 +7,7 @@ const root=path.resolve(process.cwd());
 const read=file=>fs.readFileSync(path.join(root,file),"utf8");
 
 test("guest rooms v2 migration is additive and owns guest/seat schema",()=>{
-  const sql=read("migrations/031_guest_rooms_v2_permissions.sql");
+  const sql=read("migrations/032_guest_rooms_v2_permissions.sql");
   for(const token of ["guest_visitors","guest_activity","guest_room_presence","guest_room_voice_presence","guest_room_voice_signals","speaker_seat_count","seat_index","room_voice_active_seat_unique"])assert.match(sql,new RegExp(token));
   assert.doesNotMatch(sql,/DROP\s+(TABLE|COLUMN)|TRUNCATE\s+/i);
 });
