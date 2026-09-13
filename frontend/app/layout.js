@@ -42,6 +42,7 @@ import "./ui-v3-navigation.css";
 import "./ui-v3-room-community.css";
 import "./ui-v3-experience-stage1.css";
 import "./ui-v3-stories.css";
+import "./stories-interactions.css";
 import "./guest-entry.css";
 import "./ui-v3-social-experience.css";
 import "./ui-v3-unified-scale.css";

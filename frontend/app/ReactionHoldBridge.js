@@ -1,113 +1,47 @@
 "use client";
-import {useEffect} from "react";
+import {useEffect,useRef,useState} from "react";
+import {createPortal} from "react-dom";
 
 const HOLD_MS=420;
 const MOVE_TOLERANCE=12;
 const reactions=["❤️","😂","😡","😢"];
 
 export default function ReactionHoldBridge(){
+  const[palette,setPalette]=useState(null);
+  const timer=useRef(null),active=useRef(null);
+  const close=()=>setPalette(null);
   useEffect(()=>{
-    let timer=null;
-    let active=null;
-    let palette=null;
-
-    function closePalette(){
-      palette?.remove();
-      palette=null;
-      document.querySelectorAll(".sf-reaction-picker.is-open").forEach(el=>el.classList.remove("is-open"));
-    }
-
-    function positionPalette(anchor){
-      if(!palette)return;
-      const r=anchor.getBoundingClientRect(),w=Math.min(252,window.innerWidth-20),left=Math.max(10,Math.min(window.innerWidth-w-10,r.left+r.width/2-w/2));
-      palette.style.width=`${w}px`;
-      palette.style.left=`${left}px`;
-      palette.style.top=`${Math.max(10,r.top-70)}px`;
-    }
-
-    function openPalette(picker,anchor){
-      closePalette();
+    const clearHold=()=>{clearTimeout(timer.current);timer.current=null};
+    function openPicker(picker,anchor){
       const originals=[...picker.querySelectorAll(":scope > button")];
       if(!originals.length)return;
-      picker.classList.add("is-open");
-      palette=document.createElement("div");
-      palette.className="reaction-hold-palette";
-      palette.setAttribute("role","menu");
-      reactions.forEach((emoji,index)=>{
-        const b=document.createElement("button");
-        b.type="button";
-        b.textContent=emoji;
-        b.setAttribute("aria-label",originals[index]?.getAttribute("aria-label")||"تفاعل");
-        b.addEventListener("pointerdown",ev=>ev.stopPropagation());
-        b.addEventListener("click",ev=>{
-          ev.preventDefault();
-          ev.stopPropagation();
-          delete picker.dataset.suppressNextLike;
-          originals[index]?.click();
-          closePalette();
-        });
-        palette.appendChild(b);
-      });
-      document.body.appendChild(palette);
-      positionPalette(anchor);
+      const r=anchor.getBoundingClientRect(),w=Math.min(252,window.innerWidth-20),left=Math.max(10,Math.min(window.innerWidth-w-10,r.left+r.width/2-w/2));
       picker.dataset.suppressNextLike="1";
+      setPalette({picker,buttons:originals,left,top:Math.max(10,r.top-70),width:w});
     }
-
-    function clearHold(){clearTimeout(timer);timer=null}
-
     function onPointerDown(e){
       const first=e.target.closest?.(".sf-reaction-picker > button:first-child");
-      if(!first){if(!e.target.closest?.(".reaction-hold-palette"))closePalette();return}
+      if(!first){if(!e.target.closest?.(".reaction-hold-palette"))close();return}
       if(e.pointerType==="mouse"&&e.button!==0)return;
       const picker=first.closest(".sf-reaction-picker");
-      active={picker,button:first,pointerId:e.pointerId,long:false,x:e.clientX,y:e.clientY};
+      active.current={picker,button:first,pointerId:e.pointerId,long:false,x:e.clientX,y:e.clientY};
       clearHold();
-      timer=setTimeout(()=>{
-        if(!active||active.button!==first)return;
-        active.long=true;
-        openPalette(picker,first);
+      timer.current=setTimeout(()=>{
+        if(!active.current||active.current.button!==first)return;
+        active.current.long=true;
+        openPicker(picker,first);
         try{navigator.vibrate?.(20)}catch{}
       },HOLD_MS);
     }
-
-    function onPointerMove(e){
-      if(!active||active.pointerId!==e.pointerId||active.long)return;
-      if(Math.hypot(e.clientX-active.x,e.clientY-active.y)>MOVE_TOLERANCE){clearHold();active=null}
-    }
-
-    function onPointerUp(e){
-      clearHold();
-      if(!active||active.pointerId!==e.pointerId)return;
-      const {picker,long}=active;active=null;
-      if(long){e.preventDefault();e.stopPropagation();setTimeout(()=>{if(picker.dataset.suppressNextLike==="1")delete picker.dataset.suppressNextLike},450)}
-    }
-
-    function onPointerCancel(){clearHold();active=null}
-    function onClick(e){
-      const first=e.target.closest?.(".sf-reaction-picker > button:first-child");
-      if(!first)return;
-      const picker=first.closest(".sf-reaction-picker");
-      if(picker?.dataset.suppressNextLike==="1"){e.preventDefault();e.stopPropagation();delete picker.dataset.suppressNextLike}
-    }
-    function onScroll(){clearHold();active=null;closePalette()}
-    function onResize(){if(palette)closePalette()}
-    document.addEventListener("pointerdown",onPointerDown,true);
-    document.addEventListener("pointermove",onPointerMove,true);
-    document.addEventListener("pointerup",onPointerUp,true);
-    document.addEventListener("pointercancel",onPointerCancel,true);
-    document.addEventListener("click",onClick,true);
-    window.addEventListener("scroll",onScroll,true);
-    window.addEventListener("resize",onResize);
-    return()=>{
-      clearHold();closePalette();
-      document.removeEventListener("pointerdown",onPointerDown,true);
-      document.removeEventListener("pointermove",onPointerMove,true);
-      document.removeEventListener("pointerup",onPointerUp,true);
-      document.removeEventListener("pointercancel",onPointerCancel,true);
-      document.removeEventListener("click",onClick,true);
-      window.removeEventListener("scroll",onScroll,true);
-      window.removeEventListener("resize",onResize);
-    };
+    function onPointerMove(e){const a=active.current;if(!a||a.pointerId!==e.pointerId||a.long)return;if(Math.hypot(e.clientX-a.x,e.clientY-a.y)>MOVE_TOLERANCE){clearHold();active.current=null}}
+    function onPointerUp(e){clearHold();const a=active.current;if(!a||a.pointerId!==e.pointerId)return;active.current=null;if(a.long){e.preventDefault();e.stopPropagation();setTimeout(()=>{if(a.picker.dataset.suppressNextLike==="1")delete a.picker.dataset.suppressNextLike},450)}}
+    function onPointerCancel(){clearHold();active.current=null}
+    function onClick(e){const first=e.target.closest?.(".sf-reaction-picker > button:first-child");if(!first)return;const picker=first.closest(".sf-reaction-picker");if(picker?.dataset.suppressNextLike==="1"){e.preventDefault();e.stopPropagation();delete picker.dataset.suppressNextLike}}
+    function onScroll(){clearHold();active.current=null;close()}
+    document.addEventListener("pointerdown",onPointerDown,true);document.addEventListener("pointermove",onPointerMove,true);document.addEventListener("pointerup",onPointerUp,true);document.addEventListener("pointercancel",onPointerCancel,true);document.addEventListener("click",onClick,true);window.addEventListener("scroll",onScroll,true);window.addEventListener("resize",close);
+    return()=>{clearHold();document.removeEventListener("pointerdown",onPointerDown,true);document.removeEventListener("pointermove",onPointerMove,true);document.removeEventListener("pointerup",onPointerUp,true);document.removeEventListener("pointercancel",onPointerCancel,true);document.removeEventListener("click",onClick,true);window.removeEventListener("scroll",onScroll,true);window.removeEventListener("resize",close)};
   },[]);
-  return null;
+  if(!palette||typeof document==="undefined")return null;
+  const style={position:"fixed",zIndex:1200,left:palette.left,top:palette.top,width:palette.width,bottom:"auto",right:"auto",insetInlineStart:"auto"};
+  return createPortal(<div className="reaction-hold-palette" role="menu" style={style}>{reactions.map((emoji,index)=><button key={emoji} type="button" aria-label={palette.buttons[index]?.getAttribute("aria-label")||"تفاعل"} onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.preventDefault();e.stopPropagation();delete palette.picker.dataset.suppressNextLike;palette.buttons[index]?.click();close()}}>{emoji}</button>)}</div>,document.body);
 }
