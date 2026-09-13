@@ -81,6 +81,7 @@ services:
     volumes:
       - ./ops/maintenance-gate.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ops/maintenance:/usr/share/nginx/html/maintenance:ro
+      - ./frontend/public/brand/official:/usr/share/nginx/html/brand/official:ro
       - ./.runtime/maintenance:/run/marbo3a-maintenance:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/__gate_health >/dev/null 2>&1"]
