@@ -1,7 +1,7 @@
 // MARBO3A backend bootstrap.
-// New code should use runtime.mjs and migrations. Legacy extension modules stay
-// behind this explicit compatibility boundary until their routes are folded
-// into domain routers. Sequential imports preserve the verified production order.
+// Compatibility modules still register through the historical createServer chain,
+// but one authoritative request foundation is imported LAST so its middleware is
+// registered FIRST. New code should use runtime.mjs, migrations and domain routers.
 const modules=[
   "./instrumentation.mjs",
   "./debug-trace.mjs",
@@ -25,7 +25,6 @@ const modules=[
   "./stories.mjs",
   "./guest-explore.mjs",
   "./message-media-fix.mjs",
-  "./preflight.mjs",
   "./security-p0.mjs",
   "./real-map.mjs",
   "./realtime-v2.mjs",
@@ -37,6 +36,6 @@ const modules=[
   "./security-completion.mjs",
   "./audit-completion.mjs",
   "./social-experience.mjs",
-  "./cookie-auth.mjs"
+  "./request-foundation.mjs"
 ];
 for(const module of modules)await import(module);
