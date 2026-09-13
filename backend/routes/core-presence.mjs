@@ -17,7 +17,7 @@ export function registerCorePresence(app){
       const viewer=await requireAuth(req,res);if(!viewer)return;
       const ids=String(req.query.ids||"").split(",").map(Number).filter(Number.isInteger).filter(x=>x>0).slice(0,100);
       if(!ids.length)return res.json({ok:true,users:[]});
-      const rows=(await pool.query(`SELECT u.id,u.last_seen_at,COALESCE(p.show_online,TRUE) show_online,COALESCE(p.show_last_seen,TRUE) show_last_seen FROM users u LEFT JOIN profile_privacy p ON p.user_id=u.id WHERE u.id=ANY($1::bigint[])`,[ids])).rows;
+      const rows=(await pool.query(`SELECT u.id,u.last_seen_at,COALESCE(p.show_online,TRUE) show_online,COALESCE(p.show_last_seen,TRUE) show_last_seen FROM users u LEFT JOIN profile_privacy p ON p.user_id=u.id WHERE u.id=ANY($1::bigint[]) AND (u.id=$2 OR NOT EXISTS(SELECT 1 FROM user_blocks b WHERE (b.blocker_id=$2 AND b.blocked_id=u.id) OR (b.blocker_id=u.id AND b.blocked_id=$2)))`,[ids,viewer.id])).rows;
       await ensureRedis().catch(()=>{});
       const cutoff=Date.now()-90000;let scores=[];
       try{scores=await redis.zRangeWithScores("presence:users",0,-1)}catch{}
