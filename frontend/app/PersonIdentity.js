@@ -1,0 +1,5 @@
+"use client";
+import GenderMark from "./GenderMark";
+
+export function lastSeenText(v){if(!v)return"";const t=new Date(v).getTime();if(!Number.isFinite(t))return"";const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return"آخر ظهور الآن";if(s<3600)return`آخر ظهور منذ ${Math.floor(s/60)} د`;if(s<86400)return`آخر ظهور منذ ${Math.floor(s/3600)} س`;if(s<172800)return"آخر ظهور أمس";return`آخر ظهور ${new Date(t).toLocaleDateString("ar-LY")}`}
+export default function PersonIdentity({person,name,username,gender,online,lastSeen,compact=false}){const n=name??person?.display_name??person?.peer_name??person?.username??"مستخدم مربوعة",u=username??person?.username??person?.peer_username??"",g=gender??person?.gender,p=online??person?.online,ls=lastSeen??person?.last_seen_at;return <span className={`person-identity ${compact?"compact":""}`}><b className="person-identity-name">{n} <GenderMark gender={g}/></b><small className="person-identity-meta">{u&&<bdi dir="ltr">@{u}</bdi>}{p?<span className="online">متصل الآن</span>:ls&&<span>{lastSeenText(ls)}</span>}</small></span>}

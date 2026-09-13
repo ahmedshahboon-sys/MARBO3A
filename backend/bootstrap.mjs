@@ -41,8 +41,10 @@ const modules=[
   "./security-completion.mjs",
   "./audit-completion.mjs",
   "./social-experience.mjs",
-  // F/G/H wrapper must be immediately inside request foundation so it registers before legacy domains.
+  // Corrected F/G/H routes wrap the original F/G/H compatibility layer.
   "./fgh-privacy-compat.mjs",
+  "./fgh-regression-hotfix.mjs",
+  // Request foundation must remain the outermost compatibility wrapper.
   "./request-foundation.mjs"
 ];
 for(const module of modules)await import(module);
