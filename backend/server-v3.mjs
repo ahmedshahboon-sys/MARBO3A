@@ -9,6 +9,7 @@ import {registerCoreMessaging} from "./routes/core-messaging.mjs";
 import {registerCoreSocial} from "./routes/core-social.mjs";
 import {registerCoreLocation} from "./routes/core-location.mjs";
 import {registerCoreAdminRooms} from "./routes/core-admin-rooms.mjs";
+import {registerCorePresence} from "./routes/core-presence.mjs";
 
 const app=express();
 // One boot-time compatibility registration pass, then restore Node's native API.
@@ -22,6 +23,7 @@ registerCoreMessaging(app);
 registerCoreSocial(app);
 registerCoreLocation(app);
 registerCoreAdminRooms(app);
+registerCorePresence(app);
 
 app.get("/health",async(_req,res)=>{try{await pool.query("SELECT 1");res.json({ok:true,project:"MARBO3A",database:true,redis:redis.isReady})}catch{res.status(503).json({ok:false,project:"MARBO3A",database:false,redis:redis.isReady})}});
 app.get("/api/health",async(_req,res)=>{let database="connected";try{await pool.query("SELECT 1")}catch{database="disconnected"}res.status(database==="connected"?200:503).json({ok:database==="connected",api:"MARBO3A API",database,realtime:"ready",redis:redis.isReady?"connected":"disconnected",email:process.env.BREVO_API_KEY?"configured":"missing",time:new Date().toISOString()})});
