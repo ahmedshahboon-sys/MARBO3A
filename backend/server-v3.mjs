@@ -1,5 +1,6 @@
 import express from "express";
 import http from "http";
+import {restoreHttpCreateServer} from "./bootstrap.mjs";
 import {pool,redis,ensureRedis,sessionUser,ipOf,clean} from "./runtime.mjs";
 import {registerAuthRegistration} from "./routes/auth-registration.mjs";
 import {registerAuthSession} from "./routes/auth-session.mjs";
@@ -10,7 +11,9 @@ import {registerCoreLocation} from "./routes/core-location.mjs";
 import {registerCoreAdminRooms} from "./routes/core-admin-rooms.mjs";
 
 const app=express();
+// One boot-time compatibility registration pass, then restore Node's native API.
 const server=http.createServer(app);
+restoreHttpCreateServer();
 
 registerAuthRegistration(app);
 registerAuthSession(app);
