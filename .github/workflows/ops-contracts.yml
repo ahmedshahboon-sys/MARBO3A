@@ -1,0 +1,56 @@
+name: MARBO3A Operations Contracts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  operations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n ops/deploy-production.sh
+          bash -n ops/disk-monitor.sh
+          bash -n ops/audit-foundation.sh
+      - name: Validate compose gate topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > .env
+          docker compose config --format json > /tmp/marbo3a-compose.json
+          python3 - <<'PY'
+          import json
+          c=json.load(open('/tmp/marbo3a-compose.json'))
+          s=c['services']
+          assert {'api','web','gate','db','redis','turn','backup'} <= set(s)
+          assert not s['web'].get('ports'), 'web must stay internal behind gate'
+          ports=s['gate'].get('ports') or []
+          assert any(str(p.get('published'))=='3000' and str(p.get('target'))=='8080' for p in ports), ports
+          PY
+      - name: Validate maintenance nginx config
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD/ops/maintenance-gate.conf:/etc/nginx/conf.d/default.conf:ro" \
+            -v "$PWD/ops/maintenance:/usr/share/nginx/html/maintenance:ro" \
+            nginx:1.27-alpine nginx -t
+      - name: Verify maintenance contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '/api/system/maintenance' ops/maintenance/index.html
+          grep -q 'maintenance_mode' backend/request-foundation.mjs
+          grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
+          grep -q 'docker builder prune -af' ops/deploy-production.sh
+          grep -q 'MARBO3A_DISK_WARN_PERCENT:-70' ops/disk-monitor.sh
+          grep -q 'MARBO3A_DISK_CRITICAL_PERCENT:-85' ops/disk-monitor.sh
