@@ -5,17 +5,18 @@ import process from "process";
 const root=process.cwd();
 const read=rel=>fs.readFile(path.join(root,rel),"utf8");
 const checks=[
-  ["app/VoiceRecorder.js",["document.addEventListener(\"pointerup\"","voice-record-panel locked","voice-record-panel active","onRecorded?."]],
+  ["app/VoiceRecorder.js",["document.addEventListener(\"pointerup\"","voice-record-panel active","اسحب لفوق للإلغاء","onRecorded?."]],
   ["app/StoryRail.js",["story-overlay-open","/viewers","story-viewers-panel","viewers!==null","beginSwipe","STILL_MS=6500","onTimeUpdate","filterName","overlayX","story-overlay-edit","<Link key={v.viewer_id}"]],
   ["app/ReactionHoldBridge.js",["MOVE_TOLERANCE","createPortal","useState(null)","HOLD_MS=420","position:\"fixed\""]],
   ["app/RoomVoiceStage.js",["recvonly","scheduleJoinRetry","أنت تستمع الآن","room-voice-remote-audio"]],
-  ["app/notifications/page.js",["friend_action:\"expired\"","notification-actions","respond(n,\"accept\")"]],
+  ["app/notifications/page.js",["notification:updated","notification-actions","respond(n,\"accept\")","تعليم الكل كمقروء"]],
   ["app/PremiumChrome.js",["marbo3a:notification-count","v3-unread-badge"]],
-  ["app/AppDataCoordinator.js",["/api/notifications/unread-count","/api/chats","120000"]],
-  ["app/RealtimeClient.js",["presence:update","presence:snapshot","presence:watch"]],
+  ["app/AppDataCoordinator.js",["/api/notifications/unread-count","notification:updated","/api/chats","120000"]],
+  ["app/RealtimeClient.js",["notification:updated","presence:update","presence:snapshot","presence:watch"]],
   ["app/SocialFeed.js",["comments/preview","/reactions","const previous=post,next=","reaction-people"]],
   ["app/profile/edit/page.js",["USERNAME_COOLDOWN","7 أيام","usernameNextChangeAt"]],
-  ["app/ui-v3-unified-scale.css",["--app-dock-h:62px",".sf-reaction-picker>button:not(:first-child)",".story-viewer{position:fixed",".room-community-compose{position:sticky",".voice-record-btn{touch-action:none"]]
+  ["app/ui-v3-unified-scale.css",["--app-dock-h:62px",".sf-reaction-picker>button:not(:first-child)",".story-viewer{position:fixed",".room-community-compose{position:sticky",".voice-record-btn{touch-action:none"]],
+  ["app/InterfaceFixes.js",["settings-overlay","global-search-box:focus-within","chat-bubble","profile-v3-route"]]
 ];
 
 let failed=false;
