@@ -81,3 +81,12 @@ jobs:
           done
           curl -fsS "$APP_ORIGIN/api/health" >/dev/null || { cat "$LOG"; exit 1; }
           node scripts/foundation-smoke.mjs || { cat "$LOG"; exit 1; }
+          curl -fsS "$APP_ORIGIN/api/system/maintenance" >/tmp/maintenance.json
+          node -e "const x=require('/tmp/maintenance.json'); if(x.ok!==true||x.active!==false) process.exit(1)"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "UPDATE admin_system_settings SET value='true'::jsonb,updated_at=NOW() WHERE key='maintenance_mode'" >/dev/null
+          curl -fsS "$APP_ORIGIN/api/system/maintenance" >/tmp/maintenance-on.json
+          node -e "const x=require('/tmp/maintenance-on.json'); if(x.active!==true) process.exit(1)"
+          sleep 6
+          test "$(curl -sS -o /tmp/maintenance-block.json -w '%{http_code}' "$APP_ORIGIN/api/push/config")" = "503" || { cat /tmp/maintenance-block.json || true; cat "$LOG"; exit 1; }
+          node -e "const x=require('/tmp/maintenance-block.json'); if(x.error!=='MAINTENANCE_MODE') process.exit(1)"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "UPDATE admin_system_settings SET value='false'::jsonb,updated_at=NOW() WHERE key='maintenance_mode'" >/dev/null

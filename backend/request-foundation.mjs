@@ -17,6 +17,18 @@ async function operationalControls(){
   }catch{controlCache={at:Date.now(),settings:{},features:{}}}
   return controlCache;
 }
+async function maintenanceState(){
+  try{
+    const rows=(await pool.query(`SELECT key,value FROM admin_system_settings WHERE key IN ('maintenance_mode','maintenance_message','maintenance_eta_minutes','maintenance_started_at')`)).rows;
+    const settings=Object.fromEntries(rows.map(x=>[x.key,x.value]));
+    return {
+      active:settings.maintenance_mode===true,
+      message:typeof settings.maintenance_message==="string"?settings.maintenance_message:"جاري تحديث مربوعة، بنرجعولك خلال دقائق.",
+      etaMinutes:Math.max(0,Number(settings.maintenance_eta_minutes)||0),
+      startedAt:typeof settings.maintenance_started_at==="string"?settings.maintenance_started_at:null
+    };
+  }catch{return{active:false,message:"",etaMinutes:0,startedAt:null}}
+}
 
 http.createServer=function requestFoundationCreateServer(app,...args){
   if(typeof app==="function"&&app?.use){
@@ -43,13 +55,22 @@ http.createServer=function requestFoundationCreateServer(app,...args){
       next();
     });
 
-    // Group O operational controls live here because this wrapper is registered
-    // before compatibility routes. Fail open only when the control tables are not
-    // available during a bootstrap/migration window; health and admin routes stay reachable.
+    // Public, no-cache deployment state used by already-open clients and the
+    // standalone maintenance gate. It stays readable while maintenance is active.
+    app.get("/api/system/maintenance",async(_req,res)=>{
+      res.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
+      res.setHeader("Pragma","no-cache");
+      res.json({ok:true,...await maintenanceState()});
+    });
+
+    // Operational controls live here because this wrapper is registered before
+    // compatibility routes. Health, maintenance-state and admin routes remain
+    // reachable during an automatic deploy maintenance window.
     app.use(async(req,res,next)=>{
-      if(!req.path?.startsWith("/api/")||req.path==="/api/health"||req.path==="/health")return next();
+      if(!req.path?.startsWith("/api/")||req.path==="/api/health"||req.path==="/health"||req.path==="/api/system/maintenance")return next();
       try{
         const {settings,features}=await operationalControls();
+        if(settings.maintenance_mode===true&&!req.path.startsWith("/api/admin/"))return res.status(503).json({ok:false,error:"MAINTENANCE_MODE",maintenance:true});
         // Keep the current memory-upload pipeline's established 8 MB hard ceiling.
         if(req.method==="PATCH"&&req.path==="/api/admin/advanced/settings"&&req.body?.key==="upload_max_mb"&&Number(req.body?.value)>8)return res.status(400).json({ok:false,error:"UPLOAD_LIMIT_MAX_8MB"});
         if(req.path.startsWith("/api/admin/"))return next();

@@ -5,6 +5,7 @@ import AppBootstrap from "./AppBootstrap";
 import PlatformClient from "./PlatformClient";
 import UsageTelemetry from "./UsageTelemetry";
 import NavigationRuntime from "./NavigationRuntime";
+import MaintenanceRuntime from "./MaintenanceRuntime";
 import SessionGuard from "./SessionGuard";
 import RealtimeClient from "./RealtimeClient";
 import AppDataCoordinator from "./AppDataCoordinator";
@@ -26,7 +27,7 @@ import SocialDock from "./SocialDock";
 export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
-    <AppBootstrap/><PlatformClient/><UsageTelemetry/><NavigationRuntime/>
+    <AppBootstrap/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
     {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
