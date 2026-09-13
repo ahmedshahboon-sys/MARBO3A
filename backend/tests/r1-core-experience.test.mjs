@@ -39,11 +39,12 @@ test("R1 safe voice reconnect preserves moderator force mute",()=>{
   assert.doesNotMatch(src,/DO UPDATE SET[^`]*forced_muted=FALSE/i);
 });
 
-test("R1 safety preserves blocked-user and orphan-reply behavior",()=>{
+test("R1 safety preserves blocked-user and orphan-reply behavior in thread and preview",()=>{
   const src=read("r1-safety.mjs");
   assert.ok(src.includes("user_blocks"));
   assert.ok(src.includes("posts.filter"));
   assert.ok(src.includes("comments.filter"));
+  assert.ok(src.includes("comments(?:\\/preview)?"));
   assert.ok(src.includes("!c.parent_comment_id"));
 });
 
