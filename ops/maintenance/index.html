@@ -9,15 +9,16 @@
     :root{color-scheme:dark;--bg:#090d12;--card:#111720;--line:#24303d;--text:#f6f7f9;--muted:#98a5b3;--orange:#ff7a00}
     *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{font-family:Arial,"Tahoma",sans-serif;background:radial-gradient(circle at 80% 10%,rgba(255,122,0,.16),transparent 34%),var(--bg);color:var(--text);display:grid;place-items:center;padding:24px}
     .card{width:min(520px,100%);background:rgba(17,23,32,.92);border:1px solid var(--line);border-radius:28px;padding:34px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34);text-align:center;backdrop-filter:blur(12px)}
-    .mark{width:88px;height:88px;margin:0 auto 18px;position:relative;display:grid;place-items:center}.mark:before,.mark:after{content:"";position:absolute;border:8px solid var(--orange);border-radius:50%}.mark:before{width:58px;height:58px;border-left-color:transparent;transform:rotate(-25deg)}.mark:after{width:20px;height:20px;background:var(--orange);border-width:0;right:0;top:10px;box-shadow:-52px 48px 0 -3px var(--orange)}
-    h1{font-size:26px;margin:0 0 10px}.brand{color:var(--orange);font-weight:800;letter-spacing:.4px}.message{font-size:16px;line-height:1.9;color:#d8dee6;margin:8px auto 20px;max-width:390px}.eta{font-size:14px;color:var(--muted);margin:0 0 18px}.bar{height:7px;background:#1c2631;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;width:36%;background:linear-gradient(90deg,var(--orange),#ffad4d);border-radius:99px;animation:move 1.7s ease-in-out infinite alternate}.hint{font-size:12px;color:#72808f;margin-top:16px}@keyframes move{from{transform:translateX(160%)}to{transform:translateX(-175%)}}
+    .mark{width:104px;height:104px;margin:0 auto 16px;display:block;object-fit:contain;border-radius:25px;filter:drop-shadow(0 16px 30px rgba(255,122,0,.2))}
+    h1{font-size:26px;margin:0 0 10px}.brand{color:var(--orange);font-weight:800;letter-spacing:.4px}.tagline{margin:3px 0 12px;color:var(--muted);font-size:12px}.message{font-size:16px;line-height:1.9;color:#d8dee6;margin:8px auto 20px;max-width:390px}.eta{font-size:14px;color:var(--muted);margin:0 0 18px}.bar{height:7px;background:#1c2631;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;width:36%;background:linear-gradient(90deg,var(--orange),#ffad4d);border-radius:99px;animation:move 1.7s ease-in-out infinite alternate}.hint{font-size:12px;color:#72808f;margin-top:16px}@keyframes move{from{transform:translateX(160%)}to{transform:translateX(-175%)}}
     @media (prefers-color-scheme:light){:root{color-scheme:light;--bg:#f5f7fa;--card:#fff;--line:#e3e8ef;--text:#18202a;--muted:#667585}.card{box-shadow:0 18px 55px rgba(25,34,45,.12)}.message{color:#364351}.bar{background:#edf0f4}}
   </style>
 </head>
 <body>
   <main class="card" role="status" aria-live="polite">
-    <div class="mark" aria-hidden="true"></div>
+    <img class="mark" src="/brand/official/marbo3a-mark.png" alt="شعار مربوعة">
     <div class="brand">مربوعة · MARBO3A</div>
+    <div class="tagline">أقرب الناس .. دايمًا معك</div>
     <h1>قاعدين نحدّثوا الموقع 🛠️</h1>
     <p id="message" class="message">نجّهزوا نسخة أحدث من مربوعة. الموقع بيرجع تلقائيًا أول ما يكتمل التحديث ونتأكدوا إن كل الخدمات سليمة.</p>
     <p id="eta" class="eta">عادةً الموضوع ياخذ دقائق قليلة.</p>

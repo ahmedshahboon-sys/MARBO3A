@@ -1,16 +1,16 @@
-/* Official MARBO3A brand treatment for V3. Uses the approved vector symbol; no generated wordmark raster is required. */
+/* Official MARBO3A brand treatment. Canonical runtime mark: /brand/official/marbo3a-mark.png. */
 .ui-v3 .v3-brand-lockup{min-width:0;display:flex!important;align-items:center!important;gap:12px!important}
-.ui-v3 .v3-brand-lockup>img{width:58px!important;height:58px!important;object-fit:contain!important;filter:drop-shadow(0 8px 16px rgba(255,122,0,.18))}
+.ui-v3 .v3-brand-lockup>img{width:58px!important;height:58px!important;object-fit:contain!important;border-radius:14px!important;filter:drop-shadow(0 8px 16px rgba(255,122,0,.18))}
 .ui-v3 .v3-brand-copy{display:grid!important;line-height:1!important;text-align:right!important}
 .ui-v3 .v3-brand-copy>b{font-size:28px!important;font-weight:900!important;color:#fff!important;letter-spacing:-.035em}
 .ui-v3 .v3-brand-copy>small{direction:ltr!important;unicode-bidi:isolate!important;text-align:right!important;font-size:12px!important;font-weight:900!important;letter-spacing:.32em!important;color:#fff!important;margin-top:5px!important}
 .ui-v3 .v3-brand-copy>em{font-style:normal!important;color:var(--v3-muted)!important;font-size:11px!important;font-weight:600!important;margin-top:8px!important;white-space:nowrap}
-.ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img{content:url('/brand/marbo3a-symbol-orange.svg')!important;width:128px!important;height:128px!important;border-radius:0!important;object-fit:contain!important;filter:drop-shadow(0 20px 36px rgba(255,122,0,.22))!important}
+.ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img{content:url('/brand/official/marbo3a-mark.png')!important;width:128px!important;height:128px!important;border-radius:28px!important;object-fit:contain!important;filter:drop-shadow(0 20px 36px rgba(255,122,0,.22))!important}
 .ui-v3 .auth-v1-card>header h1,.ui-v3 .auth-v1-card>h1{margin-top:10px!important}
 .ui-v3 .auth-v1-card>header p{max-width:440px!important;margin-inline:auto!important}
-.ui-v3 .pwa-modal img{content:url('/brand/marbo3a-app-icon.svg')!important;object-fit:contain!important}
+.ui-v3 .pwa-modal img{content:url('/brand/official/marbo3a-mark.png')!important;object-fit:contain!important;border-radius:24px!important}
 @media(max-width:560px){
- .ui-v3 .v3-brand-lockup>img{width:46px!important;height:46px!important}
+ .ui-v3 .v3-brand-lockup>img{width:46px!important;height:46px!important;border-radius:12px!important}
  .ui-v3 .v3-brand-copy>b{font-size:23px!important}
  .ui-v3 .v3-brand-copy>small{font-size:10px!important;letter-spacing:.25em!important}
  .ui-v3 .v3-brand-copy>em{font-size:9px!important;margin-top:6px!important}

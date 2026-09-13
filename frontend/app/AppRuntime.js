@@ -21,6 +21,7 @@ import PremiumChrome from "./PremiumChrome";
 import SettingsPanel from "./SettingsPanel";
 import ExperienceEffects from "./ExperienceEffects";
 import EngagementViewRuntime from "./EngagementViewRuntime";
+import RoomVoiceR1Runtime from "./RoomVoiceR1Runtime";
 import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 
@@ -28,7 +29,7 @@ export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
     <AppBootstrap/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     {children}

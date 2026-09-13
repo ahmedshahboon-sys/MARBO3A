@@ -6,7 +6,7 @@ export const size={width:1200,height:630};
 export const contentType="image/png";
 
 export default function OpenGraphImage(){
-  const symbol="https://marbo3a.ly/brand/marbo3a-symbol-orange.svg";
+  const symbol="https://marbo3a.ly/brand/official/marbo3a-mark.png";
   return new ImageResponse(
     <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",background:"#090d12",position:"relative",overflow:"hidden",fontFamily:"Arial, sans-serif"}}>
       <div style={{position:"absolute",width:520,height:520,borderRadius:260,background:"rgba(255,122,0,.13)",right:-120,top:-180,filter:"blur(8px)"}}/>
@@ -18,7 +18,7 @@ export default function OpenGraphImage(){
           <div style={{fontSize:23,color:"#ff8a24",marginTop:22}}>Social • Friends • Messages • Rooms</div>
         </div>
         <div style={{width:300,height:300,borderRadius:64,display:"flex",alignItems:"center",justifyContent:"center",background:"#11161d",border:"1px solid rgba(255,122,0,.22)",boxShadow:"0 28px 80px rgba(255,122,0,.18)"}}>
-          <img src={symbol} width={230} height={230} style={{objectFit:"contain"}}/>
+          <img src={symbol} width={230} height={230} style={{objectFit:"contain",borderRadius:48}}/>
         </div>
       </div>
     </div>,size

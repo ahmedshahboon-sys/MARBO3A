@@ -2,7 +2,7 @@
   "id":"/",
   "name":"مربوعة",
   "short_name":"مربوعة",
-  "description":"ناسنا، حكاياتنا، دايمًا مع بعض — تواصل، غرف، أصدقاء ورسائل على مربوعة",
+  "description":"أقرب الناس .. دايمًا معك — تواصل، غرف، أصدقاء ورسائل على مربوعة",
   "lang":"ar",
   "dir":"rtl",
   "start_url":"/home?source=pwa",
@@ -17,8 +17,7 @@
   "icons":[
     {"src":"/pwa-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
     {"src":"/pwa-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"/pwa-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"},
-    {"src":"/pwa-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+    {"src":"/pwa-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts":[
     {"name":"الرئيسية","short_name":"الرئيسية","url":"/home","icons":[{"src":"/pwa-192.png","sizes":"192x192","type":"image/png"}]},
