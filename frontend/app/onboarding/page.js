@@ -45,12 +45,12 @@ export default function OnboardingRoute(){
     }finally{setBusy(false)}
   }
 
-  if(loading)return <main className="onboarding-backdrop" dir="rtl"><section className="onboarding-card onboarding-route-card"><div className="onboarding-logo"><img src="/brand/marbo3a-app-icon.svg" alt="مربوعة"/></div><small>MARBO3A</small><h2>نجهز حسابك</h2><p>ثواني ونفتح لك مربوعة. لو الشبكة ضعيفة ما بنخلوكش عالق.</p><div className="onboarding-route-loading" role="status">جاري تحميل بيانات البداية...</div></section></main>;
+  if(loading)return <main className="onboarding-backdrop" dir="rtl"><section className="onboarding-card onboarding-route-card"><div className="onboarding-logo"><img src="/brand/official/marbo3a-mark.png" alt="مربوعة"/></div><small>MARBO3A</small><h2>نجهز حسابك</h2><p>ثواني ونفتح لك مربوعة. لو الشبكة ضعيفة ما بنخلوكش عالق.</p><div className="onboarding-route-loading" role="status">جاري تحميل بيانات البداية...</div></section></main>;
 
-  if(error)return <main className="onboarding-backdrop" dir="rtl"><section className="onboarding-card onboarding-route-card"><div className="onboarding-logo"><img src="/brand/marbo3a-app-icon.svg" alt="مربوعة"/></div><small>مشكلة اتصال</small><h2>ما قدرناش نكمل البداية</h2><p>{error}</p><div className="onboarding-actions single"><button className="onboarding-primary" type="button" onClick={()=>setAttempt(x=>x+1)}>إعادة المحاولة</button><a className="onboarding-secondary onboarding-link" href="/explore">استكشف كزائر</a></div><button className="onboarding-route-signout" type="button" onClick={()=>{clearToken();location.replace("/")}}>الرجوع لتسجيل الدخول</button></section></main>;
+  if(error)return <main className="onboarding-backdrop" dir="rtl"><section className="onboarding-card onboarding-route-card"><div className="onboarding-logo"><img src="/brand/official/marbo3a-mark.png" alt="مربوعة"/></div><small>مشكلة اتصال</small><h2>ما قدرناش نكمل البداية</h2><p>{error}</p><div className="onboarding-actions single"><button className="onboarding-primary" type="button" onClick={()=>setAttempt(x=>x+1)}>إعادة المحاولة</button><a className="onboarding-secondary onboarding-link" href="/explore">استكشف كزائر</a></div><button className="onboarding-route-signout" type="button" onClick={()=>{clearToken();location.replace("/")}}>الرجوع لتسجيل الدخول</button></section></main>;
 
   return <main className="onboarding-backdrop" dir="rtl"><section className="onboarding-card onboarding-route-card" role="dialog" aria-labelledby="onboarding-title">
-    <div className="onboarding-logo"><img src="/brand/marbo3a-app-icon.svg" alt="مربوعة"/></div>
+    <div className="onboarding-logo"><img src="/brand/official/marbo3a-mark.png" alt="مربوعة"/></div>
     <small>{step===0?"أهلًا بيك في مربوعة":"آخر خطوة"}</small>
     <h2 id="onboarding-title">{step===0?"جهز حسابك في أقل من دقيقة":"عرّف الناس عليك"}</h2>
     {step===0?<>
