@@ -7,7 +7,7 @@ import {isAppShellPath} from "./navigation-policy";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
 export default function PremiumChrome(){
   const path=usePathname(),[unread,setUnread]=useState(0);
-  useEffect(()=>{if(!isAppShellPath(path)||!token())return;let live=true;const load=()=>fetch("/api/notifications/unread-count",{headers:{authorization:`Bearer ${token()}`},cache:"no-store"}).then(r=>r.json()).then(d=>live&&setUnread(Math.max(0,Number(d.count)||0))).catch(()=>{});load();const onNew=()=>setUnread(n=>n+1),onChanged=e=>{if(Number.isFinite(Number(e?.detail?.count)))setUnread(Math.max(0,Number(e.detail.count)));else load()};window.addEventListener("marbo3a:notification:new",onNew);window.addEventListener("marbo3a:notifications-changed",onChanged);const t=setInterval(load,30000);return()=>{live=false;clearInterval(t);window.removeEventListener("marbo3a:notification:new",onNew);window.removeEventListener("marbo3a:notifications-changed",onChanged)}},[path]);
+  useEffect(()=>{if(!isAppShellPath(path)||!token())return;const onCount=e=>setUnread(Math.max(0,Number(e?.detail?.count)||0));window.addEventListener("marbo3a:notification-count",onCount);window.dispatchEvent(new CustomEvent("marbo3a:reconcile-counts"));return()=>window.removeEventListener("marbo3a:notification-count",onCount)},[path]);
   if(!isAppShellPath(path))return null;
   const conversation=/^\/chat\/\d+(?:\/|$)/.test(path)||/^\/room\/\d+\/chat(?:\/|$)/.test(path);
   return <header className={`v3-global-header${conversation?" v3-conversation-chrome":""}`} dir="rtl">
