@@ -15,7 +15,8 @@ for(const t of ["location.replace(\"/onboarding\")","fetchJson","7000","t!==\"co
 reject(gate,"onboarding-backdrop","onboarding gate must not own a second wizard");
 
 const landing=read("app/page.js");
-for(const t of ["fetchJson","6000","REQUEST_TIMEOUT","auth-v1-discover","استكشف مربوعة كزائر","/explore"])must(landing,t,"landing recovery");
+for(const t of ["fetchJson","6000","REQUEST_TIMEOUT","auth-v1-discover","استكشف مربوعة كزائر","/explore","/brand/official/marbo3a-mark.png"])must(landing,t,"landing recovery");
+reject(landing,"/logo.svg","landing must use the official PNG identity directly");
 
 const explore=read("app/explore/page.js");
 for(const t of ["fetchJson","10000","إعادة المحاولة","REQUEST_TIMEOUT"])must(explore,t,"guest explore recovery");
@@ -27,7 +28,8 @@ const permissions=read("app/PermissionsCenter.js");
 for(const t of ["marbo3a_permissions_intro_pending","FBAN","Chrome أو Safari"])must(permissions,t,"permission handoff");
 
 const sw=read("public/sw.js");
-for(const t of ["marbo3a-shell-v16-first-run","/_next/static/","SHELL.includes(url.pathname)","caches.delete"])must(sw,t,"service worker freshness");
+for(const t of ["marbo3a-shell-v17-png-brand","/_next/static/","SHELL.includes(url.pathname)","caches.delete","/favicon-16.png","/favicon-32.png","/brand/official/marbo3a-mark.png","/brand/official/marbo3a-app-icon.png","/brand/official/marbo3a-maskable.png"])must(sw,t,"service worker freshness");
+for(const t of ["/favicon.svg","/logo.svg","/pwa-icon.svg","/pwa-maskable.svg","/brand/marbo3a-app-icon.svg","/brand/marbo3a-symbol-orange.svg"])reject(sw,t,"service worker cannot precache removed SVG identity assets");
 
 const errorPage=read("app/error.js");
 for(const t of ["/api/debug/report","إعادة المحاولة","دخول كزائر","/explore"])must(errorPage,t,"global error recovery");
