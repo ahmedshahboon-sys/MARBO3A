@@ -37,7 +37,7 @@ http.createServer=function socialExperienceServer(app,...args){
 
   app.get("/api/feed/:id/comments/preview",async(req,res)=>{try{
     const u=await requireAuth(req,res);if(!u)return;const postId=Number(req.params.id);if(!Number.isSafeInteger(postId)||postId<=0)return res.status(400).json({ok:false,error:"INVALID_POST"});
-    const rows=(await pool.query(`SELECT c.id,c.post_id,c.user_id,c.body,c.created_at,c.updated_at,x.username,x.display_name,x.avatar_url FROM post_comments c JOIN users x ON x.id=c.user_id WHERE c.post_id=$1 AND c.deleted_at IS NULL ORDER BY c.id DESC LIMIT 2`,[postId])).rows.reverse();res.json({ok:true,comments:rows});
+    const rows=(await pool.query(`SELECT c.id,c.post_id,c.user_id,c.body,c.created_at,c.edited_at,c.edited_at AS updated_at,x.username,x.display_name,x.avatar_url FROM post_comments c JOIN users x ON x.id=c.user_id WHERE c.post_id=$1 AND c.deleted_at IS NULL ORDER BY c.id DESC LIMIT 2`,[postId])).rows.reverse();res.json({ok:true,comments:rows});
   }catch(e){console.error("comment preview",e);res.status(500).json({ok:false,error:"COMMENTS_LOAD_FAILED"})}});
 
   app.get("/api/notifications/unread-count",async(req,res)=>{try{const u=await requireAuth(req,res);if(!u)return;const count=Number((await pool.query(`SELECT COUNT(*)::int n FROM notifications WHERE user_id=$1 AND read_at IS NULL`,[u.id])).rows[0]?.n||0);res.json({ok:true,count})}catch(e){res.status(500).json({ok:false,error:"NOTIFICATIONS_COUNT_FAILED"})}});
