@@ -16,13 +16,23 @@ async function touchPresence(userId){
   await redis.zAdd("presence:users",[{score:Date.now(),value:String(userId)}]);
 }
 
+async function presencePrivacy(userId){
+  const row=(await pool.query(`SELECT COALESCE(p.show_online,TRUE) show_online,COALESCE(p.show_last_seen,TRUE) show_last_seen FROM users u LEFT JOIN profile_privacy p ON p.user_id=u.id WHERE u.id=$1`,[userId]).catch(()=>({rows:[]}))).rows?.[0];
+  return{showOnline:row?.show_online!==false,showLastSeen:row?.show_last_seen!==false};
+}
+
+async function publishConnectedPrivacy(io,userId){
+  const uid=String(userId),p=await presencePrivacy(uid);
+  io.to(`presence:${uid}`).emit("presence:update",{userId:Number(uid),online:Boolean(p.showOnline),lastSeenAt:null});
+}
+
 async function markOnline(io,userId){
   const uid=String(userId),count=(connections.get(uid)||0)+1;
   connections.set(uid,count);
   await touchPresence(uid).catch(()=>{});
   if(count===1){
     await pool.query(`UPDATE users SET last_seen_at=NOW() WHERE id=$1`,[uid]).catch(()=>{});
-    io.to(`presence:${uid}`).emit("presence:update",{userId:Number(uid),online:true,lastSeenAt:null});
+    await publishConnectedPrivacy(io,uid);
   }
 }
 
@@ -33,18 +43,19 @@ async function markOffline(io,userId){
   await ensureRedis().catch(()=>{});
   await redis.zRem("presence:users",uid).catch(()=>{});
   const row=(await pool.query(`UPDATE users SET last_seen_at=NOW() WHERE id=$1 RETURNING last_seen_at`,[uid]).catch(()=>({rows:[]}))).rows?.[0];
-  io.to(`presence:${uid}`).emit("presence:update",{userId:Number(uid),online:false,lastSeenAt:row?.last_seen_at||new Date().toISOString()});
+  const p=await presencePrivacy(uid);
+  io.to(`presence:${uid}`).emit("presence:update",{userId:Number(uid),online:false,lastSeenAt:p.showLastSeen?(row?.last_seen_at||new Date().toISOString()):null});
 }
 
-async function snapshot(ids){
+async function snapshot(ids,viewerId){
   if(!ids.length)return[];
-  const rows=(await pool.query(`SELECT u.id,u.last_seen_at,COALESCE(p.show_last_seen,TRUE) show_last_seen FROM users u LEFT JOIN profile_privacy p ON p.user_id=u.id WHERE u.id=ANY($1::bigint[])`,[ids])).rows;
+  const rows=(await pool.query(`SELECT u.id,u.last_seen_at,COALESCE(p.show_online,TRUE) show_online,COALESCE(p.show_last_seen,TRUE) show_last_seen FROM users u LEFT JOIN profile_privacy p ON p.user_id=u.id WHERE u.id=ANY($1::bigint[]) AND (u.id=$2 OR NOT EXISTS(SELECT 1 FROM user_blocks b WHERE (b.blocker_id=$2 AND b.blocked_id=u.id) OR (b.blocker_id=u.id AND b.blocked_id=$2)))`,[ids,viewerId])).rows;
   await ensureRedis().catch(()=>{});
   const cutoff=Date.now()-90000;
   let scores=[];
   try{scores=await redis.zRangeWithScores("presence:users",0,-1)}catch{}
   const online=new Set(scores.filter(x=>Number(x.score)>cutoff).map(x=>String(x.value)));
-  return rows.map(row=>({userId:Number(row.id),online:Boolean(row.show_last_seen)&&online.has(String(row.id)),lastSeenAt:row.show_last_seen?row.last_seen_at:null,visible:Boolean(row.show_last_seen)}));
+  return rows.map(row=>{const actualOnline=online.has(String(row.id));return{userId:Number(row.id),online:Boolean(row.show_online)&&actualOnline,lastSeenAt:Boolean(row.show_last_seen)&&!actualOnline?row.last_seen_at:null,visible:Boolean(row.show_online)||Boolean(row.show_last_seen)}});
 }
 
 export function attachRealtime(server){
@@ -62,12 +73,12 @@ export function attachRealtime(server){
     socket.join(`user:${uid}`);
     socket.data.presenceRooms=new Set();
     markOnline(io,uid).catch(()=>{});
-    const heartbeat=setInterval(()=>touchPresence(uid).catch(()=>{}),30000);
+    const heartbeat=setInterval(()=>{touchPresence(uid).then(()=>publishConnectedPrivacy(io,uid)).catch(()=>{})},30000);
     socket.emit("welcome:v2",{realtime:true,userId:Number(uid)});
 
     socket.on("presence:watch",async data=>{try{
       const ids=[...new Set((Array.isArray(data?.userIds)?data.userIds:[]).map(Number).filter(Number.isInteger).filter(x=>x>0).slice(0,100))];
-      const current=await snapshot(ids);
+      const current=await snapshot(ids,uid);
       const allowed=new Set(current.filter(x=>x.visible||String(x.userId)===uid).map(x=>String(x.userId)));
       for(const old of socket.data.presenceRooms||[])if(!allowed.has(old)){socket.leave(`presence:${old}`);socket.data.presenceRooms.delete(old)}
       for(const id of allowed)if(!socket.data.presenceRooms.has(id)){socket.join(`presence:${id}`);socket.data.presenceRooms.add(id)}
