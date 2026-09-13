@@ -33,6 +33,12 @@ test("R1 room voice resets stale join state and adds manager moderation",()=>{
   assert.match(src,/ON CONFLICT\(room_id,user_id\) DO UPDATE SET role='listener',seat_index=NULL/);
 });
 
+test("R1 safe voice reconnect preserves moderator force mute",()=>{
+  const src=read("r1-voice-preserve-mute.mjs");
+  for(const token of ["MAX_PARTICIPANTS","VOICE_ROOM_FULL","muted=room_voice_presence.forced_muted","forced_muted=room_voice_presence.forced_muted","join-reset"])assert.ok(src.includes(token),`missing ${token}`);
+  assert.doesNotMatch(src,/DO UPDATE SET[^`]*forced_muted=FALSE/i);
+});
+
 test("R1 safety preserves blocked-user and orphan-reply behavior",()=>{
   const src=read("r1-safety.mjs");
   assert.ok(src.includes("user_blocks"));
@@ -41,7 +47,7 @@ test("R1 safety preserves blocked-user and orphan-reply behavior",()=>{
   assert.ok(src.includes("!c.parent_comment_id"));
 });
 
-test("bootstrap keeps R1 routes inside safety and request foundation",()=>{
-  const src=read("bootstrap.mjs"),core=src.indexOf('"./r1-core-experience.mjs"'),safety=src.indexOf('"./r1-safety.mjs"'),foundation=src.indexOf('"./request-foundation.mjs"');
-  assert.ok(core>0&&safety>core&&foundation>safety);
+test("bootstrap keeps voice reconnect fix and R1 routes inside safety and request foundation",()=>{
+  const src=read("bootstrap.mjs"),core=src.indexOf('"./r1-core-experience.mjs"'),voice=src.indexOf('"./r1-voice-preserve-mute.mjs"'),safety=src.indexOf('"./r1-safety.mjs"'),foundation=src.indexOf('"./request-foundation.mjs"');
+  assert.ok(core>0&&voice>core&&safety>voice&&foundation>safety);
 });
