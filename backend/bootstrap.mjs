@@ -1,7 +1,9 @@
-// MARBO3A backend bootstrap.
-// New code should use runtime.mjs and migrations. Legacy extension modules stay
-// behind this explicit compatibility boundary until their routes are folded
-// into domain routers. Sequential imports preserve the verified production order.
+import http from "http";
+
+// Keep the historical extension chain contained to one boot-time registration pass.
+// server-v3 restores Node's native createServer immediately after the app is built.
+const nativeCreateServer=http.createServer.bind(http);
+
 const modules=[
   "./instrumentation.mjs",
   "./debug-trace.mjs",
@@ -25,18 +27,20 @@ const modules=[
   "./stories.mjs",
   "./guest-explore.mjs",
   "./message-media-fix.mjs",
-  "./preflight.mjs",
   "./security-p0.mjs",
   "./real-map.mjs",
   "./realtime-v2.mjs",
   "./social-auth-config.mjs",
   "./social-auth.mjs",
-  "./product-v2.mjs",
   "./experience-v2.mjs",
   "./session-control.mjs",
   "./security-completion.mjs",
   "./audit-completion.mjs",
   "./social-experience.mjs",
-  "./cookie-auth.mjs"
+  "./request-foundation.mjs"
 ];
 for(const module of modules)await import(module);
+
+export function restoreHttpCreateServer(){
+  http.createServer=nativeCreateServer;
+}

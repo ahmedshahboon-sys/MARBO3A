@@ -1,0 +1,83 @@
+name: MARBO3A Backend Foundation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: marbo3a
+          POSTGRES_USER: marbo3a
+          POSTGRES_PASSWORD: marbo3a_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U marbo3a -d marbo3a"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://marbo3a:marbo3a_ci@127.0.0.1:5432/marbo3a
+      REDIS_URL: redis://127.0.0.1:6379
+      APP_ORIGIN: http://127.0.0.1:4000
+      UPLOAD_DIR: /tmp/marbo3a-uploads
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /tmp/marbo3a-uploads
+      STORAGE_PUBLIC_PREFIX: /api/uploads
+      TURN_HOST: 127.0.0.1
+      TURN_SECRET: ci_turn_secret_not_for_production
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Syntax check all backend JavaScript modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "checking $file"
+            node --check "$file"
+          done < <(find . -type f -name '*.mjs' -not -path './node_modules/*' -print0)
+      - run: npm test
+      - name: Apply schema migrations
+        run: npm run migrate
+      - name: Start API and run foundation integration smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo mkdir -p /app/uploads
+          sudo chown -R "$(id -u):$(id -g)" /app/uploads
+          mkdir -p "$UPLOAD_DIR" "$STORAGE_LOCAL_DIR"
+          LOG=/tmp/marbo3a-foundation.log
+          npm start >"$LOG" 2>&1 &
+          PID=$!
+          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          for _ in $(seq 1 60); do
+            if curl -fsS "$APP_ORIGIN/api/health" >/dev/null 2>&1; then break; fi
+            if ! kill -0 "$PID" >/dev/null 2>&1; then cat "$LOG"; exit 1; fi
+            sleep 1
+          done
+          curl -fsS "$APP_ORIGIN/api/health" >/dev/null || { cat "$LOG"; exit 1; }
+          node scripts/foundation-smoke.mjs || { cat "$LOG"; exit 1; }
