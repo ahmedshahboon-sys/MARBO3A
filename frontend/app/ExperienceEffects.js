@@ -25,6 +25,7 @@ export default function ExperienceEffects(){
    const haptic=e=>vibrate(e?.detail?.pattern??8);
    const notification=e=>{const d=e?.detail||{},type=String(d.type||d.notification?.type||""),text=`${d.title||d.notification?.title||""} ${d.body||d.notification?.body||""}`;effect({detail:{type:/friend.*accept/i.test(type)||/قبول.*صداقة|تم قبول طلب الصداقة/.test(text)?"friendAccepted":"notification"}})};
    const message=e=>{const d=e?.detail?.message||e?.detail||{},sender=d.sender_id??d.user_id;if(sender&&meId.current&&String(sender)===String(meId.current))effect({detail:{type:"send"}})};
+   const storyClick=e=>{if(e.target?.closest?.(".story-reaction-strip button,.story-reply-form button,.story-owner-tools button"))effect({detail:{type:"story"}})};
    const update=e=>{prefs.current={...prefs.current,...(e?.detail||{})}};
    window.addEventListener("marbo3a:effect",effect);
    window.addEventListener("marbo3a:haptic",haptic);
@@ -33,7 +34,8 @@ export default function ExperienceEffects(){
    window.addEventListener("marbo3a:direct:new",message);
    window.addEventListener("marbo3a:message:new",message);
    window.addEventListener("marbo3a:experience-preferences",update);
-   return()=>{window.removeEventListener("pointerdown",unlock);window.removeEventListener("marbo3a:effect",effect);window.removeEventListener("marbo3a:haptic",haptic);window.removeEventListener("marbo3a:notification:new",notification);window.removeEventListener("marbo3a:notification:updated",notification);window.removeEventListener("marbo3a:direct:new",message);window.removeEventListener("marbo3a:message:new",message);window.removeEventListener("marbo3a:experience-preferences",update);try{audio.current?.close?.()}catch{}};
+   document.addEventListener("click",storyClick,true);
+   return()=>{window.removeEventListener("pointerdown",unlock);window.removeEventListener("marbo3a:effect",effect);window.removeEventListener("marbo3a:haptic",haptic);window.removeEventListener("marbo3a:notification:new",notification);window.removeEventListener("marbo3a:notification:updated",notification);window.removeEventListener("marbo3a:direct:new",message);window.removeEventListener("marbo3a:message:new",message);window.removeEventListener("marbo3a:experience-preferences",update);document.removeEventListener("click",storyClick,true);try{audio.current?.close?.()}catch{}};
  },[]);
  return null;
 }
