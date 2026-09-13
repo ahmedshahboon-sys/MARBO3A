@@ -1,5 +1,6 @@
 MARBO3A OFFICIAL BRAND ASSET POLICY
 
 Canonical mark: /brand/official/marbo3a-mark.svg
-Use this mark for application chrome, PWA generation, favicon/launcher derivatives, OpenGraph artwork and maintenance mode.
-Do not introduce new independent logo artwork in components or public assets.
+The canonical mark is a pure vector SVG for reliable rendering across application chrome, login, onboarding, room cards, OpenGraph, offline/maintenance surfaces and browser caches.
+PWA raster icons are derivatives of the approved identity and are committed separately.
+Do not introduce embedded base64 raster artwork or independent logo variants in components.
