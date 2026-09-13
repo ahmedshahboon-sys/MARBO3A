@@ -1,0 +1,12 @@
+import fs from "fs/promises";
+const read=file=>fs.readFile(file,"utf8");
+let failed=false;
+const must=async(file,tokens)=>{let src="";try{src=await read(file)}catch{console.error(`Missing brand file: ${file}`);failed=true;return}for(const token of tokens){if(!src.includes(token)){console.error(`Missing brand contract in ${file}: ${token}`);failed=true}}};
+await must("public/brand/official/marbo3a-mark.svg",["data:image/png;base64","aria-label=\"مربوعة\""]);
+await must("app/PremiumChrome.js",["/brand/official/marbo3a-mark.svg"]);
+await must("app/opengraph-image.js",["/brand/official/marbo3a-mark.svg"]);
+await must("app/ui-v3-brand.css",["/brand/official/marbo3a-mark.svg"]);
+await must("scripts/generate-pwa-icons.mjs",["brand/official/marbo3a-mark.svg"]);
+await must("../ops/maintenance/index.html",["/brand/official/marbo3a-mark.svg"]);
+if(failed)process.exit(1);
+console.log("R1 official brand contracts OK.");
