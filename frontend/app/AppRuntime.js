@@ -17,6 +17,7 @@ import ReactionHoldBridge from "./ReactionHoldBridge";
 import PremiumChrome from "./PremiumChrome";
 import SettingsPanel from "./SettingsPanel";
 import ExperienceEffects from "./ExperienceEffects";
+import EngagementViewRuntime from "./EngagementViewRuntime";
 import GuestBrowseEntry from "./GuestBrowseEntry";
 import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
@@ -25,7 +26,7 @@ export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
     <AppBootstrap/><PlatformClient/><NavigationRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     <GuestBrowseEntry/>
