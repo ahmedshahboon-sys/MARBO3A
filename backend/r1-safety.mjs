@@ -14,8 +14,10 @@ http.createServer=function r1SafetyServer(app,...args){
       next();
     }catch(e){next(e)}});
     app.use((req,res,next)=>{
-      if(req.method!=="GET"||!/^\/api\/feed\/\d+\/comments$/.test(req.path))return next();
+      if(req.method!=="GET"||!/^\/api\/feed\/\d+\/comments(?:\/preview)?$/.test(req.path))return next();
       const json=res.json.bind(res);
+      // Never surface replies whose root comment is absent/soft-deleted. This applies to both
+      // the full thread and the two-comment feed preview so an orphan reply cannot appear as a root.
       res.json=body=>{if(body?.ok&&Array.isArray(body.comments))body={...body,comments:body.comments.filter(c=>!c.parent_comment_id)};return json(body)};
       next();
     });
