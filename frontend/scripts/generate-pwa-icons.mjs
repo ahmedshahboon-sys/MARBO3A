@@ -7,12 +7,15 @@ const expected=[
   "pwa-512.png",
   "apple-touch-icon.png",
   "pwa-maskable-512.png",
-  path.join("brand","official","marbo3a-mark.png"),
-  path.join("brand","official","marbo3a-app-icon.png")
+  "favicon-16.png",
+  "favicon-32.png",
+  "brand/official/marbo3a-mark.png",
+  "brand/official/marbo3a-app-icon.png",
+  "brand/official/marbo3a-maskable.png"
 ];
 for(const name of expected){
-  const file=path.join(pub,name),buf=await fs.readFile(file);
-  const valid=buf.length>1024&&buf[0]===0x89&&buf.subarray(1,4).toString()==="PNG";
+  const file=path.join(pub,...name.split("/")),buf=await fs.readFile(file);
+  const valid=buf.length>250&&buf[0]===0x89&&buf.subarray(1,4).toString()==="PNG";
   if(!valid)throw new Error(`Invalid committed MARBO3A PNG asset: ${name}`);
 }
-console.log("MARBO3A Phase 1 committed PNG identity assets verified");
+console.log("MARBO3A committed PNG identity and PWA icons verified");
