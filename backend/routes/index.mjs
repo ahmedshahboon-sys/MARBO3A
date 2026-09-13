@@ -8,6 +8,7 @@ import {registerCoreAdminRooms} from "./core-admin-rooms.mjs";
 import {registerCoreAdminControl} from "./core-admin-control.mjs";
 import {registerCorePresence} from "./core-presence.mjs";
 import {registerFghSocial} from "./fgh-social.mjs";
+import {registerGroupMNEngagement} from "./group-mn-engagement.mjs";
 
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
@@ -20,4 +21,5 @@ export function registerExplicitRoutes(app){
   registerCoreAdminRooms(app);
   registerCoreAdminControl(app);
   registerCorePresence(app);
+  registerGroupMNEngagement(app);
 }

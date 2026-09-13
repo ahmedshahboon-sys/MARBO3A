@@ -1,5 +1,5 @@
 export const APP_SHELL_EXACT=new Set([
-  "/home","/feed","/search","/notifications","/friends","/messages","/rooms","/map","/settings","/saved","/blocked"
+  "/home","/feed","/search","/notifications","/friends","/messages","/rooms","/engagement","/map","/settings","/saved","/blocked"
 ]);
 const APP_SHELL_PREFIXES=["/u/","/profile/","/chat/","/room/"];
 export function isAppShellPath(path=""){
