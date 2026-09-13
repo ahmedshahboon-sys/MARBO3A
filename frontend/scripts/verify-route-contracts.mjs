@@ -12,5 +12,8 @@ const missingRequired=required.filter(route=>!patterns.some(pattern=>pattern.tes
 const literalLinks=new Set();
 for(const file of all.filter(file=>file.endsWith(".js"))){const text=await fs.readFile(file,"utf8");for(const re of [/\bhref\s*=\s*["'](\/[^"'#?]*)["']/g,/\bhref\s*=\s*\{\s*["'](\/[^"'#?]*)["']\s*\}/g]){let match;while((match=re.exec(text)))literalLinks.add(match[1]||"/")}}
 const unresolved=[...literalLinks].filter(route=>route&&!route.startsWith("/api/")&&!patterns.some(pattern=>pattern.test(route))).sort();
-if(missingRequired.length||unresolved.length){if(missingRequired.length)console.error("Missing required app routes:",missingRequired.join(", "));if(unresolved.length)console.error("Unresolved literal href routes:",unresolved.join(", "));process.exit(1)}
+const ogPath=path.join(appRoot,"opengraph-image.js"),ogSource=await fs.readFile(ogPath,"utf8"),ogRender=ogSource.slice(ogSource.indexOf("new ImageResponse("));
+const ogNumericStringDimension=/\b(?:width|height)\s*=\s*["']\d+["']/u.test(ogRender);
+const ogRenderedArabic=/[\u0600-\u06FF]/u.test(ogRender);
+if(missingRequired.length||unresolved.length||ogNumericStringDimension||ogRenderedArabic){if(missingRequired.length)console.error("Missing required app routes:",missingRequired.join(", "));if(unresolved.length)console.error("Unresolved literal href routes:",unresolved.join(", "));if(ogNumericStringDimension)console.error("Open Graph image must pass numeric width/height values as numbers, not strings.");if(ogRenderedArabic)console.error("Open Graph ImageResponse currently must not render Arabic text until the upstream RTL shaping crash is fixed.");process.exit(1)}
 console.log(`Route contracts OK: ${pages.length} page routes, ${literalLinks.size} literal links checked.`);
