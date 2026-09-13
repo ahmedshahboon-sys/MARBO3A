@@ -6,8 +6,8 @@ const root=process.cwd();
 const read=rel=>fs.readFile(path.join(root,rel),"utf8");
 const checks=[
   ["app/VoiceRecorder.js",["document.addEventListener(\"pointerup\"","voice-record-panel locked","voice-record-panel active","onRecorded?."]],
-  ["app/StoryRail.js",["story-overlay-open","/viewers","story-viewers-panel","viewers!==null"]],
-  ["app/ReactionHoldBridge.js",["MOVE_TOLERANCE","document.body.appendChild(palette)","HOLD_MS=420"]],
+  ["app/StoryRail.js",["story-overlay-open","/viewers","story-viewers-panel","viewers!==null","beginSwipe","STILL_MS=6500","onTimeUpdate","filterName","overlayX","story-overlay-edit","<Link key={v.viewer_id}"]],
+  ["app/ReactionHoldBridge.js",["MOVE_TOLERANCE","createPortal","useState(null)","HOLD_MS=420","position:\"fixed\""]],
   ["app/RoomVoiceStage.js",["recvonly","scheduleJoinRetry","أنت تستمع الآن","room-voice-remote-audio"]],
   ["app/notifications/page.js",["friend_action:\"expired\"","notification-actions","respond(n,\"accept\")"]],
   ["app/PremiumChrome.js",["marbo3a:notification-count","v3-unread-badge"]],
