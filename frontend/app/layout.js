@@ -50,6 +50,7 @@ import "./first-run-stability.css";
 import "./ui-v3-social-experience.css";
 import "./r1-core.css";
 import "./r1-admin.css";
+import "./r1-brand-override.css";
 import "./ui-v3-unified-scale.css";
 import { Cairo } from "next/font/google";
 import AppRuntime from "./AppRuntime";
