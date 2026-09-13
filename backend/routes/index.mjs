@@ -7,10 +7,12 @@ import {registerCoreLocation} from "./core-location.mjs";
 import {registerCoreAdminRooms} from "./core-admin-rooms.mjs";
 import {registerCoreAdminControl} from "./core-admin-control.mjs";
 import {registerCorePresence} from "./core-presence.mjs";
+import {registerFghSocial} from "./fgh-social.mjs";
 
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
   registerAuthSession(app);
+  registerFghSocial(app);
   registerCoreRooms(app);
   registerCoreMessaging(app);
   registerCoreSocial(app);
