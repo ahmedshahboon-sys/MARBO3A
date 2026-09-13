@@ -45,6 +45,7 @@ import "./ui-v3-stories.css";
 import "./stories-interactions.css";
 import "./guest-entry.css";
 import "./guest-rooms-v2.css";
+import "./guest-rooms-v2-extra.css";
 import "./ui-v3-social-experience.css";
 import "./ui-v3-unified-scale.css";
 import { Cairo } from "next/font/google";
