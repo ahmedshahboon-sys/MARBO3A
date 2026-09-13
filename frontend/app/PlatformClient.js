@@ -10,6 +10,7 @@ function isStandalone(){return window.matchMedia?.("(display-mode: standalone)")
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
 function isSocialBrowser(){return /FBAN|FBAV|FB_IAB|FB4A|Instagram/i.test(navigator.userAgent||"");}
 function token(){return localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";}
+function authHeader(){const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}}
 function safeActionUrl(raw){try{if(!raw)return"";const u=new URL(String(raw),location.origin);return u.origin===location.origin?`${u.pathname}${u.search}${u.hash}`:""}catch{return""}}
 
 export default function PlatformClient(){
@@ -58,12 +59,13 @@ export default function PlatformClient(){
 
     const onError=e=>report("frontend",e.error||new Error(e.message),{url:location.href});
     const onReject=e=>report("frontend",e.reason instanceof Error?e.reason:new Error(String(e.reason)),{url:location.href});
-    window.addEventListener("error",onError);window.addEventListener("unhandledrejection",onReject);
-    return()=>{source.close();window.removeEventListener("beforeinstallprompt",before);window.removeEventListener("appinstalled",installedHandler);window.removeEventListener("online",online);window.removeEventListener("offline",offlineHandler);window.removeEventListener("error",onError);window.removeEventListener("unhandledrejection",onReject);navigator.serviceWorker?.removeEventListener?.("controllerchange",controllerChanged);};
+    const onRequestFailure=e=>{const detail=e?.detail||{};report("first-run-request",new Error(`${detail.code||"REQUEST_FAILED"} ${detail.url||""}`),{url:location.href,component:isSocialBrowser()?"social-in-app-browser":"browser"})};
+    window.addEventListener("error",onError);window.addEventListener("unhandledrejection",onReject);window.addEventListener("marbo3a:request-failure",onRequestFailure);
+    return()=>{source.close();window.removeEventListener("beforeinstallprompt",before);window.removeEventListener("appinstalled",installedHandler);window.removeEventListener("online",online);window.removeEventListener("offline",offlineHandler);window.removeEventListener("error",onError);window.removeEventListener("unhandledrejection",onReject);window.removeEventListener("marbo3a:request-failure",onRequestFailure);navigator.serviceWorker?.removeEventListener?.("controllerchange",controllerChanged);};
   },[]);
 
   async function report(source,error,extra={}){
-    try{await fetch("/api/debug/report",{method:"POST",headers:{"content-type":"application/json",...(token()?{authorization:`Bearer ${token()}`}:{})},body:JSON.stringify({source,level:"ERROR",message:String(error?.message||error).slice(0,1000),context:{...extra,stack:String(error?.stack||"").slice(0,2000)}})});}catch{}
+    try{await fetch("/api/debug/report",{method:"POST",headers:{"content-type":"application/json",...authHeader()},body:JSON.stringify({source,level:"ERROR",message:String(error?.message||error).slice(0,1000),context:{...extra,stack:String(error?.stack||"").slice(0,2000)}})});}catch{}
   }
   function playTone(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=660;g.gain.value=.035;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.12);setTimeout(()=>ctx.close().catch(()=>{}),300);}catch{}}
   async function install(){if(installPrompt){await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==="accepted"){setInstalled(true);setInstallPrompt(null);}}else if(isIOS())setShowIOS(true);}
