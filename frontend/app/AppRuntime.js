@@ -1,0 +1,34 @@
+"use client";
+import {usePathname} from "next/navigation";
+import {isAppShellPath} from "./navigation-policy";
+import AppBootstrap from "./AppBootstrap";
+import PlatformClient from "./PlatformClient";
+import NavigationRuntime from "./NavigationRuntime";
+import SessionGuard from "./SessionGuard";
+import RealtimeClient from "./RealtimeClient";
+import AppDataCoordinator from "./AppDataCoordinator";
+import TypingRuntime from "./TypingRuntime";
+import SocialHomeRedirect from "./SocialHomeRedirect";
+import DebugTrace from "./DebugTrace";
+import CallCenter from "./CallCenter";
+import OnboardingGate from "./OnboardingGate";
+import ContextSafety from "./ContextSafety";
+import ReactionHoldBridge from "./ReactionHoldBridge";
+import PremiumChrome from "./PremiumChrome";
+import SettingsPanel from "./SettingsPanel";
+import GuestBrowseEntry from "./GuestBrowseEntry";
+import SideDrawer from "./SideDrawer";
+import SocialDock from "./SocialDock";
+
+export default function AppRuntime({children}){
+  const path=usePathname(),app=isAppShellPath(path);
+  return <>
+    <AppBootstrap/><PlatformClient/><NavigationRuntime/>
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/></>}
+    <SocialHomeRedirect/>
+    {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
+    <GuestBrowseEntry/>
+    {children}
+    {app&&<><SideDrawer/><SocialDock/></>}
+  </>;
+}

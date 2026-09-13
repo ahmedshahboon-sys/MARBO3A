@@ -7,7 +7,7 @@ import {isAppShellPath} from "./navigation-policy";
 const getToken=()=>typeof window==="undefined"?"":(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"");
 export default function SocialDock(){
  const path=usePathname(),[visible,setVisible]=useState(false),[unread,setUnread]=useState(0);
- useEffect(()=>{const t=getToken();setVisible(Boolean(t));if(!t){setUnread(0);return}let alive=true,busy=false;async function refresh(){if(!alive||busy||document.visibilityState!=="visible")return;busy=true;try{const r=await fetch("/api/chats",{headers:{authorization:`Bearer ${getToken()}`},cache:"no-store",credentials:"same-origin"});if(!r.ok)return;const d=await r.json();if(alive)setUnread((d.chats||[]).reduce((n,c)=>n+Number(c.unread_count||0),0))}catch{}finally{busy=false}}refresh();const timer=setInterval(refresh,15000),onVisible=()=>document.visibilityState==="visible"&&refresh();document.addEventListener("visibilitychange",onVisible);return()=>{alive=false;clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)}},[path]);
+ useEffect(()=>{const t=getToken();setVisible(Boolean(t));if(!t){setUnread(0);return}const onCount=e=>setUnread(Math.max(0,Number(e?.detail?.count)||0));window.addEventListener("marbo3a:message-unread-count",onCount);window.dispatchEvent(new CustomEvent("marbo3a:reconcile-counts"));return()=>window.removeEventListener("marbo3a:message-unread-count",onCount)},[path]);
  const badge=useMemo(()=>unread>99?"99+":String(unread),[unread]);
  if(!visible||!isAppShellPath(path))return null;
  const active=p=>path===p||path?.startsWith(p+"/");
