@@ -3,8 +3,25 @@ name: MARBO3A Operations Contracts
 on:
   push:
     branches: [main]
+    paths:
+      - "ops/**"
+      - "docker-compose*.yml"
+      - "backend/request-foundation.mjs"
+      - "frontend/app/AppRuntime.js"
+      - ".github/workflows/ops-contracts.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "ops/**"
+      - "docker-compose*.yml"
+      - "backend/request-foundation.mjs"
+      - "frontend/app/AppRuntime.js"
+      - ".github/workflows/ops-contracts.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -12,6 +29,7 @@ permissions:
 jobs:
   operations:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Shell syntax
