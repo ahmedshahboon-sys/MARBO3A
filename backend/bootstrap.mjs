@@ -41,7 +41,9 @@ const modules=[
   "./security-completion.mjs",
   "./audit-completion.mjs",
   "./social-experience.mjs",
-  "./request-foundation.mjs"
+  "./request-foundation.mjs",
+  // F/G/H privacy compatibility must be last so its middleware/routes register before legacy wrappers.
+  "./fgh-privacy-compat.mjs"
 ];
 for(const module of modules)await import(module);
 
