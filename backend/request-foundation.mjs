@@ -47,12 +47,20 @@ http.createServer=function requestFoundationCreateServer(app,...args){
     // before compatibility routes. Fail open only when the control tables are not
     // available during a bootstrap/migration window; health and admin routes stay reachable.
     app.use(async(req,res,next)=>{
-      if(!req.path?.startsWith("/api/")||req.path.startsWith("/api/admin/")||req.path==="/api/health"||req.path==="/health")return next();
+      if(!req.path?.startsWith("/api/")||req.path==="/api/health"||req.path==="/health")return next();
       try{
         const {settings,features}=await operationalControls();
+        // Keep the current memory-upload pipeline's established 8 MB hard ceiling.
+        if(req.method==="PATCH"&&req.path==="/api/admin/advanced/settings"&&req.body?.key==="upload_max_mb"&&Number(req.body?.value)>8)return res.status(400).json({ok:false,error:"UPLOAD_LIMIT_MAX_8MB"});
+        if(req.path.startsWith("/api/admin/"))return next();
         const registrationBlocked=settings.registration_enabled===false&&req.method==="POST"&&["/api/auth/request-email-otp","/api/auth/verify-email-otp","/api/auth/register"].includes(req.path);
         if(registrationBlocked)return res.status(503).json({ok:false,error:"REGISTRATION_DISABLED"});
         if(settings.rooms_enabled===false&&req.path.startsWith("/api/rooms"))return res.status(503).json({ok:false,error:"ROOMS_DISABLED"});
+        if(req.method==="POST"&&req.path==="/api/uploads"){
+          const maxMb=Math.max(1,Math.min(8,Number(settings.upload_max_mb)||8)),contentLength=Number(req.headers["content-length"]||0);
+          if(contentLength>maxMb*1024*1024+128*1024)return res.status(413).json({ok:false,error:"FILE_TOO_LARGE",maxMb});
+        }
+        if(req.method==="POST"&&req.path.startsWith("/api/profile/pin-post/")&&Number(settings.pinned_post_limit)===0)return res.status(409).json({ok:false,error:"PINNING_DISABLED"});
         if(features.engagement===false&&req.path.startsWith("/api/engagement"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"engagement"});
         if(features.map===false&&req.path.startsWith("/api/map"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"map"});
         if(features.calls===false&&req.path.startsWith("/api/calls"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"calls"});
