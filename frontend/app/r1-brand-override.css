@@ -1,6 +1,7 @@
 /* Final MARBO3A identity override. Legacy selectors are retained only as compatibility shims; every visible surface resolves to the approved PNG identity. */
 img[src="/brand/marbo3a-app-icon.svg"],
 img[src="/brand/marbo3a-symbol-orange.svg"],
+img[src="/brand/official/marbo3a-mark.svg"],
 img[src="/logo.svg"],
 img[src="/pwa-icon.svg"]{content:url('/brand/official/marbo3a-mark.png')!important;object-fit:contain!important}
 .ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img,.ui-v3 .pwa-modal img,.onboarding-logo img,.guest-brand img{content:url('/brand/official/marbo3a-mark.png')!important;object-fit:contain!important}
