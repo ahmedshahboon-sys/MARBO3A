@@ -2,7 +2,11 @@ ALTER TABLE rooms ADD COLUMN IF NOT EXISTS visibility TEXT NOT NULL DEFAULT 'pub
 DO $$ BEGIN
   ALTER TABLE rooms ADD CONSTRAINT rooms_visibility_check CHECK (visibility IN ('public','friends','private'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-UPDATE rooms SET visibility=CASE WHEN is_public THEN 'public' ELSE 'private' END WHERE visibility IS NULL OR visibility='';
+-- Before visibility existed, is_public was also toggled by join policy. Request-based rooms
+-- were therefore hidden even though they were meant to be discoverable. Preserve invite-only
+-- rooms as private, and migrate open/request rooms into the public directory.
+UPDATE rooms SET visibility=CASE WHEN join_policy='invite' AND is_public=FALSE THEN 'private' ELSE 'public' END;
+UPDATE rooms SET is_public=(visibility='public');
 
 ALTER TABLE user_locations ADD COLUMN IF NOT EXISTS visibility_mode TEXT NOT NULL DEFAULT 'everyone';
 ALTER TABLE user_locations ADD COLUMN IF NOT EXISTS ghost_mode BOOLEAN NOT NULL DEFAULT FALSE;
