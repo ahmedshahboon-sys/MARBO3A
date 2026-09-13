@@ -3,12 +3,27 @@ name: MARBO3A Backend Foundation
 on:
   pull_request:
     branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-foundation.yml"
   push:
     branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-foundation.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   foundation:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16-alpine
