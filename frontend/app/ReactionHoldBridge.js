@@ -30,13 +30,13 @@ export default function ReactionHoldBridge(){
         if(!active.current||active.current.button!==first)return;
         active.current.long=true;
         openPicker(picker,first);
-        try{navigator.vibrate?.(20)}catch{}
+        window.dispatchEvent(new CustomEvent("marbo3a:haptic",{detail:{pattern:20}}));
       },HOLD_MS);
     }
     function onPointerMove(e){const a=active.current;if(!a||a.pointerId!==e.pointerId||a.long)return;if(Math.hypot(e.clientX-a.x,e.clientY-a.y)>MOVE_TOLERANCE){clearHold();active.current=null}}
     function onPointerUp(e){clearHold();const a=active.current;if(!a||a.pointerId!==e.pointerId)return;active.current=null;if(a.long){e.preventDefault();e.stopPropagation();setTimeout(()=>{if(a.picker.dataset.suppressNextLike==="1")delete a.picker.dataset.suppressNextLike},450)}}
     function onPointerCancel(){clearHold();active.current=null}
-    function onClick(e){const first=e.target.closest?.(".sf-reaction-picker > button:first-child");if(!first)return;const picker=first.closest(".sf-reaction-picker");if(picker?.dataset.suppressNextLike==="1"){e.preventDefault();e.stopPropagation();delete picker.dataset.suppressNextLike}}
+    function onClick(e){const button=e.target.closest?.(".sf-reaction-picker > button");if(!button)return;const picker=button.closest(".sf-reaction-picker"),first=button.matches(":first-child");if(first&&picker?.dataset.suppressNextLike==="1"){e.preventDefault();e.stopPropagation();delete picker.dataset.suppressNextLike;return}window.dispatchEvent(new CustomEvent("marbo3a:effect",{detail:{type:"like"}}))}
     function onScroll(){clearHold();active.current=null;close()}
     document.addEventListener("pointerdown",onPointerDown,true);document.addEventListener("pointermove",onPointerMove,true);document.addEventListener("pointerup",onPointerUp,true);document.addEventListener("pointercancel",onPointerCancel,true);document.addEventListener("click",onClick,true);window.addEventListener("scroll",onScroll,true);window.addEventListener("resize",close);
     return()=>{clearHold();document.removeEventListener("pointerdown",onPointerDown,true);document.removeEventListener("pointermove",onPointerMove,true);document.removeEventListener("pointerup",onPointerUp,true);document.removeEventListener("pointercancel",onPointerCancel,true);document.removeEventListener("click",onClick,true);window.removeEventListener("scroll",onScroll,true);window.removeEventListener("resize",close)};
