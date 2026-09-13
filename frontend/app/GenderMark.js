@@ -1,0 +1,1 @@
+export default function GenderMark({gender,size=14}){if(gender!=="male"&&gender!=="female")return null;const male=gender==="male";return <span className={`gender-mark ${male?"male":"female"}`} title={male?"ذكر":"أنثى"} aria-label={male?"ذكر":"أنثى"} style={{fontSize:size,lineHeight:1}}>{male?"♂":"♀"}</span>}
