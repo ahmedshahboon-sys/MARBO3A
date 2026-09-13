@@ -72,7 +72,22 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports: ["127.0.0.1:3000:3000"]
+    expose: ["3000"]
+
+  gate:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports: ["127.0.0.1:3000:8080"]
+    volumes:
+      - ./ops/maintenance-gate.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ops/maintenance:/usr/share/nginx/html/maintenance:ro
+      - ./.runtime/maintenance:/run/marbo3a-maintenance:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/__gate_health >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 3s
 
   backup:
     image: postgres:16-alpine
