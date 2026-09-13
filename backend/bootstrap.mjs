@@ -43,7 +43,9 @@ const modules=[
   "./social-experience.mjs",
   // F/G/H wrapper must be immediately inside request foundation so it registers before legacy domains.
   "./fgh-privacy-compat.mjs",
-  "./request-foundation.mjs"
+  "./request-foundation.mjs",
+  // Production regression shield: last wrapper registers corrected feed/profile handlers first.
+  "./fgh-regression-hotfix.mjs"
 ];
 for(const module of modules)await import(module);
 
