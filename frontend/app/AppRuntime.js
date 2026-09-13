@@ -14,6 +14,7 @@ import SocialHomeRedirect from "./SocialHomeRedirect";
 import DebugTrace from "./DebugTrace";
 import CallCenter from "./CallCenter";
 import OnboardingGate from "./OnboardingGate";
+import PermissionsCenter from "./PermissionsCenter";
 import ContextSafety from "./ContextSafety";
 import ReactionHoldBridge from "./ReactionHoldBridge";
 import PremiumChrome from "./PremiumChrome";
@@ -30,7 +31,7 @@ export default function AppRuntime({children}){
     <AppBootstrap/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
     {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/></>}
     <SocialHomeRedirect/>
-    {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
+    {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     <GuestBrowseEntry/>
     {children}
     {app&&<><SideDrawer/><SocialDock/></>}
