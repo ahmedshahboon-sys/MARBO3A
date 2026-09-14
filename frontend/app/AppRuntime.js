@@ -26,12 +26,13 @@ import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 import SiteFontRuntime from "./SiteFontRuntime";
 import FeedModePolicy from "./FeedModePolicy";
+import UiRoundFixes from "./UiRoundFixes";
 
 export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
     <AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><FeedModePolicy/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><FeedModePolicy/><UiRoundFixes/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     {children}
