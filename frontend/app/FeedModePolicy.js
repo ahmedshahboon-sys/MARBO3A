@@ -1,10 +1,10 @@
 "use client";
-import {useEffect} from "react";
+import {useLayoutEffect} from "react";
 import {usePathname} from "next/navigation";
 
 export default function FeedModePolicy(){
   const path=usePathname();
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     if(path!=="/home")return;
     let done=false,observer;
     const chooseLatest=()=>{
