@@ -10,7 +10,7 @@ const frontendChecks=[
   ["public/sw.js",["SKIP_WAITING","notificationclick","/offline.html"]],
   ["app/AppDataCoordinator.js",["notification-count","message-unread-count","120000"]],
   ["app/SessionGuard.js",["marbo3a:realtime","visibilitychange","60000"]],
-  ["app/VoiceRecorder.js",["pointermove","pointerup","dy<-64","onRecorded?.","audio/webm"]],
+  ["app/VoiceRecorder.js",["pointermove","pointerup","CANCEL_PX","dy<-CANCEL_PX","onRecorded?.","audio/webm"]],
   ["app/notifications/page.js",["تعليم الكل كمقروء","notification:updated","notifications-changed"]],
   ["app/InterfaceFixes.js",["overflow-y:auto","width:fit-content","global-search-box:focus-within","sf-profile-actions"]],
   ["app/DebugTrace.js",["marbo3a:rtc-debug","api_error","ui_overlap","media_permissions"]]
