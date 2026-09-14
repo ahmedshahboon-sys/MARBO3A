@@ -5,8 +5,8 @@ const checks=[
  ["app/settings/privacy/page.js",["/api/privacy/v2","message_requests_enabled","who_can_see_story","read_receipts","who_can_invite_room"]],
  ["app/messages/page.js",["/api/message-requests","طلبات المراسلة","message-request:new","message-request:accepted","GenderMark"]],
  ["app/RealtimeClient.js",["message-request:new","message-request:accepted"]],
- ["app/SocialFeed.js",["GenderMark","post-friend-action","/api/friends/request","تم الإرسال ✓"]],
- ["app/u/[username]/page.js",["PostCard","/api/profile/pin-post","profile-photo-lightbox","mutual_count","avatar-post/ensure","profile-photo-post"]],
+ ["app/SocialFeed.js",["GenderMark","post-friend-action","/api/friends/request","تم الإرسال ✓","/api/profile/pin-post","pinnedId","onPinnedChange"]],
+ ["app/u/[username]/page.js",["PostCard","pinnedId","onPinnedChange","profile-photo-lightbox","mutual_count","avatar-post/ensure","profile-photo-post"]],
  ["app/InterfaceFixes.js",["gender-mark.male","gender-mark.female","post-friend-action","message-request-actions","profile-completeness-card","profile-photo-post"]]
 ];
 let failed=false;
