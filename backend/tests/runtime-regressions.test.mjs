@@ -69,3 +69,22 @@ test("chat list respects show_online independently from last seen",()=>{
   assert.match(src,/online:showOnline&&actualOnline/);
   assert.match(src,/last_seen_at:showLastSeen&&!actualOnline/);
 });
+
+test("direct post interactions enforce the smart-feed visibility contract",()=>{
+  const src=read("r1-safety.mjs");
+  assert.match(src,/canAccessPost/);
+  assert.match(src,/who_can_see_posts/);
+  assert.match(src,/user_blocks/);
+  assert.match(src,/friends_of_friends/);
+  assert.match(src,/\/api\\\/feed\\\/\\d\+/);
+  assert.match(src,/POST_NOT_FOUND/);
+});
+
+test("authenticated profile feed honors post visibility and blocks",()=>{
+  const src=read("feed-extensions.mjs");
+  assert.match(src,/who_can_see_posts/);
+  assert.match(src,/canSeePosts/);
+  assert.match(src,/await blocked\(viewer\.id,p\.id\)/);
+  assert.match(src,/postVisible\?/);
+  assert.match(src,/postRows=postVisible\?/);
+});
