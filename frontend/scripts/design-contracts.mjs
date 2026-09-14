@@ -11,10 +11,11 @@ await must("app/ui-contract-lock.css",[
   ".chat-stream>*{position:relative", ".chat-bubble{position:relative", ".social-dock"
 ]);
 await must("app/layout.js",[
-  'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"',
+  'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"','import "./ui-audience.css"',
   'data-site-font="readex"'
 ]);
 await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow"]);
+await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png"]);
 await must("app/admin/debug/page.js",["groupEvents","debug-duplicate-count","<details>"]);
 if(failed)process.exit(1);
 console.log("MARBO3A locked design contracts OK.");
