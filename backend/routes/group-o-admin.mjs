@@ -6,7 +6,8 @@ const SETTINGS={
   rooms_enabled:{type:"boolean"},
   upload_max_mb:{type:"integer",min:1,max:25},
   story_lifetime_hours:{type:"integer",min:1,max:72},
-  pinned_post_limit:{type:"integer",min:0,max:1}
+  pinned_post_limit:{type:"integer",min:0,max:1},
+  site_font:{type:"enum",values:["readex","cairo"]}
 };
 const FLAGS=new Set(["engagement","map","calls","voice_rooms","guest_explore"]);
 const MOD_TYPES=new Set(["posts","images","stories","comments","rooms","reports","reported_messages"]);
@@ -19,7 +20,7 @@ const auditReason=v=>clean(v,500);
 async function writeChangeAudit(adminId,action,entityType,entityId,beforeState,afterState,reason=""){
   await pool.query(`INSERT INTO admin_change_audit(admin_id,action,entity_type,entity_id,before_state,after_state,reason) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7)`,[adminId,clean(action,120),clean(entityType,80),entityId==null?null:String(entityId),beforeState==null?null:JSON.stringify(beforeState),afterState==null?null:JSON.stringify(afterState),auditReason(reason)]);
 }
-function parseSetting(key,value){const spec=SETTINGS[key];if(!spec)return{ok:false};if(spec.type==="boolean")return typeof value==="boolean"?{ok:true,value}:{ok:false};const x=Number(value);return Number.isInteger(x)&&x>=spec.min&&x<=spec.max?{ok:true,value:x}:{ok:false}}
+function parseSetting(key,value){const spec=SETTINGS[key];if(!spec)return{ok:false};if(spec.type==="boolean")return typeof value==="boolean"?{ok:true,value}:{ok:false};if(spec.type==="enum")return spec.values.includes(String(value))?{ok:true,value:String(value)}:{ok:false};const x=Number(value);return Number.isInteger(x)&&x>=spec.min&&x<=spec.max?{ok:true,value:x}:{ok:false}}
 async function systemSettings(){const rows=(await pool.query(`SELECT key,value,description,updated_at,updated_by FROM admin_system_settings ORDER BY key`)).rows;return Object.fromEntries(rows.map(r=>[r.key,{value:r.value,description:r.description,updatedAt:r.updated_at,updatedBy:r.updated_by}]))}
 async function featureFlags(){return(await pool.query(`SELECT key,enabled,description,updated_at,updated_by FROM feature_flags ORDER BY key`)).rows}
 
@@ -59,6 +60,8 @@ async function moderationRows(type,q,limit){
 
 export function registerGroupOAdmin(app){
   app.post("/api/telemetry/activity",async(req,res)=>{try{const sessionKey=safeKey(req.body?.sessionId),visitorKey=safeKey(req.body?.visitorId),event=req.body?.event==="pageview"?"pageview":"heartbeat",path=safePath(req.body?.path);if(!sessionKey)return res.status(400).json({ok:false,error:"SESSION_ID_REQUIRED"});const user=await sessionUser(req).catch(()=>null),ua=clean(req.headers["user-agent"],300);await pool.query(`INSERT INTO usage_sessions(session_key,user_id,visitor_key,started_at,last_seen_at,page_views,user_agent) VALUES($1,$2,$3,NOW(),NOW(),0,$4) ON CONFLICT(session_key) DO UPDATE SET user_id=COALESCE(EXCLUDED.user_id,usage_sessions.user_id),visitor_key=COALESCE(NULLIF(EXCLUDED.visitor_key,''),usage_sessions.visitor_key),last_seen_at=NOW(),user_agent=EXCLUDED.user_agent`,[sessionKey,user?.id||null,visitorKey||null,ua]);if(event==="pageview"){const ins=await pool.query(`INSERT INTO usage_page_views(session_key,user_id,path,view_bucket) VALUES($1,$2,$3,date_trunc('minute',NOW())) ON CONFLICT(session_key,path,view_bucket) DO NOTHING RETURNING id`,[sessionKey,user?.id||null,path]);if(ins.rowCount)await pool.query(`UPDATE usage_sessions SET page_views=page_views+1,last_seen_at=NOW() WHERE session_key=$1`,[sessionKey])}res.json({ok:true})}catch(e){console.error("usage telemetry",e);res.status(500).json({ok:false,error:"TELEMETRY_FAILED"})}});
+
+  app.get("/api/public/ui-settings",async(_req,res)=>{try{const value=(await pool.query(`SELECT value FROM admin_system_settings WHERE key='site_font'`)).rows[0]?.value,font=["readex","cairo"].includes(String(value))?String(value):"readex";res.setHeader("Cache-Control","public,max-age=30,stale-while-revalidate=120");res.json({ok:true,font})}catch{res.json({ok:true,font:"readex"})}});
 
   app.get("/api/features",async(_req,res)=>{try{const rows=await featureFlags();res.json({ok:true,features:Object.fromEntries(rows.map(x=>[x.key,Boolean(x.enabled)]))})}catch{res.json({ok:true,features:{}})}});
 

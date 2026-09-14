@@ -13,7 +13,7 @@ export default function RoomVoiceR1Runtime(){
   const[host,setHost]=useState(null),[state,setState]=useState(null),[open,setOpen]=useState(false),[status,setStatus]=useState("");
 
   useEffect(()=>{let prev=Number(sessionStorage.getItem("marbo3a_voice_room")||0)||null;if(prev&&prev!==roomId&&token()){
-    try{fetch(`/api/rooms/${prev}/voice/leave`,{method:"POST",headers:{authorization:`Bearer ${token()}`,"content-type":"application/json"},body:"{}",credentials:"same-origin",keepalive:true}).catch(()=>{})}catch{}
+    try{fetch(`/api/rooms/${prev}/voice/leave`,{method:"POST",headers:{authorization:`Bearer ${token()}`,"content-type":"application/json"},body:JSON.stringify({beforeMs:Date.now()}),credentials:"same-origin",keepalive:true}).catch(()=>{})}catch{}
     document.querySelectorAll(".room-voice-remote-audio").forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch{}})
   }
   if(roomId)sessionStorage.setItem("marbo3a_voice_room",String(roomId));else sessionStorage.removeItem("marbo3a_voice_room");
