@@ -9,12 +9,18 @@ async function hashPassword(password){const salt=crypto.randomBytes(16),derived=
 async function verifyPassword(password,stored){try{const[algo,saltHex,hashHex]=String(stored||"").split(":");if(algo!=="scrypt")return false;const out=await scryptAsync(password,Buffer.from(saltHex,"hex"),64),a=Buffer.from(hashHex,"hex"),b=Buffer.from(out);return a.length===b.length&&crypto.timingSafeEqual(a,b)}catch{return false}}
 async function revokeAll(userId,exceptToken=""){
   await ensureRedis();
+  if(exceptToken){
+    const h=tokenHash(exceptToken);
+    await pool.query(`DELETE FROM durable_sessions WHERE user_id=$1 AND token_hash<>$2`,[userId,h]);
+    await pool.query(`DELETE FROM user_sessions WHERE user_id=$1 AND session_hash<>$2`,[userId,h]).catch(()=>{});
+  }else{
+    await pool.query(`DELETE FROM durable_sessions WHERE user_id=$1`,[userId]);
+    await pool.query(`DELETE FROM user_sessions WHERE user_id=$1`,[userId]).catch(()=>{});
+  }
   for await(const raw of redis.scanIterator({MATCH:"session:*",COUNT:200})){
     const key=String(raw);if(exceptToken&&key===`session:${exceptToken}`)continue;
     if(String(await redis.get(key))===String(userId))await redis.del(key);
   }
-  if(exceptToken){const h=tokenHash(exceptToken);await Promise.all([pool.query(`DELETE FROM user_sessions WHERE user_id=$1 AND session_hash<>$2`,[userId,h]).catch(()=>{}),pool.query(`DELETE FROM durable_sessions WHERE user_id=$1 AND token_hash<>$2`,[userId,h]).catch(()=>{})])}
-  else await Promise.all([pool.query(`DELETE FROM user_sessions WHERE user_id=$1`,[userId]).catch(()=>{}),pool.query(`DELETE FROM durable_sessions WHERE user_id=$1`,[userId]).catch(()=>{})]);
 }
 async function resetAttempt(key){
   const attempts=await redis.incr(key);
