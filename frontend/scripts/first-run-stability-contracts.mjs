@@ -21,13 +21,13 @@ const explore=read("app/explore/page.js");
 for(const t of ["fetchJson","10000","إعادة المحاولة","REQUEST_TIMEOUT"])must(explore,t,"guest explore recovery");
 
 const platform=read("app/PlatformClient.js");
-for(const t of ["isSocialBrowser","FBAN","FB_IAB","نسخ الرابط لفتحه في المتصفح","install-nudge","live-notification-toast","pathname===\"/explore\""])must(platform,t,"social browser and PWA support");
+for(const t of ["isSocialBrowser","FBAN","FB_IAB","نسخ الرابط لفتحه في المتصفح","install-nudge","live-notification-toast","pathname===\"/explore\"","installRouteAllowed","live_started"])must(platform,t,"social browser and PWA support");
 
 const permissions=read("app/PermissionsCenter.js");
 for(const t of ["marbo3a_permissions_intro_pending","FBAN","Chrome أو Safari"])must(permissions,t,"permission handoff");
 
 const sw=read("public/sw.js");
-for(const t of ["marbo3a-shell-v17-social-experience","/_next/static/","SHELL.includes(url.pathname)","caches.delete"])must(sw,t,"service worker freshness");
+for(const t of ["marbo3a-shell-v18-parts123","/_next/static/","SHELL.includes(url.pathname)","caches.delete"])must(sw,t,"service worker freshness");
 
 const errorPage=read("app/error.js");
 for(const t of ["/api/debug/report","إعادة المحاولة","دخول كزائر","/explore"])must(errorPage,t,"global error recovery");
