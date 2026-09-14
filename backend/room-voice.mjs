@@ -73,11 +73,17 @@ http.createServer=function roomVoiceCreateServer(app,...args){
     }catch{res.status(500).json({ok:false,error:"VOICE_HEARTBEAT_FAILED"})}});
 
     app.post("/api/rooms/:id/voice/leave",async(req,res)=>{try{
-      const u=await auth(req,res);if(!u)return;const roomId=Number(req.params.id);
-      await pool.query(`DELETE FROM room_voice_presence WHERE room_id=$1 AND user_id=$2`,[roomId,u.id]);
-      await pool.query(`DELETE FROM room_voice_signals WHERE room_id=$1 AND (sender_id=$2 OR recipient_id=$2)`,[roomId,u.id]);
-      await pool.query(`DELETE FROM guest_room_voice_signals WHERE room_id=$1 AND (sender_user_id=$2 OR recipient_user_id=$2)`,[roomId,u.id]).catch(()=>{});
-      emitRoom(roomId,"roomvoice:state",{roomId,reason:"leave",userId:u.id});res.json({ok:true});
+      const u=await auth(req,res);if(!u)return;const roomId=Number(req.params.id),beforeMs=Number(req.body?.beforeMs||0);
+      const guarded=Number.isFinite(beforeMs)&&beforeMs>0;
+      const deleted=guarded
+        ?await pool.query(`DELETE FROM room_voice_presence WHERE room_id=$1 AND user_id=$2 AND last_seen<=to_timestamp($3::double precision/1000.0) RETURNING user_id`,[roomId,u.id,beforeMs])
+        :await pool.query(`DELETE FROM room_voice_presence WHERE room_id=$1 AND user_id=$2 RETURNING user_id`,[roomId,u.id]);
+      if(deleted.rowCount){
+        await pool.query(`DELETE FROM room_voice_signals WHERE room_id=$1 AND (sender_id=$2 OR recipient_id=$2)`,[roomId,u.id]);
+        await pool.query(`DELETE FROM guest_room_voice_signals WHERE room_id=$1 AND (sender_user_id=$2 OR recipient_user_id=$2)`,[roomId,u.id]).catch(()=>{});
+        emitRoom(roomId,"roomvoice:state",{roomId,reason:"leave",userId:u.id});
+      }
+      res.json({ok:true,guarded,removed:deleted.rowCount>0});
     }catch{res.status(500).json({ok:false,error:"VOICE_LEAVE_FAILED"})}});
 
     app.post("/api/rooms/:id/voice/request",async(req,res)=>{try{

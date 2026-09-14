@@ -46,3 +46,10 @@ a.feature-back,a.public-open,.feature-head a,.settings-links a{color:inherit!imp
 /* Clear selected/disabled states across product surfaces. */
 button:disabled{cursor:not-allowed!important}.feed-tabs button:disabled,.inbox-tabs button:disabled{color:#657080!important}.feature-actions button:disabled,.setting-action:disabled{opacity:.62!important}
 .chat-send:disabled,.room-compose>button:disabled{background:#222a34!important;color:#727e8d!important;border-color:#303a48!important;opacity:1!important}
+/* Current bundle: shared gender filter. */
+.gender-filter{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
+.gender-filter::-webkit-scrollbar{display:none}
+.gender-filter button{flex:0 0 auto;min-height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:#111821;color:#9da7b5;font:inherit;font-size:11px;font-weight:800}
+.gender-filter button.active{border-color:rgba(255,122,0,.48);background:rgba(255,122,0,.12);color:#ff9a40}
+html[data-theme="light"] .gender-filter button{background:#fff;color:#666;border-color:#ddd}
+html[data-theme="light"] .gender-filter button.active{background:#fff1e5;color:#b85000;border-color:#ffb579}

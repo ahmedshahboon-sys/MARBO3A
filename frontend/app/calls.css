@@ -3,3 +3,6 @@
 @media(max-width:360px){.call-actions.active-call{gap:0}.call-actions button{width:44px;height:44px}.call-actions button span{font-size:6.5px}.call-local-video{width:72px;height:100px}}
 @media(min-width:700px){.call-actions{bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}.call-local-video{left:max(22px,calc((100vw - 900px)/2));width:132px;height:184px}}
 @media(max-height:540px) and (orientation:landscape){.call-top{top:max(8px,env(safe-area-inset-top));text-align:right;right:20px;left:auto}.call-top h2{font-size:17px}.call-top p{font-size:10px}.call-actions{bottom:max(5px,env(safe-area-inset-bottom));width:min(72vw,520px);padding:4px}.call-actions button{width:44px;height:44px}.call-actions button span{font-size:6.5px}.call-local-video{bottom:58px;width:78px;height:104px}.call-audio-hero{padding:42px 20px 62px}.call-audio-hero img,.call-audio-hero .call-avatar-fallback{width:100px;height:100px}}
+/* Current bundle: center the 3 audio controls without touching video WebRTC/UI. */
+.call-overlay.audio .call-actions.active-call{display:flex;justify-content:center;align-items:center;gap:clamp(10px,4vw,20px)}
+.call-overlay.audio .call-actions.active-call>button{flex:0 0 82px}
