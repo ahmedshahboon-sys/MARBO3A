@@ -98,6 +98,15 @@ test("public profile summary only counts guest-visible posts",()=>{
   assert.match(src,/delete user\.who_can_see_posts/);
 });
 
+test("post edits cannot create an empty text-only post and delete clears stale pins",()=>{
+  const src=read("feed-extensions.mjs");
+  assert.match(src,/SELECT 1 FROM post_media WHERE post_id=\$1 LIMIT 1/);
+  assert.match(src,/if\(!body&&!hasMedia\)return res\.status\(400\)\.json\(\{ok:false,error:"EMPTY_POST"\}\)/);
+  assert.match(src,/UPDATE users SET pinned_post_id=NULL WHERE pinned_post_id=\$1/);
+  assert.match(src,/client\.query\("BEGIN"\)/);
+  assert.match(src,/client\.query\("COMMIT"\)/);
+});
+
 test("deleting a root comment soft-deletes its replies and reports the count",()=>{
   const src=read("release-hardening.mjs");
   const start=src.indexOf('app.delete("/api/feed/:postId/comments/:commentId"');
