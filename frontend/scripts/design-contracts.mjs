@@ -1,11 +1,14 @@
 import fs from "fs/promises";
 let failed=false;
 async function must(file,tokens){let src="";try{src=await fs.readFile(file,"utf8")}catch(e){console.error(`Missing UI contract file: ${file}`);failed=true;return}for(const token of tokens){if(!src.includes(token)){console.error(`Missing UI contract in ${file}: ${token}`);failed=true}}}
+async function mustNot(file,tokens){let src="";try{src=await fs.readFile(file,"utf8")}catch(e){console.error(`Missing UI contract file: ${file}`);failed=true;return}for(const token of tokens){if(src.includes(token)){console.error(`Forbidden UI contract token in ${file}: ${token}`);failed=true}}}
 await must("app/design-system.css",[
   "--ui-font:var(--font-app)","--ui-page-title:22px","--ui-section-title:18px","--ui-body:14px",
   "--ui-btn-h:42px","--ui-input-h:44px","--ui-card-radius:18px","--ui-accent:#ff7a00",
-  'html[data-theme="light"]'
+  'html[data-theme="light"]','body.ui-v3{background:var(--ui-bg)!important;color:var(--ui-text)!important}'
 ]);
+await must("app/brand.css",["/brand/official/marbo3a-mark.png","background-size:contain","background-repeat:no-repeat"]);
+await mustNot("app/brand.css",["background-image:url('/logo.svg')"]);
 await must("app/ui-contract-lock.css",[
   "FINAL MARBO3A UI CONTRACT",".v3-audience-stats","body.story-overlay-open .v3-global-header",
   ".chat-stream>*{position:relative", ".chat-bubble{position:relative", ".social-dock"
