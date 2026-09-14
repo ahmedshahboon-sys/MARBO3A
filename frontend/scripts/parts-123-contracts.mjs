@@ -1,0 +1,26 @@
+import fs from "node:fs";
+import path from "node:path";
+const root=path.resolve(process.cwd());
+const read=file=>fs.readFileSync(path.join(root,file),"utf8");
+const must=(src,token,label)=>{if(!src.includes(token))throw new Error(`${label}: missing ${token}`)};
+
+const css=read("app/parts-123-hardening.css");
+for(const t of [".install-nudge>img","main.chat-social","room-community-page",".call-overlay","live-moderation-sheet","live-report-card"])must(css,t,"parts 1-3 css");
+const voiceCss=read("app/parts-123-voice.css");
+for(const t of ["voice-record-btn.hold","voice-record-panel.cancel-armed"])must(voiceCss,t,"voice gesture css");
+const viewport=read("app/ViewportRuntime.js");
+for(const t of ["visualViewport","focusin","data-keyboard-open","--marbo3a-vvw"])must(viewport,t,"viewport runtime");
+const voice=read("app/VoiceRecorder.js");
+for(const t of ["CANCEL_PX","cancelHint","navigator.vibrate","voice_recorder_cancel_gesture"])must(voice,t,"voice recorder");
+const host=read("app/live/new/page.js");
+for(const t of ["/announce","/moderation","slowMode","shareLive","beforeunload","peak_viewers"])must(host,t,"live host");
+const viewer=read("app/live/[id]/page.js");
+for(const t of ["/report","scheduleReconnect","marbo3a:live-kicked","LIVE_BLOCKED","share"])must(viewer,t,"live viewer");
+const liveApi=read("app/live/live-api.js");
+for(const t of ["LIVE_CHAT_MUTED","LIVE_CHAT_CLOSED","LIVE_SLOW_MODE","LIVE_BLOCKED"])must(liveApi,t,"live api errors");
+const platform=read("app/PlatformClient.js");
+for(const t of ["installRouteAllowed","live_started","/live/${n.ref_id}"])must(platform,t,"PWA/live notification routing");
+const layout=read("app/layout.js");
+for(const t of ["./parts-123-hardening.css","./parts-123-voice.css"])must(layout,t,"parts 1-3 css imports");
+if(!(layout.indexOf('./parts-123-hardening.css')<layout.indexOf('./ui-v3-unified-scale.css')))throw new Error("parts 1-3 css must remain before locked UI tail");
+console.log("Parts 1-3 hardening contracts OK");
