@@ -91,6 +91,13 @@ test("authenticated profile feed honors post visibility and blocks",()=>{
   assert.match(src,/postRows=postVisible\?/);
 });
 
+test("public profile summary only counts guest-visible posts",()=>{
+  const src=read("social-ui-backend.mjs");
+  assert.match(src,/who_can_see_posts/);
+  assert.match(src,/COALESCE\(pp\.who_can_see_posts,'everyone'\)='everyone'/);
+  assert.match(src,/delete user\.who_can_see_posts/);
+});
+
 test("deleting a root comment soft-deletes its replies and reports the count",()=>{
   const src=read("release-hardening.mjs");
   const start=src.indexOf('app.delete("/api/feed/:postId/comments/:commentId"');
