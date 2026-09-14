@@ -102,3 +102,13 @@ test("deleting a root comment soft-deletes its replies and reports the count",()
   assert.match(route,/deletedCount:deleted\.length/);
   assert.match(route,/deletedIds:deleted\.map/);
 });
+
+test("saved post lists stop exposing posts after privacy or block changes",()=>{
+  const src=read("closure-routes.mjs");
+  assert.match(src,/visibleSavedRows/);
+  assert.match(src,/who_can_see_posts/);
+  assert.match(src,/user_blocks/);
+  assert.match(src,/friends_of_friends/);
+  assert.match(src,/ids:visible\.map/);
+  assert.match(src,/posts:visible/);
+});
