@@ -1,6 +1,7 @@
 import http from "http";
 import express from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import {pool} from "./runtime.mjs";
 
 const prior=http.createServer.bind(http);
@@ -46,6 +47,12 @@ http.createServer=function requestFoundationCreateServer(app,...args){
       next();
     });
     app.use(cors({origin:(origin,cb)=>cb(null,allowedOrigin(origin)),credentials:true,methods:["GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS"],allowedHeaders:["Content-Type","Authorization","X-Requested-With"]}));
+
+    // This foundation wrapper is registered before every historical route.
+    // Security limits must live here; a limiter registered in a later wrapper
+    // can be bypassed when an earlier route handler sends the response first.
+    app.use("/api/auth",rateLimit({windowMs:15*60*1000,limit:120,standardHeaders:true,legacyHeaders:false}));
+    app.use("/api",rateLimit({windowMs:60*1000,limit:600,standardHeaders:true,legacyHeaders:false,skip:req=>["GET","HEAD","OPTIONS"].includes(req.method)}));
 
     app.use((_req,res,next)=>{
       res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:");
