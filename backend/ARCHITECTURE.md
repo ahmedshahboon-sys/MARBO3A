@@ -44,3 +44,18 @@ Rules for the remaining migration:
 3. Add integration/regression coverage for the complete response contract and authorization.
 4. Remove only the now-shadowed registration, then retire the historical module only when all of its remaining routes have owners.
 5. Never change bootstrap order merely to make a newer route win; ordering changes can alter middleware and security semantics across unrelated domains.
+
+## Group 2 security/session audit — 2026-09-15
+
+Security/session rules established in this round:
+
+- `durable_sessions` is the authority for session validity and absolute expiry. Redis `session:*` entries are a cache and must not extend a session beyond `durable_sessions.expires_at`.
+- Session creation is fail-closed: a token is not usable unless its durable row is written successfully. Session destruction and security revocation delete durable authorization first, then clear Redis cache entries.
+- `user_sessions` is device metadata only (user-agent/IP/history). It must not be used as the source of truth for deciding whether a session exists or is revocable.
+- `/api/account/sessions`, `/api/account/sessions/:id` and `/api/account/logout-all` are currently owned at runtime by `session-control.mjs`; the older copies in `core-extensions.mjs` are shadowed compatibility routes and must not be edited as if they were authoritative.
+- `/api/auth/reset-password` and `/api/account/change-password` are currently owned at runtime by `security-completion.mjs`; the older copies in `platform-extra.mjs`/`core-extensions.mjs` are shadowed compatibility implementations pending domain migration.
+- `/api/admin/users/:id/status` and report-driven freeze/ban behavior are currently reached through `audit-completion.mjs` before the older status handler. Its revocation path must remain durable-first.
+- `request-foundation.mjs` owns request-wide security middleware that must execute before compatibility routes: origin/CORS checks, rate limits and OAuth-session normalization.
+- Password-reset verification and 2FA verification are bounded-attempt challenges. Password-reset request responses intentionally do not reveal whether the supplied email exists.
+
+Remaining migration rule: do not remove the shadowed security routes only because a stronger runtime owner exists. Retire them when their containing historical module has no remaining required routes and the explicit replacement has integration coverage.
