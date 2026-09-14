@@ -13,6 +13,10 @@ await must("app/ThemeRuntime.js",["marbo3a_theme","prefers-color-scheme: light",
 await must("app/ui-v3-navigation.css",["color:var(--ui-muted)!important","color:var(--ui-accent)!important","box-shadow:0 0 0 3px var(--ui-bg)!important",".about-page","var(--ui-surface)","var(--ui-text)"]);
 await must("app/ui-v3-settings.css",["var(--ui-text)","var(--ui-border)","var(--ui-surface)","var(--ui-bg-elevated)"]);
 await mustNot("app/ui-v3-settings.css",["rgba(13,18,24,.92)","rgba(20,27,35,.96)","color:#fff"]);
+await must("app/ui-v3-messages.css",["var(--ui-accent)","var(--ui-text-2)","var(--ui-muted)"]);
+await must("app/ui-v3-profile.css",["background:linear-gradient(145deg,var(--ui-surface),var(--ui-bg-elevated))","border:6px solid var(--ui-surface)!important","color:var(--ui-text)!important","background:var(--ui-surface-2)!important"]);
+await must("app/ui-v3-rooms.css",["background:linear-gradient(145deg,var(--ui-surface),var(--ui-bg-elevated))","background:var(--ui-surface)","color:var(--ui-text-2)","border:1px solid var(--ui-border)"]);
+await must("app/ui-v3-chat.css",["var(--ui-bg-elevated)","var(--ui-bg)!important","background:var(--ui-surface)!important","background:var(--ui-surface-2)!important","color:var(--ui-text)!important"]);
 await must("app/ui-contract-lock.css",[
   "FINAL MARBO3A UI CONTRACT",".v3-audience-stats","body.story-overlay-open .v3-global-header",
   ".chat-stream>*{position:relative", ".chat-bubble{position:relative", ".social-dock"
