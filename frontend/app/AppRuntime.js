@@ -25,12 +25,13 @@ import RoomVoiceR1Runtime from "./RoomVoiceR1Runtime";
 import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 import SiteFontRuntime from "./SiteFontRuntime";
+import FeedModePolicy from "./FeedModePolicy";
 
 export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
     <AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><FeedModePolicy/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     {children}
