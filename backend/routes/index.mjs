@@ -14,6 +14,7 @@ import {registerFeedMode} from "./feed-mode.mjs";
 import {registerStabilityOverrides} from "./stability-overrides.mjs";
 import {registerTv} from "./tv.mjs";
 import {registerLive} from "./live.mjs";
+import {registerLiveSocial} from "./live-social.mjs";
 
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
@@ -31,5 +32,6 @@ export function registerExplicitRoutes(app){
   registerStabilityOverrides(app);
   registerTv(app);
   registerLive(app);
+  registerLiveSocial(app);
   registerGroupOAdmin(app);
 }
