@@ -20,7 +20,7 @@ export default function PremiumChrome(){
       <span title="المتصلون الآن خلال آخر 90 ثانية"><i className="v3-online-pulse"/><b>{compact(audience.onlineNow)}</b><small>متصل</small></span>
     </div>
     <nav className="v3-header-actions" aria-label="اختصارات">
-      <Link prefetch href="/notifications" aria-label={unread?`الإشعارات، ${unread} غير مقروءة`:"الإشعارات"} className="v3-header-icon" style={{position:"relative"}}><Icon name="bell"/>{unread>0&&<b className="v3-unread-badge" style={{position:"absolute",top:-2,right:-5,display:"grid",placeItems:"center",borderRadius:999,background:"#ff7a00",color:"#fff",fontWeight:900,boxShadow:"0 0 0 2px #080c12"}}>{unread>99?"99+":unread}</b>}</Link>
+      <Link prefetch href="/notifications" aria-label={unread?`الإشعارات، ${unread} غير مقروءة`:"الإشعارات"} className="v3-header-icon" style={{position:"relative"}}><Icon name="bell"/>{unread>0&&<b className="v3-unread-badge" style={{position:"absolute",top:-2,right:-5,display:"grid",placeItems:"center",borderRadius:999,background:"var(--ui-accent)",color:"#fff",fontWeight:900,boxShadow:"0 0 0 2px var(--ui-bg)"}}>{unread>99?"99+":unread}</b>}</Link>
       <Link prefetch href="/search" aria-label="البحث" className="v3-header-icon"><Icon name="search"/></Link>
     </nav>
   </header>;
