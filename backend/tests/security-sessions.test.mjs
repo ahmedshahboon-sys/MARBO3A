@@ -11,6 +11,17 @@ test("session validity is bounded by durable absolute expiry",()=>{
   assert.match(src,/UPDATE durable_sessions SET last_seen=NOW\(\) WHERE token_hash=\$1/);
 });
 
+test("session creation and logout fail closed around durable storage",()=>{
+  const src=read("runtime.mjs");
+  const create=src.slice(src.indexOf("export async function createSession"),src.indexOf("export async function destroySession"));
+  const destroy=src.slice(src.indexOf("export async function destroySession"),src.indexOf("export const clean"));
+  assert.match(create,/await pool\.query\(`INSERT INTO durable_sessions/);
+  assert.match(create,/await redis\.del\(`session:\$\{token\}`\)\.catch/);
+  assert.doesNotMatch(create,/INSERT INTO durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
+  assert.ok(destroy.indexOf("DELETE FROM durable_sessions")<destroy.indexOf("redis.del"),"durable revocation must precede cache cleanup");
+  assert.doesNotMatch(destroy,/DELETE FROM durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
+});
+
 test("session cookies stay HttpOnly Secure and SameSite Lax",()=>{
   const src=read("runtime.mjs");
   assert.match(src,/HttpOnly; Secure; SameSite=Lax/);
@@ -42,10 +53,20 @@ test("password reset request does not reveal whether an email exists",()=>{
   assert.doesNotMatch(src,/TOO_SOON/);
 });
 
-test("password changes revoke every other durable session",()=>{
+test("credential changes revoke durable sessions before Redis cache",()=>{
   const src=read("security-completion.mjs");
+  const revoke=src.slice(src.indexOf("async function revokeAll"),src.indexOf("async function resetAttempt"));
   assert.match(src,/revokeAll\(u\.id,keep\)/);
-  assert.match(src,/DELETE FROM durable_sessions WHERE user_id=\$1 AND token_hash<>\$2/);
+  assert.match(revoke,/DELETE FROM durable_sessions WHERE user_id=\$1 AND token_hash<>\$2/);
+  assert.ok(revoke.indexOf("DELETE FROM durable_sessions")<revoke.indexOf("redis.scanIterator"));
+});
+
+test("moderation revocation is durable-first",()=>{
+  const src=read("audit-completion.mjs");
+  const revoke=src.slice(src.indexOf("async function revokeUserSessions"),src.indexOf("async function reportTargetUser"));
+  assert.match(revoke,/DELETE FROM durable_sessions WHERE user_id=\$1/);
+  assert.ok(revoke.indexOf("DELETE FROM durable_sessions")<revoke.indexOf("redis.scanIterator"));
+  assert.doesNotMatch(revoke,/DELETE FROM durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
 });
 
 test("2FA setup and login challenges cap verification attempts",()=>{
@@ -56,10 +77,12 @@ test("2FA setup and login challenges cap verification attempts",()=>{
   assert.match(src,/u\.account_status!=="active"/);
 });
 
-test("request foundation rate-limits auth and API mutations before legacy routes",()=>{
+test("request foundation rate-limits mutations and normalizes OAuth sessions",()=>{
   const src=read("request-foundation.mjs");
-  assert.match(src,/import rateLimit from "express-rate-limit"/);
+  assert.match(src,/import \{pool,sessionUser,tokenFrom\} from "\.\/runtime\.mjs"/);
   assert.match(src,/app\.use\("\/api\/auth",rateLimit/);
   assert.match(src,/app\.use\("\/api",rateLimit/);
   assert.match(src,/\["GET","HEAD","OPTIONS"\]\.includes\(req\.method\)/);
+  assert.match(src,/app\.use\("\/api\/auth\/oauth",async\(req,res,next\)=>/);
+  assert.match(src,/await sessionUser\(req\)/);
 });
