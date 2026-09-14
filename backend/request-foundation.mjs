@@ -54,6 +54,18 @@ http.createServer=function requestFoundationCreateServer(app,...args){
     app.use("/api/auth",rateLimit({windowMs:15*60*1000,limit:120,standardHeaders:true,legacyHeaders:false}));
     app.use("/api",rateLimit({windowMs:60*1000,limit:600,standardHeaders:true,legacyHeaders:false,skip:req=>["GET","HEAD","OPTIONS"].includes(req.method)}));
 
+    // Location privacy must be normalized before historical profile handlers.
+    // Turning precise sharing off removes coordinates instead of retaining them,
+    // and precise sharing fails closed when either coordinate is invalid.
+    app.use((req,res,next)=>{
+      if(req.method!=="PATCH"||req.path!=="/api/profile/extended"||req.body?.city===undefined)return next();
+      const share=Boolean(req.body?.sharePrecise);
+      if(!share){delete req.body.latitude;delete req.body.longitude;return next()}
+      const lat=Number(req.body?.latitude),lng=Number(req.body?.longitude);
+      if(!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lng)||lng<-180||lng>180)return res.status(400).json({ok:false,error:"INVALID_PRECISE_LOCATION"});
+      next();
+    });
+
     // Legacy OAuth linking has its own current-user helper. Validate any supplied
     // MARBO3A session through the runtime first so expired durable sessions cannot
     // survive only because a stale Redis key is still present.
@@ -98,7 +110,8 @@ http.createServer=function requestFoundationCreateServer(app,...args){
         }
         if(req.method==="POST"&&req.path.startsWith("/api/profile/pin-post/")&&Number(settings.pinned_post_limit)===0)return res.status(409).json({ok:false,error:"PINNING_DISABLED"});
         if(features.engagement===false&&req.path.startsWith("/api/engagement"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"engagement"});
-        if(features.map===false&&req.path.startsWith("/api/map"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"map"});
+        const mapProfileWrite=req.method==="PATCH"&&req.path==="/api/profile/extended"&&req.body?.city!==undefined;
+        if(features.map===false&&(req.path.startsWith("/api/map")||req.path==="/api/location"||mapProfileWrite))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"map"});
         if(features.calls===false&&req.path.startsWith("/api/calls"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"calls"});
         if(features.voice_rooms===false&&/^\/api\/rooms\/\d+\/voice(?:\/|$)/.test(req.path))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"voice_rooms"});
         if(features.guest_explore===false&&req.path.startsWith("/api/public/"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"guest_explore"});
