@@ -28,11 +28,13 @@ import SocialDock from "./SocialDock";
 import SiteFontRuntime from "./SiteFontRuntime";
 import FeedModePolicy from "./FeedModePolicy";
 import UiRoundFixes from "./UiRoundFixes";
+import ViewportRuntime from "./ViewportRuntime";
+import LibyanDialectRuntime from "./LibyanDialectRuntime";
 
 export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
-    <AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
+    <ViewportRuntime/><LibyanDialectRuntime/><AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
     {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><RoomExperienceRuntime/><FeedModePolicy/><UiRoundFixes/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
