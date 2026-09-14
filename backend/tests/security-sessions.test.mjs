@@ -34,10 +34,26 @@ test("password reset challenge has a bounded attempt budget",()=>{
   assert.match(src,/redis\.incr\(key\)/);
 });
 
+test("password reset request does not reveal whether an email exists",()=>{
+  const src=read("platform-extra.mjs");
+  assert.match(src,/const resetRateKey=email=>/);
+  assert.match(src,/if\(!row\)return res\.json\(\{ok:true\}\)/);
+  assert.doesNotMatch(src,/pwdreset:rate:\$\{row\.id\}/);
+  assert.doesNotMatch(src,/TOO_SOON/);
+});
+
 test("password changes revoke every other durable session",()=>{
   const src=read("security-completion.mjs");
   assert.match(src,/revokeAll\(u\.id,keep\)/);
   assert.match(src,/DELETE FROM durable_sessions WHERE user_id=\$1 AND token_hash<>\$2/);
+});
+
+test("2FA setup and login challenges cap verification attempts",()=>{
+  const src=read("routes/auth-session.mjs");
+  assert.match(src,/TWO_FACTOR_MAX_ATTEMPTS=5/);
+  assert.match(src,/JSON\.stringify\(\{hash:hashCode\(u\.id,code\),enable,attempts:0\}\)/);
+  assert.match(src,/2FA_TOO_MANY_ATTEMPTS/);
+  assert.match(src,/u\.account_status!=="active"/);
 });
 
 test("request foundation rate-limits auth and API mutations before legacy routes",()=>{
