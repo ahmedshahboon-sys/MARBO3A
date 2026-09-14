@@ -6,7 +6,7 @@ const entry=read("app/GuestBrowseEntry.js");
 for(const t of ["دخول كزائر","الغرف","اسمع الصوت","/explore"])must(entry,t,"guest landing entry");
 
 const explore=read("app/explore/page.js");
-for(const t of ["/api/public/guest/session","/api/public/guest/activity","PublicRoomRail","guestOnly","التصفح والاستماع للغرف"] )must(explore,t,"guest explore");
+for(const t of ["/api/public/guest/session","/api/public/guest/activity","PublicRoomRail","guestOnly","الغرف العامة الشغالة","/api/public/live","guest-now-strip","guest-live-section","setInterval(refresh,12000)"] )must(explore,t,"guest explore");
 
 const rail=read("app/PublicRoomRail.js");
 for(const t of ["/api/public/rooms-v2","active_total","speaker_seat_count","speakers_count","listeners_count","/guest/room/"])must(rail,t,"public rooms rail");
