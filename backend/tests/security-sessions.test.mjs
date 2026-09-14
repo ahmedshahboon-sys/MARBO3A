@@ -39,3 +39,11 @@ test("password changes revoke every other durable session",()=>{
   assert.match(src,/revokeAll\(u\.id,keep\)/);
   assert.match(src,/DELETE FROM durable_sessions WHERE user_id=\$1 AND token_hash<>\$2/);
 });
+
+test("request foundation rate-limits auth and API mutations before legacy routes",()=>{
+  const src=read("request-foundation.mjs");
+  assert.match(src,/import rateLimit from "express-rate-limit"/);
+  assert.match(src,/app\.use\("\/api\/auth",rateLimit/);
+  assert.match(src,/app\.use\("\/api",rateLimit/);
+  assert.match(src,/\["GET","HEAD","OPTIONS"\]\.includes\(req\.method\)/);
+});
