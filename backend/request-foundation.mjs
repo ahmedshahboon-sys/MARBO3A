@@ -98,7 +98,6 @@ http.createServer=function requestFoundationCreateServer(app,...args){
       try{
         const {settings,features}=await operationalControls();
         if(settings.maintenance_mode===true&&!req.path.startsWith("/api/admin/"))return res.status(503).json({ok:false,error:"MAINTENANCE_MODE",maintenance:true});
-        // Keep the current memory-upload pipeline's established 8 MB hard ceiling.
         if(req.method==="PATCH"&&req.path==="/api/admin/advanced/settings"&&req.body?.key==="upload_max_mb"&&Number(req.body?.value)>8)return res.status(400).json({ok:false,error:"UPLOAD_LIMIT_MAX_8MB"});
         if(req.path.startsWith("/api/admin/"))return next();
         const registrationBlocked=settings.registration_enabled===false&&req.method==="POST"&&["/api/auth/request-email-otp","/api/auth/verify-email-otp","/api/auth/register"].includes(req.path);
@@ -111,7 +110,7 @@ http.createServer=function requestFoundationCreateServer(app,...args){
         if(req.method==="POST"&&req.path.startsWith("/api/profile/pin-post/")&&Number(settings.pinned_post_limit)===0)return res.status(409).json({ok:false,error:"PINNING_DISABLED"});
         if(features.engagement===false&&req.path.startsWith("/api/engagement"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"engagement"});
         const mapProfileWrite=req.method==="PATCH"&&req.path==="/api/profile/extended"&&req.body?.city!==undefined;
-        if(features.map===false&&(req.path.startsWith("/api/map")||req.path==="/api/location"||mapProfileWrite))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"map"});
+        if(features.map===false&&(req.path.startsWith("/api/map")||req.path==="/api/location"||req.path==="/api/profile/location"||mapProfileWrite))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"map"});
         if(features.calls===false&&req.path.startsWith("/api/calls"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"calls"});
         if(features.voice_rooms===false&&/^\/api\/rooms\/\d+\/voice(?:\/|$)/.test(req.path))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"voice_rooms"});
         if(features.guest_explore===false&&req.path.startsWith("/api/public/"))return res.status(503).json({ok:false,error:"FEATURE_DISABLED",feature:"guest_explore"});
