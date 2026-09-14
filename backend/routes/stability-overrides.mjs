@@ -14,16 +14,25 @@ async function audienceSnapshot(){
     const scores=await redis.zRangeWithScores("presence:users",0,-1);
     onlineUsers=scores.filter(x=>Number(x.score)>cutoff).length;
   }catch{}
-  const [guestTotalRows,legacyUserRows,activeGuestRows]=await Promise.all([
+  const [guestTotalRows,legacyUserRows,activeGuestRows,registeredRows,trackingRows]=await Promise.all([
     safeRows(`SELECT COUNT(*)::int c FROM guest_visitors`),
     safeRows(`SELECT COUNT(*)::int c FROM users u WHERE NOT EXISTS(SELECT 1 FROM guest_visitors g WHERE g.linked_user_id=u.id)`),
-    safeRows(`SELECT COUNT(*)::int c FROM guest_visitors WHERE linked_user_id IS NULL AND last_seen_at>NOW()-INTERVAL '90 seconds'`)
+    safeRows(`SELECT COUNT(*)::int c FROM guest_visitors WHERE linked_user_id IS NULL AND last_seen_at>NOW()-INTERVAL '90 seconds'`),
+    safeRows(`SELECT COUNT(*)::int c FROM users`),
+    safeRows(`SELECT MIN(first_seen_at) tracking_started_at FROM guest_visitors`,[],[{tracking_started_at:null}])
   ]);
   const guestTotal=Number(row0(guestTotalRows,{c:0}).c||0);
   const legacyUsers=Number(row0(legacyUserRows,{c:0}).c||0);
+  const registeredUsers=Number(row0(registeredRows,{c:0}).c||0);
   const onlineGuests=Number(row0(activeGuestRows,{c:0}).c||0);
+  const totalVisitors=guestTotal+legacyUsers;
   return{
-    totalVisitors:guestTotal+legacyUsers,
+    totalVisitors,
+    trackedAudience:totalVisitors,
+    guestVisitorIds:guestTotal,
+    registeredUsers,
+    trackingStartedAt:row0(trackingRows,{tracking_started_at:null}).tracking_started_at||null,
+    metricDefinition:"tracked-identities",
     onlineNow:onlineUsers+onlineGuests,
     onlineUsers,
     onlineGuests
@@ -67,7 +76,7 @@ export function registerStabilityOverrides(app){
       const stats=await audienceSnapshot();
       res.setHeader("Cache-Control","public,max-age=10,stale-while-revalidate=20");
       res.json({ok:true,...stats});
-    }catch(e){console.error("public site stats",e);res.json({ok:true,totalVisitors:0,onlineNow:0,onlineUsers:0,onlineGuests:0})}
+    }catch(e){console.error("public site stats",e);res.json({ok:true,totalVisitors:0,trackedAudience:0,guestVisitorIds:0,registeredUsers:0,trackingStartedAt:null,metricDefinition:"tracked-identities",onlineNow:0,onlineUsers:0,onlineGuests:0})}
   });
 
   /* Registered before Group O's legacy handler. One unavailable analytics source

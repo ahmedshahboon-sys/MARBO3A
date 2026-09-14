@@ -12,9 +12,9 @@ test("feed modes type the seed parameter in every production query",()=>{
   assert.match(src,/mode===?"random"|mode==="random"/);
 });
 
-test("public audience stats include registered and anonymous presence",()=>{
+test("public audience stats distinguish tracked identities from live presence",()=>{
   const src=read("routes/stability-overrides.mjs");
-  for(const token of ["/api/public/site-stats","presence:users","guest_visitors","onlineGuests","totalVisitors","/api/admin/advanced/analytics"])
+  for(const token of ["/api/public/site-stats","presence:users","guest_visitors","onlineGuests","totalVisitors","trackedAudience","guestVisitorIds","registeredUsers","trackingStartedAt","metricDefinition","tracked-identities","/api/admin/advanced/analytics"])
     assert.ok(src.includes(token),`missing ${token}`);
 });
 
