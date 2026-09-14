@@ -49,7 +49,7 @@ test("call ICE config advertises external IP relay fallback",()=>{
 test("voice recorder keeps one pointer target mounted while recording",()=>{
   const src=readFrontend("VoiceRecorder.js");
   assert.match(src,/return <button type="button" className=\{`voice-record-btn hold/);
-  assert.match(src,/state==="recording"\?<div className=\{`voice-record-panel active/);
+  assert.match(src,/state==="recording"\?<span className=\{`voice-record-panel active/);
   assert.match(src,/document\.addEventListener\("pointerup",upGlobal/);
   assert.match(src,/finish\(true\)/);
   assert.match(src,/finish\(false\)/);
