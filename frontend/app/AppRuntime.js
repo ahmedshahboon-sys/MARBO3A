@@ -22,6 +22,7 @@ import SettingsPanel from "./SettingsPanel";
 import ExperienceEffects from "./ExperienceEffects";
 import EngagementViewRuntime from "./EngagementViewRuntime";
 import RoomVoiceR1Runtime from "./RoomVoiceR1Runtime";
+import RoomExperienceRuntime from "./RoomExperienceRuntime";
 import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 import SiteFontRuntime from "./SiteFontRuntime";
@@ -32,7 +33,7 @@ export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path);
   return <>
     <AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><FeedModePolicy/><UiRoundFixes/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><RoomExperienceRuntime/><FeedModePolicy/><UiRoundFixes/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
     {children}
