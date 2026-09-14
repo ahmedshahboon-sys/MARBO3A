@@ -20,7 +20,7 @@ must(marketPage,"ما فيش دفع أو بيع فعلي توا","marketplace pr
 
 const admin=read("app/admin/sponsored/page.js");for(const t of ["/api/admin/sponsored-posts","ظهور","نقر","CTR","مموّل"])must(admin,t,"sponsored admin");
 
-const explore=read("app/explore/page.js");for(const t of ["feedSeed","&seed=","متاجر إلكترونية قريبًا","guest-post-sponsored"])must(explore,t,"guest smart feed continuity");
+const explore=read("app/explore/page.js");for(const t of ["feedSeed","&seed=","واجهة مربوعة الحالية","guest-post-sponsored","/api/public/live","الغرف العامة الشغالة"])must(explore,t,"guest smart feed continuity");
 
 const runtime=read("app/AppRuntime.js");must(runtime,"RoomVoiceR1Runtime","R1 runtime mount");
 const layout=read("app/layout.js");must(layout,'import "./r1-core.css"','R1 styles');must(layout,'import "./r1-admin.css"','R1 admin styles');
