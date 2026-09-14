@@ -28,3 +28,11 @@ test("presence is an explicit domain and realtime supports watch events",()=>{
   assert.match(realtime,/presence:update/);
   assert.match(realtime,/\/rt-v2\/socket\.io/);
 });
+
+test("notification unread count has one transitional owner",()=>{
+  const legacyOwner=read("v1-social-extra.mjs");
+  const socialExperience=read("social-experience.mjs");
+  const route=/app\.get\("\/api\/notifications\/unread-count"/;
+  assert.match(legacyOwner,route);
+  assert.doesNotMatch(socialExperience,route);
+});
