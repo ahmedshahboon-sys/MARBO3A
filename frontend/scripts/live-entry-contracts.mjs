@@ -6,9 +6,10 @@ must("app/AppRuntime.js",["LiveEntryRuntime","<LiveEntryRuntime/>","immersiveLiv
 must("app/SideDrawer.js",["/live","اللايفات"],"live drawer entry");
 must("app/live/new/page.js",["liveRef","viewersRef","pendingIce","startLoops","live_host_","router.push(\"/live\")"],"live host rtc lifecycle");
 must("app/live/[id]/page.js",["pendingIce","flushIce","scheduleReconnect","live_viewer_","live-exit-x","router.push(\"/live\")"],"live viewer rtc lifecycle");
-must("app/layout.js",["./live.css","./live-entry.css","./live-round-a.css","./live-guest-polish.css","./tv-admin-extra.css"],"live and tv styles");
+must("app/layout.js",["./live.css","./live-entry.css","./live-round-a.css","./live-guest-polish.css","./tv-admin-extra.css","./ui-contract-additions.css"],"live and tv styles");
 must("app/live-round-a.css",[".live-immersive",".live-watch-chat",".live-exit-x","orientation:landscape"],"live immersive styles");
 must("app/live-guest-polish.css",[".install-nudge",".guest-now-strip",".guest-live-section",".live-watch-chat","orientation:landscape"],"live guest polish styles");
+must("app/ui-contract-additions.css",["Final immersive live ownership",".live-immersive .live-watch-chat",".live-immersive .live-studio-controls",".install-nudge","orientation:landscape"],"final live UI ownership");
 must("app/PlatformClient.js",["marbo3a_install_nudge_until","dismissInstall(7)","installRouteAllowed"],"install nudge persistence");
 must("app/explore/page.js",["/api/public/live","guest-now-strip","guest-live-section","setInterval(refresh,12000)"],"guest live sync");
 must("public/sw.js",["marbo3a-shell-v19-live-guest-sync","cache:\"no-store\"","SKIP_WAITING"],"fresh pwa shell");
