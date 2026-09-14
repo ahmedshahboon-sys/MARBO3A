@@ -11,6 +11,7 @@ import {registerFghSocial} from "./fgh-social.mjs";
 import {registerGroupMNEngagement} from "./group-mn-engagement.mjs";
 import {registerGroupOAdmin} from "./group-o-admin.mjs";
 import {registerFeedMode} from "./feed-mode.mjs";
+import {registerStabilityOverrides} from "./stability-overrides.mjs";
 
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
@@ -25,5 +26,6 @@ export function registerExplicitRoutes(app){
   registerCorePresence(app);
   registerGroupMNEngagement(app);
   registerFeedMode(app);
+  registerStabilityOverrides(app);
   registerGroupOAdmin(app);
 }
