@@ -18,7 +18,11 @@ await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats",
 await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png","زائر مسجل"]);
 await must("app/admin/debug/page.js",["groupEvents","debug-duplicate-count","<details>"]);
 await must("app/FeedModePolicy.js",["/home","الأحدث","مختار لك","feed-mode-tabs"]);
-await must("app/UiRoundFixes.js",["public-room-card","smart-feed-strip","feed-more-button","real-map-canvas"]);
-await must("app/RealPeopleMap.js",["basemaps.cartocdn.com","tile.openstreetmap.org","CARTO"]);
+await must("app/SocialFeed.js",["useState(\"latest\")","FriendSuggestions","feed-pinned-ribbon","parentCommentId","تثبيت أعلى الرئيسية","/api/engagement/suggestions"]);
+await must("app/UiRoundFixes.js",["public-room-card","smart-feed-strip","feed-more-button","real-map-canvas","sf-comment-replies","feed-friend-suggestions","install-nudge","live-notification-toast","room-system-event"]);
+await must("app/RealPeopleMap.js",["basemaps.cartocdn.com","tile.openstreetmap.org","CARTO","centeredViewer"]);
+await must("app/StoryRail.js",["/api/stories/mutes","story-muted-manage","shareStory","إظهار الستوريات"]);
+await must("app/PlatformClient.js",["beforeinstallprompt","install-nudge","marbo3a:notification:new","live-notification-toast","3000","15000"]);
+await must("app/RoomExperienceRuntime.js",["/leave","room:member-event","room-system-event"]);
 if(failed)process.exit(1);
 console.log("MARBO3A locked design contracts OK.");
