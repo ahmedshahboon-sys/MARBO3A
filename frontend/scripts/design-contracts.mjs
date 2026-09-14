@@ -14,8 +14,11 @@ await must("app/layout.js",[
   'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"','import "./ui-audience.css"',
   'data-site-font="readex"'
 ]);
-await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow"]);
-await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png"]);
+await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow","trackingStartedAt"]);
+await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png","زائر مسجل"]);
 await must("app/admin/debug/page.js",["groupEvents","debug-duplicate-count","<details>"]);
+await must("app/FeedModePolicy.js",["/home","الأحدث","مختار لك","feed-mode-tabs"]);
+await must("app/UiRoundFixes.js",["public-room-card","smart-feed-strip","feed-more-button","real-map-canvas"]);
+await must("app/RealPeopleMap.js",["basemaps.cartocdn.com","tile.openstreetmap.org","CARTO"]);
 if(failed)process.exit(1);
 console.log("MARBO3A locked design contracts OK.");
