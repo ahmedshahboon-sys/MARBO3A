@@ -33,13 +33,13 @@ import LibyanDialectRuntime from "./LibyanDialectRuntime";
 import LiveEntryRuntime from "./LiveEntryRuntime";
 
 export default function AppRuntime({children}){
-  const path=usePathname(),app=isAppShellPath(path);
+  const path=usePathname(),app=isAppShellPath(path),immersiveLive=/^\/live\/(?:new|\d+)$/.test(path||"");
   return <>
     <ViewportRuntime/><LibyanDialectRuntime/><AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
     {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><RoomExperienceRuntime/><FeedModePolicy/><UiRoundFixes/><LiveEntryRuntime/></>}
     <SocialHomeRedirect/>
-    {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/><PremiumChrome/><SettingsPanel/></>}
+    {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/>{!immersiveLive&&<PremiumChrome/>}<SettingsPanel/></>}
     {children}
-    {app&&<><SideDrawer/><SocialDock/></>}
+    {app&&!immersiveLive&&<><SideDrawer/><SocialDock/></>}
   </>;
 }
