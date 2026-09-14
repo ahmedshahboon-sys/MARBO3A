@@ -9,13 +9,14 @@ await must("app/design-system.css",[
 ]);
 await must("app/brand.css",["/brand/official/marbo3a-mark.png","background-size:contain","background-repeat:no-repeat"]);
 await mustNot("app/brand.css",["background-image:url('/logo.svg')"]);
+await must("app/ThemeRuntime.js",["marbo3a_theme","prefers-color-scheme: light","/api/settings","data-theme","dataset.themePreference"]);
 await must("app/ui-contract-lock.css",[
   "FINAL MARBO3A UI CONTRACT",".v3-audience-stats","body.story-overlay-open .v3-global-header",
   ".chat-stream>*{position:relative", ".chat-bubble{position:relative", ".social-dock"
 ]);
 await must("app/layout.js",[
   'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"','import "./ui-audience.css"',
-  'data-site-font="readex"'
+  'data-site-font="readex"','import ThemeRuntime from "./ThemeRuntime"','<ThemeRuntime/>'
 ]);
 await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow","trackingStartedAt"]);
 await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png","زائر مسجل"]);
