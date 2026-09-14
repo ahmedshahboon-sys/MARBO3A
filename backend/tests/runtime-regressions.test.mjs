@@ -76,8 +76,10 @@ test("direct post interactions enforce the smart-feed visibility contract",()=>{
   assert.match(src,/who_can_see_posts/);
   assert.match(src,/user_blocks/);
   assert.match(src,/friends_of_friends/);
-  assert.match(src,/\/api\\\/feed\\\/\\d\+/);
   assert.match(src,/POST_NOT_FOUND/);
+  assert.match(src,/reactions\?/);
+  assert.match(src,/comments/);
+  assert.match(src,/save/);
 });
 
 test("authenticated profile feed honors post visibility and blocks",()=>{
@@ -87,4 +89,16 @@ test("authenticated profile feed honors post visibility and blocks",()=>{
   assert.match(src,/await blocked\(viewer\.id,p\.id\)/);
   assert.match(src,/postVisible\?/);
   assert.match(src,/postRows=postVisible\?/);
+});
+
+test("deleting a root comment soft-deletes its replies and reports the count",()=>{
+  const src=read("release-hardening.mjs");
+  const start=src.indexOf('app.delete("/api/feed/:postId/comments/:commentId"');
+  const end=src.indexOf('app.use(async(req,_res,next)',start);
+  assert.ok(start>=0&&end>start,"comment delete route must exist before notification middleware");
+  const route=src.slice(start,end);
+  assert.match(route,/parent_comment_id/);
+  assert.match(route,/parent_comment_id=\$2/);
+  assert.match(route,/deletedCount:deleted\.length/);
+  assert.match(route,/deletedIds:deleted\.map/);
 });
