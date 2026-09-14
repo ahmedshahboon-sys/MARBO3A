@@ -16,6 +16,7 @@ import {registerTv} from "./tv.mjs";
 import {registerTvAdmin} from "./tv-admin.mjs";
 import {registerLive} from "./live.mjs";
 import {registerLiveSocial} from "./live-social.mjs";
+import {registerLiveHardening} from "./live-hardening.mjs";
 
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
@@ -33,6 +34,7 @@ export function registerExplicitRoutes(app){
   registerStabilityOverrides(app);
   registerTv(app);
   registerTvAdmin(app);
+  registerLiveHardening(app);
   registerLive(app);
   registerLiveSocial(app);
   registerGroupOAdmin(app);

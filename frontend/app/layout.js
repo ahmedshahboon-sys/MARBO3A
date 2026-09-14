@@ -57,6 +57,8 @@ import "./live.css";
 import "./live-entry.css";
 import "./ui-audience.css";
 import "./responsive-round.css";
+import "./parts-123-hardening.css";
+import "./parts-123-voice.css";
 import "./ui-v3-unified-scale.css";
 import "./ui-contract-lock.css";
 import "./ui-contract-additions.css";

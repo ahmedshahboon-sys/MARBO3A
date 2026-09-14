@@ -10,7 +10,8 @@ function isSocialBrowser(){return /FBAN|FBAV|FB_IAB|FB4A|Instagram/i.test(naviga
 function token(){return localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";}
 function authHeader(){const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}}
 function safeActionUrl(raw){try{if(!raw)return"";const u=new URL(String(raw),location.origin);return u.origin===location.origin?`${u.pathname}${u.search}${u.hash}`:""}catch{return""}}
-function notificationHref(n){const type=String(n?.type||"");if(type==="friend_request")return"/friends";if(type==="friend_accepted"&&n?.actor_username)return`/u/${encodeURIComponent(n.actor_username)}`;if((type.startsWith("post_")||type.startsWith("comment_"))&&n?.ref_id)return`/home?post=${n.ref_id}`;if(type.startsWith("story_")&&n?.ref_id)return`/home?story=${n.ref_id}`;if((type==="direct_message"||type.startsWith("direct_"))&&n?.ref_id)return`/chat/${n.ref_id}`;if(type.includes("room")&&n?.ref_id)return`/room/${n.ref_id}/chat`;if(type.includes("message"))return"/messages";if(type.includes("room"))return"/rooms";return"/notifications"}
+function installRouteAllowed(){if(typeof location==="undefined")return true;return !/^\/(admin|chat|room|live)(\/|$)/.test(location.pathname)}
+function notificationHref(n){const type=String(n?.type||"");if(type==="friend_request")return"/friends";if(type==="friend_accepted"&&n?.actor_username)return`/u/${encodeURIComponent(n.actor_username)}`;if(type==="live_started"&&n?.ref_id)return`/live/${n.ref_id}`;if((type.startsWith("post_")||type.startsWith("comment_"))&&n?.ref_id)return`/home?post=${n.ref_id}`;if(type.startsWith("story_")&&n?.ref_id)return`/home?story=${n.ref_id}`;if((type==="direct_message"||type.startsWith("direct_"))&&n?.ref_id)return`/chat/${n.ref_id}`;if(type.includes("room")&&n?.ref_id)return`/room/${n.ref_id}/chat`;if(type.includes("message"))return"/messages";if(type.includes("room"))return"/rooms";return"/notifications"}
 
 export default function PlatformClient(){
   const [installPrompt,setInstallPrompt]=useState(null),[installed,setInstalled]=useState(false),[showIOS,setShowIOS]=useState(false),[installNudge,setInstallNudge]=useState(false),[updateReady,setUpdateReady]=useState(false),[offline,setOffline]=useState(false),[broadcast,setBroadcast]=useState(null),[socialBrowser,setSocialBrowser]=useState(false),[socialNotice,setSocialNotice]=useState(true),[copied,setCopied]=useState(false),[notification,setNotification]=useState(null);
@@ -32,7 +33,7 @@ export default function PlatformClient(){
   },[]);
 
   useEffect(()=>{if(notification)return;const next=notifQueue.current.shift();if(!next)return;setNotification(next);clearTimeout(notifTimer.current);notifTimer.current=setTimeout(()=>setNotification(null),3000)},[notification]);
-  useEffect(()=>{if(installed||nudgeShown.current||(!installPrompt&&!isIOS()))return;const show=setTimeout(()=>{nudgeShown.current=true;setInstallNudge(true)},5000);return()=>clearTimeout(show)},[installed,installPrompt]);
+  useEffect(()=>{if(installed||nudgeShown.current||(!installPrompt&&!isIOS())||!installRouteAllowed())return;const show=setTimeout(()=>{nudgeShown.current=true;setInstallNudge(true)},5000);return()=>clearTimeout(show)},[installed,installPrompt]);
   useEffect(()=>{if(!installNudge)return;const hide=setTimeout(()=>setInstallNudge(false),15000);return()=>clearTimeout(hide)},[installNudge]);
 
   async function report(source,error,extra={}){try{await fetch("/api/debug/report",{method:"POST",headers:{"content-type":"application/json",...authHeader()},body:JSON.stringify({source,level:"ERROR",message:String(error?.message||error).slice(0,1000),context:{...extra,stack:String(error?.stack||"").slice(0,2000)}})})}catch{}}
