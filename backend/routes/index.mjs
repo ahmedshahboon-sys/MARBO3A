@@ -13,6 +13,7 @@ import {registerGroupOAdmin} from "./group-o-admin.mjs";
 import {registerFeedMode} from "./feed-mode.mjs";
 import {registerStabilityOverrides} from "./stability-overrides.mjs";
 import {registerTv} from "./tv.mjs";
+import {registerTvAdmin} from "./tv-admin.mjs";
 import {registerLive} from "./live.mjs";
 import {registerLiveSocial} from "./live-social.mjs";
 
@@ -31,6 +32,7 @@ export function registerExplicitRoutes(app){
   registerFeedMode(app);
   registerStabilityOverrides(app);
   registerTv(app);
+  registerTvAdmin(app);
   registerLive(app);
   registerLiveSocial(app);
   registerGroupOAdmin(app);
