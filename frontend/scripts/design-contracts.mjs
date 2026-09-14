@@ -22,7 +22,7 @@ await must("app/SocialFeed.js",["useState(\"latest\")","FriendSuggestions","feed
 await must("app/UiRoundFixes.js",["public-room-card","smart-feed-strip","feed-more-button","real-map-canvas","sf-comment-replies","feed-friend-suggestions","install-nudge","live-notification-toast","room-system-event"]);
 await must("app/RealPeopleMap.js",["basemaps.cartocdn.com","tile.openstreetmap.org","CARTO","centeredViewer"]);
 await must("app/StoryRail.js",["/api/stories/mutes","story-muted-manage","shareStory","إظهار الستوريات"]);
-await must("app/PlatformClient.js",["beforeinstallprompt","install-nudge","marbo3a:notification:new","live-notification-toast","3000","15000"]);
+await must("app/PlatformClient.js",["beforeinstallprompt","install-nudge","marbo3a:notification:new","live-notification-toast","3000","12000","marbo3a_install_nudge_until","dismissInstall(7)"]);
 await must("app/RoomExperienceRuntime.js",["/leave","room:member-event","room-system-event"]);
 if(failed)process.exit(1);
 console.log("MARBO3A locked design contracts OK.");
