@@ -56,13 +56,13 @@ http.createServer=function requestFoundationCreateServer(app,...args){
 
     // Location privacy must be normalized before historical profile handlers.
     // Turning precise sharing off removes coordinates instead of retaining them,
-    // and precise sharing fails closed when either coordinate is invalid.
+    // and precise sharing fails closed when either coordinate is missing or invalid.
     app.use((req,res,next)=>{
       if(req.method!=="PATCH"||req.path!=="/api/profile/extended"||req.body?.city===undefined)return next();
       const share=Boolean(req.body?.sharePrecise);
       if(!share){delete req.body.latitude;delete req.body.longitude;return next()}
-      const lat=Number(req.body?.latitude),lng=Number(req.body?.longitude);
-      if(!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lng)||lng<-180||lng>180)return res.status(400).json({ok:false,error:"INVALID_PRECISE_LOCATION"});
+      const rawLat=req.body?.latitude,rawLng=req.body?.longitude,provided=v=>v!==undefined&&v!==null&&v!=="",lat=Number(rawLat),lng=Number(rawLng);
+      if(!provided(rawLat)||!provided(rawLng)||!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lng)||lng<-180||lng>180)return res.status(400).json({ok:false,error:"INVALID_PRECISE_LOCATION"});
       next();
     });
 
