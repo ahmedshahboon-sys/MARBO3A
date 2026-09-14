@@ -15,6 +15,8 @@ async function modeFeed(viewerId,{mode,seed,offset,limit}){
     :mode==="engaged"
       ?`((SELECT COUNT(*) FROM post_reactions r WHERE r.post_id=p.id)*3+(SELECT COUNT(*) FROM post_comments c WHERE c.post_id=p.id AND c.deleted_at IS NULL)*4) DESC,p.created_at DESC,p.id DESC`
       :`p.created_at DESC,p.id DESC`;
+  /* Keep $2 explicitly typed for every mode. PostgreSQL otherwise cannot infer the
+     skipped seed parameter when latest/friends/engaged still use $3/$4. */
   const rows=(await pool.query(`SELECT p.id,p.body,p.image_url,p.location_label,p.created_at,p.updated_at,u.id user_id,u.username,u.display_name,u.gender,u.avatar_url,
     COALESCE(pp.who_can_see_posts,'everyone') privacy_rule,
     (SELECT COUNT(*)::int FROM post_reactions r WHERE r.post_id=p.id) likes_count,
@@ -28,6 +30,7 @@ async function modeFeed(viewerId,{mode,seed,offset,limit}){
   LEFT JOIN profile_privacy pp ON pp.user_id=p.user_id
   WHERE p.deleted_at IS NULL
     AND u.account_status='active'
+    AND ($2::bigint IS NOT NULL)
     AND NOT EXISTS(SELECT 1 FROM user_blocks b WHERE (b.blocker_id=$1 AND b.blocked_id=p.user_id) OR (b.blocked_id=$1 AND b.blocker_id=p.user_id))
     ${friendsOnly}
   ORDER BY ${order}
@@ -42,7 +45,7 @@ async function modeFeed(viewerId,{mode,seed,offset,limit}){
       selected.push(row);
     }
   }
-  return{posts:selected,nextCursor:rows.length&&consumed?offset+consumed:null};
+  return{posts:selected,nextCursor:rows.length===take&&consumed?offset+consumed:null};
 }
 export function registerFeedMode(app){
   app.get("/api/feed-mode",async(req,res)=>{try{
