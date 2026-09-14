@@ -1,4 +1,5 @@
 import {randomUUID} from "node:crypto";
+import {Readable} from "node:stream";
 import {pool,requireAuth} from "../runtime.mjs";
 
 function isAdmin(u){return u?.role==='admin'}
@@ -31,24 +32,29 @@ async function replaceChannels(rows){
     await client.query('COMMIT');
   }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
 }
+function proxied(target){return `/api/tv/proxy?t=${encodeURIComponent(ticketFor(target))}`}
 function rewritePlaylist(text,sourceUrl){
-  return String(text).replace(/\r/g,'').split('\n').map(line=>{const value=line.trim();if(!value||value.startsWith('#'))return line;try{const target=new URL(value,sourceUrl).toString();if(!safeHttp(target))return line;return `/api/tv/proxy?t=${encodeURIComponent(ticketFor(target))}`}catch{return line}}).join('\n');
+  return String(text).replace(/\r/g,'').split('\n').map(line=>{
+    if(line.includes('URI="'))return line.replace(/URI="([^"]+)"/g,(m,value)=>{try{const target=new URL(value,sourceUrl).toString();return safeHttp(target)?`URI="${proxied(target)}"`:m}catch{return m}});
+    const value=line.trim();if(!value||value.startsWith('#'))return line;
+    try{const target=new URL(value,sourceUrl).toString();return safeHttp(target)?proxied(target):line}catch{return line}
+  }).join('\n');
 }
-async function proxyTarget(target,res){
+async function proxyTarget(target,req,res){
   const url=safeHttp(target);if(!url)return res.status(400).end();
-  let upstream;try{upstream=await fetch(url,{redirect:'follow',signal:AbortSignal.timeout(20000),headers:{'user-agent':'MARBO3A-TV/1.0'}})}catch{return res.status(502).end()}
+  const headers={'user-agent':'MARBO3A-TV/1.0'};if(req.headers.range)headers.range=req.headers.range;
+  let upstream;try{upstream=await fetch(url,{redirect:'follow',signal:AbortSignal.timeout(20000),headers})}catch{return res.status(502).end()}
   if(!upstream.ok)return res.status(upstream.status).end();
   const type=String(upstream.headers.get('content-type')||'').toLowerCase(),finalUrl=upstream.url||url.toString();
   if(type.includes('mpegurl')||/\.m3u8?(\?|$)/i.test(finalUrl)){
     const text=await upstream.text();res.setHeader('content-type','application/vnd.apple.mpegurl; charset=utf-8');res.setHeader('cache-control','private, no-store');return res.send(rewritePlaylist(text,finalUrl));
   }
-  const len=upstream.headers.get('content-length'),range=upstream.headers.get('content-range'),acceptRanges=upstream.headers.get('accept-ranges');if(type)res.setHeader('content-type',type);if(len)res.setHeader('content-length',len);if(range)res.setHeader('content-range',range);if(acceptRanges)res.setHeader('accept-ranges',acceptRanges);res.setHeader('cache-control','private, no-store');
-  const buf=Buffer.from(await upstream.arrayBuffer());return res.status(upstream.status).send(buf);
+  for(const name of ['content-type','content-length','content-range','accept-ranges']){const value=upstream.headers.get(name);if(value)res.setHeader(name,value)}res.setHeader('cache-control','private, no-store');res.status(upstream.status);if(!upstream.body)return res.end();Readable.fromWeb(upstream.body).on('error',()=>{try{res.end()}catch{}}).pipe(res);
 }
 export function registerTv(app){
   app.get('/api/tv/channels',async(req,res)=>{const u=await requireAuth(req,res);if(!u)return;const rows=(await pool.query(`SELECT id,name,logo_url,group_title,stream_url FROM tv_channels WHERE enabled=TRUE ORDER BY sort_order,id`)).rows;res.json({ok:true,channels:rows.map(({stream_url,...c})=>({...c,play_url:`/api/tv/stream/${c.id}?t=${ticketFor(stream_url)}`}))})});
-  app.get('/api/tv/stream/:id',async(req,res)=>{const row=takeTicket(req.query.t);if(!row)return res.status(401).json({ok:false,error:'STREAM_TICKET_EXPIRED'});return proxyTarget(row.target,res)});
-  app.get('/api/tv/proxy',async(req,res)=>{const row=takeTicket(req.query.t);if(!row)return res.status(401).end();return proxyTarget(row.target,res)});
+  app.get('/api/tv/stream/:id',async(req,res)=>{const row=takeTicket(req.query.t);if(!row)return res.status(401).json({ok:false,error:'STREAM_TICKET_EXPIRED'});return proxyTarget(row.target,req,res)});
+  app.get('/api/tv/proxy',async(req,res)=>{const row=takeTicket(req.query.t);if(!row)return res.status(401).end();return proxyTarget(row.target,req,res)});
   app.get('/api/admin/tv/source',async(req,res)=>{const u=await requireAuth(req,res);if(!u)return;if(!isAdmin(u))return res.status(403).json({ok:false,error:'FORBIDDEN'});const s=(await pool.query(`SELECT id,kind,base_url,username,m3u_url,enabled,updated_at FROM tv_sources ORDER BY id DESC LIMIT 1`)).rows[0]||null;const count=(await pool.query(`SELECT COUNT(*)::int c FROM tv_channels`)).rows[0].c;res.json({ok:true,source:s,channels:count})});
   app.put('/api/admin/tv/source',async(req,res)=>{const u=await requireAuth(req,res);if(!u)return;if(!isAdmin(u))return res.status(403).json({ok:false,error:'FORBIDDEN'});const kind=['m3u','xtream'].includes(req.body?.kind)?req.body.kind:'m3u';const base=String(req.body?.baseUrl||'').trim(),username=String(req.body?.username||'').trim(),password=String(req.body?.password||'').trim(),m3u=String(req.body?.m3uUrl||'').trim();if(base&&!safeHttp(base))return res.status(400).json({ok:false,error:'INVALID_SOURCE_URL'});if(m3u&&!safeHttp(m3u))return res.status(400).json({ok:false,error:'INVALID_SOURCE_URL'});const current=(await pool.query(`SELECT * FROM tv_sources ORDER BY id DESC LIMIT 1`)).rows[0];if(current){await pool.query(`UPDATE tv_sources SET kind=$1,base_url=$2,username=$3,password=CASE WHEN $4='' THEN password ELSE $4 END,m3u_url=$5,updated_at=NOW() WHERE id=$6`,[kind,base||null,username||null,password,m3u||null,current.id])}else{await pool.query(`INSERT INTO tv_sources(kind,base_url,username,password,m3u_url) VALUES($1,$2,$3,$4,$5)`,[kind,base||null,username||null,password||null,m3u||null])}res.json({ok:true})});
   app.post('/api/admin/tv/import-m3u',async(req,res)=>{const u=await requireAuth(req,res);if(!u)return;if(!isAdmin(u))return res.status(403).json({ok:false,error:'FORBIDDEN'});const rows=parseM3u(req.body?.content||'');if(!rows.length)return res.status(400).json({ok:false,error:'NO_CHANNELS'});await replaceChannels(rows);res.json({ok:true,count:rows.length})});
