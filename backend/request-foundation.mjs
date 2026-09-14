@@ -2,7 +2,7 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import {pool} from "./runtime.mjs";
+import {pool,sessionUser,tokenFrom} from "./runtime.mjs";
 
 const prior=http.createServer.bind(http);
 const allowedOrigin=origin=>!origin||origin==="https://marbo3a.ly"||origin==="https://www.marbo3a.ly"||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
@@ -53,6 +53,14 @@ http.createServer=function requestFoundationCreateServer(app,...args){
     // can be bypassed when an earlier route handler sends the response first.
     app.use("/api/auth",rateLimit({windowMs:15*60*1000,limit:120,standardHeaders:true,legacyHeaders:false}));
     app.use("/api",rateLimit({windowMs:60*1000,limit:600,standardHeaders:true,legacyHeaders:false,skip:req=>["GET","HEAD","OPTIONS"].includes(req.method)}));
+
+    // Legacy OAuth linking has its own current-user helper. Validate any supplied
+    // MARBO3A session through the runtime first so expired durable sessions cannot
+    // survive only because a stale Redis key is still present.
+    app.use("/api/auth/oauth",async(req,res,next)=>{
+      if(!tokenFrom(req))return next();
+      try{await sessionUser(req);next()}catch(e){console.error("oauth session validation",e);res.status(503).json({ok:false,error:"SESSION_VALIDATION_FAILED"})}
+    });
 
     app.use((_req,res,next)=>{
       res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:");
