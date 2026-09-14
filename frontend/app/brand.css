@@ -22,8 +22,8 @@ body, button, input, textarea, select {
   background: linear-gradient(145deg, var(--marbo-orange-2), var(--marbo-orange)) !important;
   box-shadow: 0 12px 30px rgba(255,122,0,.20);
 }
-.brand-mark{color:transparent!important;background-image:url('/logo.svg')!important;background-size:cover!important;background-position:center!important;background-color:transparent!important}
-.mini-mark{color:transparent!important;background-image:url('/logo.svg')!important;background-size:cover!important}
+.brand-mark{color:transparent!important;background-image:url('/brand/official/marbo3a-mark.png')!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;background-color:transparent!important}
+.mini-mark{color:transparent!important;background-image:url('/brand/official/marbo3a-mark.png')!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;background-color:transparent!important}
 
 .auth-tabs button.active,.form-stack>button,.primary-action,.join-button,.small-primary,.inline-form button,.composer button {
   background: linear-gradient(135deg,var(--marbo-orange-2),var(--marbo-orange)) !important;
