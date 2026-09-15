@@ -9,7 +9,7 @@ await must("app/design-system.css",[
 ]);
 await must("app/brand.css",["/brand/official/marbo3a-mark.png","background-size:contain","background-repeat:no-repeat"]);
 await mustNot("app/brand.css",["background-image:url('/logo.svg')"]);
-await must("app/ThemeRuntime.js",["marbo3a_theme","prefers-color-scheme: light","/api/settings","data-theme","dataset.themePreference"]);
+await must("app/ThemeRuntime.js",["marbo3a_theme","prefers-color-scheme: light","/api/settings","dataset.theme=","dataset.themePreference"]);
 await must("app/ui-v3-navigation.css",["color:var(--ui-muted)!important","color:var(--ui-accent)!important","box-shadow:0 0 0 3px var(--ui-bg)!important",".about-page","var(--ui-surface)","var(--ui-text)"]);
 await must("app/ui-v3-settings.css",["var(--ui-text)","var(--ui-border)","var(--ui-surface)","var(--ui-bg-elevated)"]);
 await mustNot("app/ui-v3-settings.css",["rgba(13,18,24,.92)","rgba(20,27,35,.96)","color:#fff"]);
