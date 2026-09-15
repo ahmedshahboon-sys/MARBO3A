@@ -1,0 +1,14 @@
+import {pool,requireAuth,clean} from "./runtime.mjs";
+import {requirePermission} from "./security-moderation.mjs";
+
+async function audit(adminId,action,commentId,reason,before,after){
+ await pool.query(`INSERT INTO audit_logs(user_id,level,category,action,details) VALUES($1,'INFO','MODERATION',$2,$3::jsonb)`,[adminId,action,JSON.stringify({target:{type:"comment",id:commentId},reason,before,after})]).catch(()=>{});
+ await pool.query(`INSERT INTO admin_change_audit(admin_id,action,entity_type,entity_id,before_state,after_state,reason) VALUES($1,$2,'comment',$3,$4::jsonb,$5::jsonb,$6)`,[adminId,action,String(commentId),JSON.stringify(before),JSON.stringify(after),reason]).catch(()=>{});
+}
+
+export function registerCommentModeration(app){
+ // Ordinary comment mutation is owner-only. Admins/moderators use the audited endpoint below.
+ app.use(async(req,res,next)=>{const match=req.path.match(/^\/api\/feed\/(\d+)\/comments\/(\d+)$/);if(!match||!["PATCH","DELETE"].includes(req.method))return next();try{const user=await requireAuth(req,res);if(!user)return;const postId=Number(match[1]),commentId=Number(match[2]);const comment=(await pool.query(`SELECT id,user_id FROM post_comments WHERE id=$1 AND post_id=$2 AND deleted_at IS NULL`,[commentId,postId])).rows[0];if(!comment)return res.status(404).json({ok:false,error:"COMMENT_NOT_FOUND"});if(String(comment.user_id)!==String(user.id))return res.status(403).json({ok:false,error:"FORBIDDEN"});next()}catch(e){console.error("comment owner guard",e);res.status(500).json({ok:false,error:"COMMENT_AUTHZ_FAILED"})}});
+
+ app.delete("/api/admin/comments/:id",async(req,res)=>{try{const admin=await requirePermission(req,res,"posts.moderate");if(!admin)return;const id=Number(req.params.id),reason=clean(req.body?.reason,500);if(!Number.isSafeInteger(id)||id<1)return res.status(400).json({ok:false,error:"INVALID_COMMENT"});if(reason.length<3)return res.status(400).json({ok:false,error:"AUDIT_REASON_REQUIRED"});const before=(await pool.query(`SELECT id,post_id,user_id,parent_comment_id,body,deleted_at FROM post_comments WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"COMMENT_NOT_FOUND"});if(before.deleted_at)return res.status(409).json({ok:false,error:"COMMENT_ALREADY_DELETED"});const rows=(await pool.query(`UPDATE post_comments SET body='',deleted_at=NOW() WHERE deleted_at IS NULL AND (id=$1 OR (parent_comment_id=$1 AND $2::bigint IS NULL)) RETURNING id,post_id,user_id,parent_comment_id,deleted_at`,[id,before.parent_comment_id])).rows;await audit(admin.id,"admin_comment_delete",id,reason,before,{deletedIds:rows.map(x=>x.id),deleted_at:rows[0]?.deleted_at||null});res.json({ok:true,commentId:id,deletedIds:rows.map(x=>x.id),deletedCount:rows.length})}catch(e){console.error("admin comment delete",e);res.status(500).json({ok:false,error:"ADMIN_COMMENT_DELETE_FAILED"})}});
+}
