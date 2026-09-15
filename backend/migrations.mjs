@@ -16,13 +16,18 @@ try{
     const nonTransactional=sql.includes(NON_TRANSACTIONAL_MARKER);
     console.log(`applying migration ${name}${nonTransactional?" (non-transactional)":""}`);
     if(nonTransactional){
-      // PostgreSQL treats an advisory lock held by this session as compatible with
-      // normal statements, but CREATE INDEX CONCURRENTLY must not share a client
-      // carrying transaction state from the migration runner. Execute the SQL on
-      // a fresh pool connection while the lock-holding client serializes runners.
+      // CREATE INDEX CONCURRENTLY cannot execute in a transaction block, including
+      // PostgreSQL's implicit transaction around a multi-statement query string.
+      // Keep the advisory lock on the runner connection, but execute each SQL
+      // statement separately on a fresh connection so every concurrent index is
+      // its own top-level command.
       const migrationClient=await pool.connect();
       try{
-        await migrationClient.query(sql);
+        const statements=sql
+          .split(";")
+          .map(statement=>statement.trim())
+          .filter(statement=>statement && !statement.split("\n").every(line=>line.trim().startsWith("--")));
+        for(const statement of statements)await migrationClient.query(statement);
         await client.query(`INSERT INTO schema_migrations(name) VALUES($1)`,[name]);
       }finally{migrationClient.release()}
       continue;
