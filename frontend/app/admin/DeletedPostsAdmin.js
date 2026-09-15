@@ -1,0 +1,13 @@
+"use client";
+import {useEffect,useState} from "react";
+import AppDialog from "../AppDialog";
+
+const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
+async function api(path,options={}){const t=token(),headers={...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}) ,...(options.headers||{})};if(options.body&&!headers["content-type"])headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+export default function DeletedPostsAdmin(){
+ const[posts,setPosts]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[selected,setSelected]=useState(null),[reason,setReason]=useState("استعادة بعد مراجعة الإدارة"),[busy,setBusy]=useState(false);
+ async function load(){setLoading(true);try{const d=await api("/api/admin/moderation/deleted-posts");setPosts(d.posts||[]);setError("")}catch(e){setError(e.message)}finally{setLoading(false)}}
+ useEffect(()=>{load()},[]);
+ async function restore(){if(!selected||busy)return;setBusy(true);try{await api(`/api/admin/posts/${selected.id}/restore`,{method:"POST",body:JSON.stringify({reason:reason.trim()||"استعادة بعد مراجعة الإدارة"})});setPosts(v=>v.filter(p=>p.id!==selected.id));setSelected(null)}catch(e){setError(e.message)}finally{setBusy(false)}}
+ return <section className="admin-card admin-deleted-posts"><header><div><h2>المنشورات المحذوفة إداريًا</h2><p>مراجعة المنشورات المحذوفة واستعادتها عند حدوث خطأ. كل استعادة تُسجل في سجل الإدارة.</p></div><button type="button" onClick={load}>تحديث</button></header>{error&&<p className="sf-alert">{error}</p>}{loading?<p>جاري التحميل...</p>:!posts.length?<p className="sf-muted">لا توجد منشورات محذوفة للمراجعة.</p>:<div className="admin-list">{posts.map(p=><article key={p.id} className="admin-row"><div><b>{p.display_name||p.username} <small><bdi dir="ltr">@{p.username}</bdi></small></b><p>{p.body||"منشور وسائط بدون نص"}</p><small>Post #{p.id} · User #{p.user_id} · حذف {p.deleted_at?new Date(p.deleted_at).toLocaleString("ar-LY"):"-"}</small></div><button type="button" onClick={()=>{setReason("استعادة بعد مراجعة الإدارة");setSelected(p)}}>استعادة المنشور</button></article>)}</div>}{selected&&<AppDialog open input value={reason} onValueChange={setReason} title="استعادة المنشور؟" description={`سيعود منشور @${selected.username} للظهور في الأماكن التي تعتمد على المنشورات النشطة.`} confirmLabel={busy?"جاري الاستعادة...":"استعادة"} onConfirm={restore} onClose={()=>!busy&&setSelected(null)}/>}</section>
+}
