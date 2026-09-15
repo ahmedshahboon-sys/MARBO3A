@@ -9,7 +9,7 @@ const explore=read("app/explore/page.js");
 for(const t of ["/api/public/guest/session","/api/public/guest/activity","PublicRoomRail","guestOnly","الغرف العامة الشغالة","/api/public/live","guest-now-strip","guest-live-section","setInterval(refresh,12000)"] )must(explore,t,"guest explore");
 
 const rail=read("app/PublicRoomRail.js");
-for(const t of ["/api/public/rooms-v2","active_total","speaker_seat_count","speakers_count","listeners_count","/guest/room/"])must(rail,t,"public rooms rail");
+for(const t of ["/api/public/rooms-rail","active_total","speaker_seat_count","speakers_count","listeners_count","/guest/room/"])must(rail,t,"public rooms rail");
 
 const guestRoom=read("app/guest/room/[id]/page.js");
 for(const t of ["RoomVoiceStage","/messages","/presence/join","/presence/heartbeat","للقراءة فقط كزائر","سجل حسابك باش تكتب"] )must(guestRoom,t,"guest room");
