@@ -17,8 +17,11 @@ import {registerTvAdmin} from "./tv-admin.mjs";
 import {registerLive} from "./live.mjs";
 import {registerLiveSocial} from "./live-social.mjs";
 import {registerLiveHardening} from "./live-hardening.mjs";
+import {registerSecurityModeration} from "../security-moderation.mjs";
 
 export function registerExplicitRoutes(app){
+  // Security policy middleware must be registered before the handlers it protects.
+  registerSecurityModeration(app);
   registerAuthRegistration(app);
   registerAuthSession(app);
   registerFghSocial(app);
