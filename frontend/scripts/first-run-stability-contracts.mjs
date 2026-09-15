@@ -27,7 +27,7 @@ const permissions=read("app/PermissionsCenter.js");
 for(const t of ["marbo3a_permissions_intro_pending","FBAN","Chrome أو Safari"])must(permissions,t,"permission handoff");
 
 const sw=read("public/sw.js");
-for(const t of ["marbo3a-shell-v19-live-guest-sync","/_next/static/","SHELL.includes(url.pathname)","caches.delete","cache:\"no-store\"","SKIP_WAITING"])must(sw,t,"service worker freshness");
+for(const t of ["marbo3a-shell-v20-guest-pwa-safety","/_next/static/","SHELL.includes(url.pathname)","caches.delete","cache:\"no-store\"","SKIP_WAITING","safeAppPath"])must(sw,t,"service worker freshness");
 
 const errorPage=read("app/error.js");
 for(const t of ["/api/debug/report","إعادة المحاولة","دخول كزائر","/explore"])must(errorPage,t,"global error recovery");
