@@ -15,7 +15,7 @@ for(const t of ["CANCEL_PX","cancelHint","navigator.vibrate","voice_recorder_can
 const host=read("app/live/new/page.js");
 for(const t of ["/announce","/moderation","slowMode","shareLive","beforeunload","peak_viewers"])must(host,t,"live host");
 const viewer=read("app/live/[id]/page.js");
-for(const t of ["/report","scheduleReconnect","marbo3a:live-kicked","LIVE_BLOCKED","share"])must(viewer,t,"live viewer");
+for(const t of ["/report","scheduleReconnect","marbo3a:live:kicked","LIVE_BLOCKED","share"])must(viewer,t,"live viewer");
 const liveApi=read("app/live/live-api.js");
 for(const t of ["LIVE_CHAT_MUTED","LIVE_CHAT_CLOSED","LIVE_SLOW_MODE","LIVE_BLOCKED"])must(liveApi,t,"live api errors");
 const platform=read("app/PlatformClient.js");
