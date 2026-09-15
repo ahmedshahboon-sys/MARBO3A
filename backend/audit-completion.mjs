@@ -4,11 +4,12 @@ import {pool,redis,ensureRedis,requireAdmin,clean,emitUser,isAdmin} from "./runt
 const prior=http.createServer.bind(http);
 async function revokeUserSessions(userId,reason="moderated"){
   await ensureRedis();
+  await pool.query(`DELETE FROM durable_sessions WHERE user_id=$1`,[userId]);
+  await pool.query(`DELETE FROM user_sessions WHERE user_id=$1`,[userId]).catch(()=>{});
   for await(const raw of redis.scanIterator({MATCH:"session:*",COUNT:200})){
     const key=String(raw),value=await redis.get(key);
     if(String(value)===String(userId))await redis.del(key);
   }
-  await Promise.all([pool.query(`DELETE FROM user_sessions WHERE user_id=$1`,[userId]).catch(()=>{}),pool.query(`DELETE FROM durable_sessions WHERE user_id=$1`,[userId]).catch(()=>{})]);
   emitUser(userId,"session:revoked",{reason,at:new Date().toISOString()});
 }
 async function reportTargetUser(report){const id=Number(report.target_id);if(!Number.isSafeInteger(id)||id<1)return null;if(report.target_type==="user")return id;const map={post:["posts","user_id"],comment:["post_comments","user_id"],message:["messages","user_id"],direct_message:["direct_messages","sender_id"],room:["rooms","owner_id"]},spec=map[report.target_type];if(!spec)return null;const row=(await pool.query(`SELECT ${spec[1]} AS user_id FROM ${spec[0]} WHERE id=$1 LIMIT 1`,[id])).rows[0];return row?.user_id?Number(row.user_id):null}

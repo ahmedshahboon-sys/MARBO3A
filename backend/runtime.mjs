@@ -61,7 +61,7 @@ async function restoreDurableSession(token){
   try{
     const row=(await pool.query(`SELECT user_id,expires_at FROM durable_sessions WHERE token_hash=$1 AND expires_at>NOW() LIMIT 1`,[tokenHash(token)])).rows[0];
     if(!row?.user_id)return null;
-    const ttl=Math.max(60,Math.min(SESSION_TTL,Math.floor((new Date(row.expires_at).getTime()-Date.now())/1000)));
+    const ttl=Math.max(1,Math.min(SESSION_TTL,Math.floor((new Date(row.expires_at).getTime()-Date.now())/1000)));
     await redis.set(`session:${token}`,String(row.user_id),{EX:ttl});
     return String(row.user_id);
   }catch(e){
@@ -74,12 +74,16 @@ export async function sessionUser(req){
   await ensureRedis();
   const token=tokenFrom(req);
   if(!token)return null;
+  const hash=tokenHash(token);
   let id=await redis.get(`session:${token}`);
-  if(!id)id=await restoreDurableSession(token);
+  if(id){
+    const durable=(await pool.query(`SELECT user_id FROM durable_sessions WHERE token_hash=$1 AND user_id=$2 AND expires_at>NOW() LIMIT 1`,[hash,id]).catch(()=>({rows:[]}))).rows[0];
+    if(!durable){await redis.del(`session:${token}`).catch(()=>{});return null}
+  }else id=await restoreDurableSession(token);
   if(!id)return null;
   const user=(await pool.query(`SELECT id,email,username,display_name,gender,bio,avatar_url,account_status,ban_reason,role,two_factor_enabled,onboarding_completed,created_at FROM users WHERE id=$1`,[id])).rows[0]||null;
-  if(!user){await redis.del(`session:${token}`).catch(()=>{});return null}
-  await redis.expire(`session:${token}`,SESSION_TTL).catch(()=>{});
+  if(!user){await redis.del(`session:${token}`).catch(()=>{});await pool.query(`DELETE FROM durable_sessions WHERE token_hash=$1`,[hash]).catch(()=>{});return null}
+  await pool.query(`UPDATE durable_sessions SET last_seen=NOW() WHERE token_hash=$1`,[hash]).catch(()=>{});
   return user;
 }
 
@@ -103,17 +107,23 @@ export async function requireAdmin(req,res){
 export async function createSession(userId,ttl=SESSION_TTL){
   await ensureRedis();
   const token=crypto.randomBytes(32).toString("hex");
-  const safeTtl=Math.max(60,Number(ttl)||SESSION_TTL);
+  const safeTtl=Math.max(60,Number(ttl)||SESSION_TTL),hash=tokenHash(token);
   await redis.set(`session:${token}`,String(userId),{EX:safeTtl});
-  await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+($3::text||' seconds')::interval,NOW()) ON CONFLICT(token_hash) DO UPDATE SET user_id=EXCLUDED.user_id,expires_at=EXCLUDED.expires_at,last_seen=NOW()`,[tokenHash(token),userId,String(safeTtl)]).catch(()=>{});
+  try{
+    await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+($3::text||' seconds')::interval,NOW()) ON CONFLICT(token_hash) DO UPDATE SET user_id=EXCLUDED.user_id,expires_at=EXCLUDED.expires_at,last_seen=NOW()`,[hash,userId,String(safeTtl)]);
+  }catch(e){
+    await redis.del(`session:${token}`).catch(()=>{});
+    throw e;
+  }
   return token;
 }
 
 export async function destroySession(token){
   if(!token)return;
   await ensureRedis();
-  await redis.del(`session:${token}`);
-  await pool.query(`DELETE FROM durable_sessions WHERE token_hash=$1`,[tokenHash(token)]).catch(()=>{});
+  const hash=tokenHash(token);
+  await pool.query(`DELETE FROM durable_sessions WHERE token_hash=$1`,[hash]);
+  await redis.del(`session:${token}`).catch(()=>{});
 }
 
 export const clean=(v="",n=300)=>String(v??"").trim().replace(/\s+/g," ").slice(0,n);
