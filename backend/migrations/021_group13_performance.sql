@@ -1,5 +1,7 @@
+-- MARBO3A_MIGRATION_NO_TRANSACTION
 -- Group 13: additive indexes for high-frequency lifecycle queries.
--- CONCURRENTLY is intentional so a production migration does not take long write locks.
+-- These indexes intentionally use CONCURRENTLY, so the migration runner must execute this file outside BEGIN/COMMIT.
+-- IF NOT EXISTS keeps retry safe if a previous interrupted deployment created one or more indexes before failing.
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_posts_live_created ON posts(created_at DESC,id DESC) WHERE deleted_at IS NULL;
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_posts_user_live_created ON posts(user_id,created_at DESC,id DESC) WHERE deleted_at IS NULL;
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_room_created_live ON messages(room_id,created_at DESC,id DESC) WHERE deleted_at IS NULL;
