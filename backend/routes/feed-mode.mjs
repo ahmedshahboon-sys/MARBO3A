@@ -15,9 +15,7 @@ async function modeFeed(viewerId,{mode,seed,offset,limit}){
     :mode==="engaged"
       ?`((SELECT COUNT(*) FROM post_reactions r WHERE r.post_id=p.id)*3+(SELECT COUNT(*) FROM post_comments c WHERE c.post_id=p.id AND c.deleted_at IS NULL)*4) DESC,p.created_at DESC,p.id DESC`
       :`p.created_at DESC,p.id DESC`;
-  /* Keep $2 explicitly typed for every mode. PostgreSQL otherwise cannot infer the
-     skipped seed parameter when latest/friends/engaged still use $3/$4. */
-  const rows=(await pool.query(`SELECT p.id,p.body,p.image_url,p.location_label,p.created_at,p.updated_at,u.id user_id,u.username,u.display_name,u.gender,u.avatar_url,
+  const rows=(await pool.query(`SELECT p.id,p.body,p.image_url,p.location_label,p.created_at,p.updated_at,u.id user_id,u.username,u.display_name,u.gender,u.avatar_url,u.role author_role,
     COALESCE(pp.who_can_see_posts,'everyone') privacy_rule,
     (SELECT COUNT(*)::int FROM post_reactions r WHERE r.post_id=p.id) likes_count,
     (SELECT COUNT(*)::int FROM post_comments c WHERE c.post_id=p.id AND c.deleted_at IS NULL) comments_count,
@@ -40,6 +38,7 @@ async function modeFeed(viewerId,{mode,seed,offset,limit}){
     const row=rows[i];consumed=i+1;
     if(await allowed(row.privacy_rule,viewerId,row.user_id)){
       delete row.privacy_rule;
+      row.official_badge=row.author_role==="admin"?"admin":row.author_role==="moderator"?"moderator":null;
       row.relation=await relation(viewerId,row.user_id);
       row.sponsored=false;
       selected.push(row);
