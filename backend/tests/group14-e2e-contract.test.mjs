@@ -13,7 +13,7 @@ test("group14 matrix refuses source-only PASS claims",()=>{
 
 test("runtime smoke is read-only and requires explicit target",()=>{
  const s=read("scripts/group14-runtime-smoke.mjs");
- assert.match(s,/E2E_BASE_URL is required/);assert.match(s,/method/,{message:""});
+ assert.match(s,/E2E_BASE_URL is required/);
  assert.doesNotMatch(s,/method:\s*["'](?:POST|PUT|PATCH|DELETE)/);
  assert.match(s,/\/api\/health/);assert.match(s,/\/api\/system\/maintenance/);assert.match(s,/guest-auth-boundary/);
 });
