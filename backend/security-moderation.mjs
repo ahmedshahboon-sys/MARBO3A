@@ -1,0 +1,48 @@
+import crypto from "crypto";
+import {pool,redis,ensureRedis,requireAuth,clean,isAdmin} from "./runtime.mjs";
+
+// Central policy helpers for administrative identity protection and content moderation.
+// Keep these server-side: client-provided role/badge/permission fields are never trusted.
+const RESERVED_ADMIN_IDENTITIES=new Set([
+  "admin","administrator","moderator","mod","support","marbo3a","marbo3a admin","marbo3a support",
+  "الادارة","ادارة","ادارة مربوعة","المشرف","مشرف","الدعم","دعم مربوعة","مربوعة"
+]);
+const REPORT_REASONS=new Set(["spam","scam_fraud","impersonation","harassment","dangerous_link","inappropriate","other"]);
+const MODERATION_PERMISSIONS={admin:new Set(["posts.moderate","posts.delete_any","posts.restore","users.moderate","reports.review"]),moderator:new Set(["posts.moderate","posts.delete_any","reports.review"])};
+const normalizeArabic=s=>s.normalize("NFKC").replace(/[إأآٱ]/g,"ا").replace(/ـ/g,"").replace(/[\u064B-\u065F\u0670]/g,"");
+export function normalizeReservedIdentity(v){return normalizeArabic(String(v||"").trim().toLowerCase()).replace(/[._-]+/g," ").replace(/\s+/g," ")}
+export function isReservedIdentity(v){return RESERVED_ADMIN_IDENTITIES.has(normalizeReservedIdentity(v))}
+export function trustedBadge(user){const role=String(user?.role||"").toLowerCase();return role==="admin"?"admin":role==="moderator"?"moderator":null}
+export function hasPermission(user,permission){return Boolean(MODERATION_PERMISSIONS[String(user?.role||"").toLowerCase()]?.has(permission))}
+export async function requirePermission(req,res,permission){const user=await requireAuth(req,res);if(!user)return null;if(!hasPermission(user,permission)){res.status(403).json({ok:false,error:"FORBIDDEN",permission});return null}return user}
+export function reservedNames(){return [...RESERVED_ADMIN_IDENTITIES]}
+
+const fingerprint=body=>crypto.createHash("sha256").update(normalizeArabic(clean(body,3000).toLowerCase()).replace(/https?:\/\/[^\s]+/g,m=>m.replace(/[?#].*$/,""))).digest("hex");
+const links=body=>[...String(body||"").matchAll(/https?:\/\/[^\s<>"']+/gi)].map(x=>x[0].replace(/[),.!?]+$/,""));
+export async function enforcePostSpam(user,body){
+  await ensureRedis();const uid=Number(user.id),text=clean(body,3000),hash=fingerprint(text),urls=links(text).map(x=>{try{return new URL(x).hostname.toLowerCase()+new URL(x).pathname}catch{return x.toLowerCase()}});
+  const floodKey=`post:flood:${uid}`,dupeKey=`post:dupe:${uid}:${hash}`;const flood=await redis.incr(floodKey);if(flood===1)await redis.expire(floodKey,60);const dupes=await redis.incr(dupeKey);if(dupes===1)await redis.expire(dupeKey,900);
+  let repeatedLink=0;for(const url of [...new Set(urls)].slice(0,8)){const key=`post:link:${uid}:${crypto.createHash("sha1").update(url).digest("hex")}`,n=await redis.incr(key);if(n===1)await redis.expire(key,900);repeatedLink=Math.max(repeatedLink,n)}
+  if(flood>8||dupes>3||repeatedLink>5){const retryAfter=flood>8?Math.max(10,await redis.ttl(floodKey)):Math.max(30,await redis.ttl(dupeKey));await pool.query(`INSERT INTO audit_logs(user_id,level,category,action,details) VALUES($1,'WARN','ABUSE','post_spam_cooldown',$2::jsonb)`,[uid,JSON.stringify({flood,dupes,repeatedLink,retryAfter})]).catch(()=>{});return{ok:false,retryAfter,reason:dupes>3?"DUPLICATE_POST_SPAM":repeatedLink>5?"REPEATED_LINK_SPAM":"POST_FLOOD"}}
+  return{ok:true,warning:dupes===3||flood>=7||repeatedLink===5,metrics:{flood,dupes,repeatedLink}}
+}
+
+async function audit(adminId,action,target,reason,metadata={}){await pool.query(`INSERT INTO audit_logs(user_id,level,category,action,details) VALUES($1,'INFO','MODERATION',$2,$3::jsonb)`,[adminId,clean(action,180),JSON.stringify({target,reason,...metadata})]).catch(()=>{});await pool.query(`INSERT INTO admin_change_audit(admin_id,action,entity_type,entity_id,before_state,after_state,reason) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7)`,[adminId,clean(action,120),target.type,String(target.id),metadata.before?JSON.stringify(metadata.before):null,metadata.after?JSON.stringify(metadata.after):null,clean(reason,500)]).catch(()=>{})}
+
+export function registerSecurityModeration(app){
+  app.get("/api/security/identity-policy",(_req,res)=>res.json({ok:true,reservedPolicy:true}));
+
+  // Runs before the existing registration handler and rejects only exact normalized reserved identities.
+  app.use(async(req,res,next)=>{if(req.method!=="POST"||req.path!=="/api/auth/register")return next();if(isReservedIdentity(req.body?.username)||isReservedIdentity(req.body?.displayName))return res.status(409).json({ok:false,error:"RESERVED_IDENTITY"});next()});
+  app.use(async(req,res,next)=>{if(req.method!=="PATCH"||req.path!=="/api/profile/identity")return next();const user=await requireAuth(req,res);if(!user)return;if(!isAdmin(user)&&(isReservedIdentity(req.body?.username)||isReservedIdentity(req.body?.displayName)))return res.status(409).json({ok:false,error:"RESERVED_IDENTITY"});next()});
+
+  // Spam guard is deliberately progressive and only intercepts post creation.
+  app.use(async(req,res,next)=>{if(req.method!=="POST"||req.path!=="/api/feed")return next();try{const user=await requireAuth(req,res);if(!user)return;const verdict=await enforcePostSpam(user,req.body?.body||"");if(!verdict.ok){res.setHeader("Retry-After",String(verdict.retryAfter));return res.status(429).json({ok:false,error:verdict.reason,retryAfter:verdict.retryAfter})}if(verdict.warning)res.setHeader("X-Marbo3a-Spam-Warning","1");next()}catch(e){console.error("post spam guard",e);next()}});
+
+  // Report validation/abuse protection. Existing /api/reports remains the writer.
+  app.use(async(req,res,next)=>{if(req.method!=="POST"||req.path!=="/api/reports")return next();try{const user=await requireAuth(req,res);if(!user)return;const type=String(req.body?.targetType||""),target=Number(req.body?.targetId),reason=String(req.body?.reason||"").trim().toLowerCase();if(!["post","user","comment","message","direct_message","room"].includes(type)||!Number.isSafeInteger(target)||target<1)return res.status(400).json({ok:false,error:"INVALID_REPORT"});if(!REPORT_REASONS.has(reason))return res.status(400).json({ok:false,error:"INVALID_REPORT_REASON"});await ensureRedis();const key=`report:rate:${user.id}`,n=await redis.incr(key);if(n===1)await redis.expire(key,3600);if(n>20)return res.status(429).json({ok:false,error:"REPORT_RATE_LIMITED",retryAfter:Math.max(1,await redis.ttl(key))});const duplicate=(await pool.query(`SELECT 1 FROM reports WHERE reporter_id=$1 AND target_type=$2 AND target_id=$3 AND status='open' AND created_at>NOW()-INTERVAL '24 hours' LIMIT 1`,[user.id,type,target])).rows[0];if(duplicate)return res.status(409).json({ok:false,error:"REPORT_ALREADY_OPEN"});next()}catch(e){console.error("report guard",e);res.status(500).json({ok:false,error:"REPORT_CHECK_FAILED"})}});
+
+  app.get("/api/admin/moderation/deleted-posts",async(req,res)=>{try{const admin=await requirePermission(req,res,"posts.restore");if(!admin)return;const rows=(await pool.query(`SELECT p.id,p.user_id,p.body,p.image_url,p.created_at,p.deleted_at,u.username,u.display_name FROM posts p JOIN users u ON u.id=p.user_id WHERE p.deleted_at IS NOT NULL ORDER BY p.deleted_at DESC LIMIT 250`)).rows;res.json({ok:true,posts:rows})}catch(e){console.error("deleted posts",e);res.status(500).json({ok:false,error:"DELETED_POSTS_FAILED"})}});
+  app.delete("/api/admin/posts/:id",async(req,res)=>{try{const admin=await requirePermission(req,res,"posts.delete_any");if(!admin)return;const id=Number(req.params.id),reason=clean(req.body?.reason,500);if(!Number.isSafeInteger(id)||id<1)return res.status(400).json({ok:false,error:"INVALID_POST"});if(reason.length<3)return res.status(400).json({ok:false,error:"AUDIT_REASON_REQUIRED"});const before=(await pool.query(`SELECT id,user_id,body,image_url,deleted_at FROM posts WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"POST_NOT_FOUND"});if(before.deleted_at)return res.status(409).json({ok:false,error:"POST_ALREADY_DELETED"});const after=(await pool.query(`UPDATE posts SET deleted_at=NOW() WHERE id=$1 RETURNING id,user_id,deleted_at`,[id])).rows[0];await pool.query(`UPDATE users SET pinned_post_id=NULL WHERE pinned_post_id=$1`,[id]);await audit(admin.id,"admin_post_delete",{type:"post",id},reason,{before,after,ownerUserId:before.user_id});res.json({ok:true,post:after})}catch(e){console.error("admin post delete",e);res.status(500).json({ok:false,error:"ADMIN_POST_DELETE_FAILED"})}});
+  app.post("/api/admin/posts/:id/restore",async(req,res)=>{try{const admin=await requirePermission(req,res,"posts.restore");if(!admin)return;const id=Number(req.params.id),reason=clean(req.body?.reason,500)||"restore";if(!Number.isSafeInteger(id)||id<1)return res.status(400).json({ok:false,error:"INVALID_POST"});const before=(await pool.query(`SELECT id,user_id,body,image_url,deleted_at FROM posts WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"POST_NOT_FOUND"});if(!before.deleted_at)return res.status(409).json({ok:false,error:"POST_NOT_DELETED"});const after=(await pool.query(`UPDATE posts SET deleted_at=NULL,updated_at=NOW() WHERE id=$1 RETURNING id,user_id,deleted_at,updated_at`,[id])).rows[0];await audit(admin.id,"admin_post_restore",{type:"post",id},reason,{before,after,ownerUserId:before.user_id});res.json({ok:true,post:after})}catch(e){console.error("admin post restore",e);res.status(500).json({ok:false,error:"ADMIN_POST_RESTORE_FAILED"})}});
+}
