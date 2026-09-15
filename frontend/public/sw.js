@@ -1,8 +1,8 @@
-const VERSION="marbo3a-shell-v20-guest-pwa-safety";
+const VERSION="marbo3a-shell-v21-release-freshness";
 const OFFLINE="/offline.html";
 const SHELL=[OFFLINE,"/manifest.webmanifest","/favicon.svg","/logo.svg","/pwa-icon.svg","/pwa-maskable.svg","/pwa-192.png","/pwa-512.png","/pwa-maskable-512.png","/apple-touch-icon.png","/brand/official/marbo3a-mark.png"];
 const safeAppPath=value=>{try{const u=new URL(String(value||"/home"),self.location.origin);return u.origin===self.location.origin?`${u.pathname}${u.search}${u.hash}`:"/home"}catch{return"/home"}};
-self.addEventListener("install",event=>{event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)));});
+self.addEventListener("install",event=>{event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
 self.addEventListener("fetch",event=>{const req=event.request;if(req.method!=="GET")return;const url=new URL(req.url);if(url.origin!==location.origin)return;if(url.pathname.startsWith("/api/")||url.pathname.startsWith("/uploads/"))return;if(req.mode==="navigate"){event.respondWith(fetch(req,{cache:"no-store"}).catch(()=>caches.match(OFFLINE)));return}if(url.pathname.startsWith("/_next/static/")){event.respondWith(fetch(req).then(res=>{if(res.ok&&res.type==="basic"){const copy=res.clone();caches.open(VERSION).then(c=>c.put(req,copy)).catch(()=>{})}return res}).catch(()=>caches.match(req)));return}if(SHELL.includes(url.pathname)){event.respondWith(fetch(req,{cache:"no-store"}).then(res=>{if(res.ok&&res.type==="basic"){const copy=res.clone();caches.open(VERSION).then(c=>c.put(req,copy)).catch(()=>{})}return res}).catch(()=>caches.match(req)));}});
