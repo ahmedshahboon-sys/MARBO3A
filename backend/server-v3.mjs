@@ -1,11 +1,14 @@
 import express from "express";
 import http from "http";
 import {restoreHttpCreateServer} from "./bootstrap.mjs";
-import {pool,redis,ensureRedis,sessionUser,ipOf,clean} from "./runtime.mjs";
+import {pool,redis,ensureRedis} from "./runtime.mjs";
 import {attachRealtime} from "./realtime.mjs";
 import {registerExplicitRoutes} from "./routes/index.mjs";
 
 const app=express();
+// bootstrap instrumentation owns /api/telemetry/ping when createServer is invoked.
+// Keep a single canonical telemetry owner instead of registering an unreachable
+// second handler later in this file.
 const server=http.createServer(app);
 restoreHttpCreateServer();
 
@@ -14,7 +17,6 @@ attachRealtime(server);
 
 app.get("/health",async(_req,res)=>{try{await pool.query("SELECT 1");res.json({ok:true,project:"MARBO3A",database:true,redis:redis.isReady})}catch{res.status(503).json({ok:false,project:"MARBO3A",database:false,redis:redis.isReady})}});
 app.get("/api/health",async(_req,res)=>{let database="connected";try{await pool.query("SELECT 1")}catch{database="disconnected"}res.status(database==="connected"?200:503).json({ok:database==="connected",api:"MARBO3A API",database,realtime:"ready",redis:redis.isReady?"connected":"disconnected",email:process.env.BREVO_API_KEY?"configured":"missing",time:new Date().toISOString()})});
-app.post("/api/telemetry/ping",async(req,res)=>{const visitorId=clean(req.body?.visitorId,100);if(!visitorId)return res.status(400).json({ok:false});const user=await sessionUser(req).catch(()=>null);await pool.query(`INSERT INTO visitor_presence(visitor_id,user_id,last_seen,first_seen,last_ip) VALUES($1,$2,NOW(),NOW(),$3) ON CONFLICT(visitor_id) DO UPDATE SET user_id=EXCLUDED.user_id,last_seen=NOW(),last_ip=EXCLUDED.last_ip`,[visitorId,user?.id||null,ipOf(req)]);res.json({ok:true})});
 
 await ensureRedis();
 server.listen(4000,"0.0.0.0",()=>console.log("MARBO3A API listening on 4000 · explicit routes · realtime + presence"));
