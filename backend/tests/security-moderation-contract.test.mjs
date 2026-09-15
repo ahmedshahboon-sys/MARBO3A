@@ -1,0 +1,24 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+const here=path.dirname(fileURLToPath(import.meta.url));
+const read=name=>fs.readFileSync(path.join(here,"..",name),"utf8");
+const sec=read("security-moderation.mjs"),feed=read("feed-extensions.mjs"),comments=read("comment-moderation.mjs"),routes=read("routes/index.mjs");
+
+test("01 admin identity is reserved",()=>assert.match(sec,/"admin"/));
+test("02 Arabic administrative identities are reserved",()=>assert.match(sec,/"الادارة"/));
+test("03 reserved identity normalization uses NFKC",()=>assert.match(sec,/normalize\("NFKC"\)/));
+test("04 registration is protected by reserved identity policy",()=>assert.match(sec,/\/api\/auth\/register/));
+test("05 trusted badge derives from role",()=>assert.match(sec,/trustedBadge\(user\).*user\?\.role/s));
+test("06 delete-any permission exists independently",()=>assert.match(sec,/posts\.delete_any/));
+test("07 moderation capability endpoint is authenticated",()=>assert.match(sec,/\/api\/security\/me.*requireAuth/s));
+test("08 ordinary post update is owner-only",()=>assert.match(feed,/app\.patch\("\/api\/feed\/:id"[\s\S]*?String\(p\.user_id\)!==String\(u\.id\).*FORBIDDEN/));
+test("09 ordinary post delete is owner-only",()=>assert.match(feed,/app\.delete\("\/api\/feed\/:id"[\s\S]*?String\(p\.user_id\)!==String\(u\.id\).*FORBIDDEN/));
+test("10 admin post deletion requires reason",()=>assert.match(sec,/AUDIT_REASON_REQUIRED/));
+test("11 admin post deletion is soft delete",()=>assert.match(sec,/UPDATE posts SET deleted_at=NOW\(\)/));
+test("12 deleted posts can be restored through protected endpoint",()=>assert.match(sec,/\/api\/admin\/posts\/:id\/restore/));
+test("13 ordinary comment mutation has owner guard",()=>assert.match(comments,/comment owner guard/));
+test("14 administrative comment deletion is separate and audited",()=>{assert.match(comments,/\/api\/admin\/comments\/:id/);assert.match(comments,/admin_comment_delete/)});
+test("15 spam and duplicate-report controls are installed before routes",()=>{assert.match(sec,/post:flood:/);assert.match(sec,/REPORT_ALREADY_OPEN/);assert.ok(routes.indexOf("registerSecurityModeration(app)")<routes.indexOf("registerAuthRegistration(app)"))});
