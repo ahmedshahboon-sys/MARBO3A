@@ -9,10 +9,13 @@ test("request observability is bounded and outer-owned",()=>{
  assert.ok(boot.indexOf('./observability-foundation.mjs')<boot.indexOf('./request-foundation.mjs'));
 });
 
-test("hot path indexes are additive and concurrent",()=>{
- const sql=repo("backend/migrations/021_group13_performance.sql");
+test("hot path indexes are additive concurrent and runner-compatible",()=>{
+ const sql=repo("backend/migrations/021_group13_performance.sql"),runner=repo("backend/migrations.mjs");
  for(const name of ["idx_posts_live_created","idx_messages_room_created_live","idx_direct_messages_conversation_created_live","idx_notifications_user_unread_created","idx_operation_logs_errors_created"])assert.ok(sql.includes(name));
  assert.ok((sql.match(/CREATE INDEX CONCURRENTLY IF NOT EXISTS/g)||[]).length>=8);
+ assert.match(sql,/MARBO3A_MIGRATION_NO_TRANSACTION/);
+ assert.match(runner,/NON_TRANSACTIONAL_MARKER="MARBO3A_MIGRATION_NO_TRANSACTION"/);
+ assert.match(runner,/if\(nonTransactional\)/);
 });
 
 test("encrypted backup fails closed and restore verification is isolated",()=>{
