@@ -32,6 +32,7 @@ html{font-size:14px;background:var(--ui-bg);color-scheme:dark}
 html[data-theme="light"]{color-scheme:light}
 body,button,input,textarea,select{font-family:var(--ui-font)!important}
 body{color:var(--ui-text)}
+body.ui-v3{background:var(--ui-bg)!important;color:var(--ui-text)!important}
 button,input,textarea,select{letter-spacing:0}
 
 /* Typography hierarchy */
