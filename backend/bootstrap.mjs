@@ -55,7 +55,9 @@ const modules=[
   "./r1-voice-preserve-mute.mjs",
   // R1 safety middleware registers ahead of R1 routes and preserves blocking/orphan-reply guarantees.
   "./r1-safety.mjs",
-  // Request foundation must remain the outermost compatibility wrapper.
+  // Request observability wraps the historical route chain, while request-foundation remains
+  // the final import so security/parsing middleware is still registered first at runtime.
+  "./observability-foundation.mjs",
   "./request-foundation.mjs"
 ];
 for(const module of modules)await import(module);
