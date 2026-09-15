@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
+const readRepo=file=>fs.readFileSync(new URL(`../../${file}`,import.meta.url),"utf8");
 
 test("explicit admin control owns resilient overview system and readiness",()=>{
  const src=read("routes/core-admin-control.mjs");
@@ -36,7 +37,7 @@ test("account status and privilege changes enter the change audit",()=>{
 });
 
 test("admin UI uses the resilient control overview and reasoned destructive dialogs",()=>{
- const src=read("../frontend/app/admin/AdminCenter.js");
+ const src=readRepo("frontend/app/admin/AdminCenter.js");
  assert.ok(src.includes('/api/admin/control/overview'));
  assert.ok(!src.includes('/api/admin/stats'),"legacy all-or-nothing stats endpoint should not drive the main dashboard");
  assert.ok(src.includes('سبب تغيير الصلاحية — مطلوب'));
