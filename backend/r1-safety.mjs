@@ -19,6 +19,22 @@ async function canAccessPost(postId,u){
 
 http.createServer=function r1SafetyServer(app,...args){
   if(typeof app==="function"&&app?.use){
+    // Public/guest surfaces must never leak disabled accounts or soft-deleted room-message payloads.
+    app.use((req,res,next)=>{
+      if(req.method!=="GET"||req.path!=="/api/public/feed")return next();
+      const json=res.json.bind(res);
+      res.json=async body=>{try{if(body?.ok&&Array.isArray(body.posts)&&body.posts.length){const ids=[...new Set(body.posts.map(p=>Number(p.user_id)).filter(Number.isSafeInteger))];if(ids.length){const active=new Set((await pool.query(`SELECT id FROM users WHERE id=ANY($1::bigint[]) AND account_status='active'`,[ids])).rows.map(x=>String(x.id)));body={...body,posts:body.posts.filter(p=>active.has(String(p.user_id)))}}}}catch{return json({ok:false,error:"PUBLIC_FEED_FAILED"})}return json(body)};
+      next();
+    });
+    app.use(async(req,res,next)=>{try{
+      const match=req.path.match(/^\/api\/public\/rooms-v2\/(\d+)\/presence\/heartbeat$/);if(req.method!=="POST"||!match)return next();
+      const room=(await pool.query(`SELECT 1 FROM rooms WHERE id=$1 AND visibility='public'`,[Number(match[1])])).rows[0];if(!room)return res.status(404).json({ok:false,error:"ROOM_NOT_FOUND"});next();
+    }catch(e){next(e)}});
+    app.use((req,res,next)=>{
+      if(req.method!=="GET"||!/^\/api\/public\/rooms-v2\/\d+\/messages$/.test(req.path))return next();
+      const json=res.json.bind(res);res.json=body=>{if(body?.ok&&Array.isArray(body.messages))body={...body,messages:body.messages.map(m=>m?.deleted_at?{...m,body:null,attachment_url:null,attachment_type:null}:m)};return json(body)};next();
+    });
+
     app.use(async(req,res,next)=>{try{
       if(req.method!=="GET"||req.path!=="/api/feed")return next();
       const u=await requireAuth(req,res);if(!u)return;
