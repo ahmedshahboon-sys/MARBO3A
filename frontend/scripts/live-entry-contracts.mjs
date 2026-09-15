@@ -12,6 +12,6 @@ must("app/live-guest-polish.css",[".install-nudge",".guest-now-strip",".guest-li
 must("app/ui-contract-additions.css",["Final immersive live ownership",".live-immersive .live-watch-chat",".live-immersive .live-studio-controls",".install-nudge","orientation:landscape"],"final live UI ownership");
 must("app/PlatformClient.js",["marbo3a_install_nudge_until","dismissInstall(7)","installRouteAllowed"],"install nudge persistence");
 must("app/explore/page.js",["/api/public/live","guest-now-strip","guest-live-section","setInterval(refresh,12000)"],"guest live sync");
-must("public/sw.js",["marbo3a-shell-v19-live-guest-sync","cache:\"no-store\"","SKIP_WAITING"],"fresh pwa shell");
+must("public/sw.js",["marbo3a-shell-v20-guest-pwa-safety","cache:\"no-store\"","SKIP_WAITING"],"fresh pwa shell");
 must("app/admin/tv/page.js",["/api/admin/tv/test-source","/api/admin/tv/channels/","جرّب المصدر","اختبار"],"tv admin completion");
 console.log("live-entry contracts: ok");
