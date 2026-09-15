@@ -40,8 +40,6 @@ http.createServer=function socialExperienceServer(app,...args){
     const rows=(await pool.query(`SELECT c.id,c.post_id,c.user_id,c.body,c.created_at,c.edited_at,c.edited_at AS updated_at,x.username,x.display_name,x.avatar_url FROM post_comments c JOIN users x ON x.id=c.user_id WHERE c.post_id=$1 AND c.deleted_at IS NULL ORDER BY c.id DESC LIMIT 2`,[postId])).rows.reverse();res.json({ok:true,comments:rows});
   }catch(e){console.error("comment preview",e);res.status(500).json({ok:false,error:"COMMENTS_LOAD_FAILED"})}});
 
-  app.get("/api/notifications/unread-count",async(req,res)=>{try{const u=await requireAuth(req,res);if(!u)return;const count=Number((await pool.query(`SELECT COUNT(*)::int n FROM notifications WHERE user_id=$1 AND read_at IS NULL`,[u.id])).rows[0]?.n||0);res.json({ok:true,count})}catch(e){res.status(500).json({ok:false,error:"NOTIFICATIONS_COUNT_FAILED"})}});
-
   app.get("/api/profile/identity",async(req,res)=>{try{const u=await requireAuth(req,res);if(!u)return;const row=(await pool.query(`SELECT id,username,display_name,username_changed_at FROM users WHERE id=$1`,[u.id])).rows[0];const next=row.username_changed_at?new Date(new Date(row.username_changed_at).getTime()+7*86400000):null;res.json({ok:true,user:row,usernameNextChangeAt:next?.toISOString()||null,canChangeUsername:!next||next<=new Date()})}catch(e){res.status(500).json({ok:false,error:"IDENTITY_LOAD_FAILED"})}});
 
   app.patch("/api/profile/identity",async(req,res)=>{try{
