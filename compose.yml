@@ -90,6 +90,9 @@ services:
       retries: 8
       start_period: 3s
 
+  # Local emergency copy only. This volume lives on the same host and is not an offsite backup.
+  # Production protection is owned by ops/backup-database.sh: encrypted dump + checksum + optional offsite copy,
+  # followed by ops/verify-backup-restore.sh on a controlled schedule.
   backup:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -103,8 +106,8 @@ services:
       'while true; do
         export PGPASSWORD="$${POSTGRES_PASSWORD}";
         TS=$$(date +%Y%m%d-%H%M%S);
-        pg_dump -h db -U "$${POSTGRES_USER:-marbo3a}" -d "$${POSTGRES_DB:-marbo3a}" -Fc -f "/backups/marbo3a-$${TS}.dump" && echo "backup completed: $${TS}";
-        find /backups -type f -name "marbo3a-*.dump" -mtime +14 -delete;
+        pg_dump -h db -U "$${POSTGRES_USER:-marbo3a}" -d "$${POSTGRES_DB:-marbo3a}" -Fc -f "/backups/marbo3a-$${TS}.dump" && echo "local emergency backup completed: $${TS}";
+        find /backups -type f -name "marbo3a-*.dump" -mtime +7 -delete;
         sleep 86400;
       done'
 
