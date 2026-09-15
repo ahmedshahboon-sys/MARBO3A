@@ -3,8 +3,8 @@
    screen still renders a raw HTML control. Loaded after the V3 density layer. */
 
 body.ui-v3{
-  --v3-control-h:40px;
-  --v3-control-compact-h:34px;
+  --v3-control-h:42px;
+  --v3-control-compact-h:36px;
   --v3-control-radius:12px;
   --v3-control-bg:#151c25;
   --v3-control-bg-hover:#1b2430;
@@ -14,160 +14,17 @@ body.ui-v3{
 }
 
 .ui-v3 :is(button,input,textarea,select){font:inherit;color:inherit}
-.ui-v3 :is(button,.ui-button,.ui-icon-button,[role="button"]){
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-}
+.ui-v3 :is(button,.ui-button,.ui-icon-button,[role="button"]){-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
-/* Canonical reusable buttons. */
-.ui-v3 .ui-button{
-  -webkit-appearance:none;
-  appearance:none;
-  min-height:var(--v3-control-h);
-  padding:0 13px;
-  border:1px solid var(--v3-control-border);
-  border-radius:var(--v3-control-radius);
-  background:var(--v3-control-bg);
-  color:var(--v3-control-text);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  font-size:13px;
-  font-weight:800;
-  line-height:1;
-  text-decoration:none;
-  white-space:nowrap;
-  box-shadow:none;
-  cursor:pointer;
-  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .12s ease,opacity .16s ease;
-}
-.ui-v3 .ui-button:hover{background:var(--v3-control-bg-hover);border-color:rgba(255,255,255,.18)}
-.ui-v3 .ui-button:active{transform:translateY(1px) scale(.985)}
-.ui-v3 .ui-button.ui-primary{background:linear-gradient(105deg,#cf5900,var(--v3-orange));border-color:rgba(255,154,65,.48);color:#fff}
-.ui-v3 .ui-button.ui-primary:hover{background:linear-gradient(105deg,#dd6100,#ff8617)}
-.ui-v3 .ui-button.ui-secondary{background:#18212b;border-color:#34404e;color:#eef2f6}
-.ui-v3 .ui-button.ui-ghost{background:transparent;border-color:var(--v3-control-border);color:var(--v3-control-muted)}
-.ui-v3 .ui-button.ui-danger{background:#321a1e;border-color:#6a333b;color:#ffabb2}
-.ui-v3 .ui-button.ui-compact{min-height:var(--v3-control-compact-h);padding-inline:10px;border-radius:10px;font-size:11px;gap:5px}
-.ui-v3 .ui-button:disabled,.ui-v3 .ui-button[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none!important}
+.ui-v3 .ui-button{-webkit-appearance:none;appearance:none;min-height:var(--v3-control-h);padding:0 13px;border:1px solid var(--v3-control-border);border-radius:var(--v3-control-radius);background:var(--v3-control-bg);color:var(--v3-control-text);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;line-height:1;text-decoration:none;white-space:nowrap;box-shadow:none;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .12s ease,opacity .16s ease}
+.ui-v3 .ui-button:hover{background:var(--v3-control-bg-hover);border-color:rgba(255,255,255,.18)}.ui-v3 .ui-button:active{transform:translateY(1px) scale(.985)}.ui-v3 .ui-button.ui-primary{background:linear-gradient(105deg,#cf5900,var(--v3-orange));border-color:rgba(255,154,65,.48);color:#fff}.ui-v3 .ui-button.ui-primary:hover{background:linear-gradient(105deg,#dd6100,#ff8617)}.ui-v3 .ui-button.ui-secondary{background:#18212b;border-color:#34404e;color:#eef2f6}.ui-v3 .ui-button.ui-ghost{background:transparent;border-color:var(--v3-control-border);color:var(--v3-control-muted)}.ui-v3 .ui-button.ui-danger{background:#321a1e;border-color:#6a333b;color:#ffabb2}.ui-v3 .ui-button.ui-compact{min-height:var(--v3-control-compact-h);padding-inline:10px;border-radius:10px;font-size:11px;gap:5px}.ui-v3 .ui-button:disabled,.ui-v3 .ui-button[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none!important}
 
-.ui-v3 .ui-icon-button{
-  -webkit-appearance:none;
-  appearance:none;
-  width:38px;
-  height:38px;
-  min-width:38px;
-  min-height:38px;
-  padding:0;
-  border:1px solid var(--v3-control-border);
-  border-radius:12px;
-  background:var(--v3-control-bg);
-  color:var(--v3-control-text);
-  display:grid;
-  place-items:center;
-  box-shadow:none;
-  cursor:pointer;
-  transition:background .16s ease,border-color .16s ease,transform .12s ease,opacity .16s ease;
-}
-.ui-v3 .ui-icon-button:hover{background:var(--v3-control-bg-hover);border-color:rgba(255,255,255,.18)}
-.ui-v3 .ui-icon-button:active{transform:translateY(1px) scale(.97)}
-.ui-v3 .ui-icon-button svg{width:19px;height:19px}
-.ui-v3 .ui-icon-button.ui-compact{width:34px;height:34px;min-width:34px;min-height:34px;border-radius:10px}
-.ui-v3 .ui-icon-button:disabled{opacity:.48;cursor:not-allowed;transform:none!important}
+.ui-v3 .ui-icon-button{-webkit-appearance:none;appearance:none;width:42px;height:42px;min-width:42px;min-height:42px;padding:0;border:1px solid var(--v3-control-border);border-radius:12px;background:var(--v3-control-bg);color:var(--v3-control-text);display:grid;place-items:center;box-shadow:none;cursor:pointer;transition:background .16s ease,border-color .16s ease,transform .12s ease,opacity .16s ease}.ui-v3 .ui-icon-button:hover{background:var(--v3-control-bg-hover);border-color:rgba(255,255,255,.18)}.ui-v3 .ui-icon-button:active{transform:translateY(1px) scale(.97)}.ui-v3 .ui-icon-button svg{width:20px;height:20px}.ui-v3 .ui-icon-button.ui-compact{width:36px;height:36px;min-width:36px;min-height:36px;border-radius:10px}.ui-v3 .ui-icon-button:disabled{opacity:.48;cursor:not-allowed;transform:none!important}
 
-/* Legacy/raw fallback: text buttons never fall back to browser chrome. */
-.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)){
-  -webkit-appearance:none;
-  appearance:none;
-  min-height:36px;
-  padding:0 10px;
-  border:1px solid var(--v3-control-border);
-  border-radius:11px;
-  background:var(--v3-control-bg);
-  color:var(--v3-control-text);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  font-size:12px;
-  font-weight:800;
-  box-shadow:none;
-}
-.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)):hover{background:var(--v3-control-bg-hover)}
-.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)):active{transform:translateY(1px)}
+.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)){-webkit-appearance:none;appearance:none;min-height:40px;padding:0 11px;border:1px solid var(--v3-control-border);border-radius:11px;background:var(--v3-control-bg);color:var(--v3-control-text);display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:800;box-shadow:none}.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)):hover{background:var(--v3-control-bg-hover)}.ui-v3 button:not([class]):not(:has(img)):not(:has(video)):not(:has(canvas)):active{transform:translateY(1px)}
 
-/* Future form fields inherit the app visual language instead of white browser defaults. */
-.ui-v3 :is(
-  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([class]),
-  textarea:not([class]),
-  select:not([class]),
-  .ui-field
-){
-  -webkit-appearance:none;
-  appearance:none;
-  width:100%;
-  min-height:40px;
-  border:1px solid var(--v3-control-border);
-  border-radius:var(--v3-control-radius);
-  background:#0f151d;
-  color:var(--v3-control-text);
-  padding:0 12px;
-  outline:0;
-  box-shadow:none;
-  font-size:13px;
-  line-height:1.5;
-}
-.ui-v3 textarea:not([class]),.ui-v3 textarea.ui-field{padding-block:10px;resize:vertical}
-.ui-v3 select:not([class]),.ui-v3 select.ui-field{
-  padding-left:34px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23a8b1bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:left 9px center;
-  background-size:17px 17px;
-}
-.ui-v3 :is(input,textarea)::placeholder{color:#7f8a99;opacity:1}
-.ui-v3 :is(input[type="checkbox"],input[type="radio"]){accent-color:var(--v3-orange)}
-.ui-v3 input[type="file"]::file-selector-button{
-  border:1px solid var(--v3-control-border);
-  border-radius:10px;
-  background:var(--v3-control-bg);
-  color:var(--v3-control-text);
-  min-height:34px;
-  padding:0 10px;
-  margin-inline-end:8px;
-  font:inherit;
-  font-weight:800;
-  cursor:pointer;
-}
-.ui-v3 :is(input,textarea,select):-webkit-autofill{
-  -webkit-text-fill-color:var(--v3-control-text)!important;
-  -webkit-box-shadow:0 0 0 1000px #0f151d inset!important;
-  transition:background-color 9999s ease-out 0s;
-}
+.ui-v3 :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([class]),textarea:not([class]),select:not([class]),.ui-field){-webkit-appearance:none;appearance:none;width:100%;min-height:42px;border:1px solid var(--v3-control-border);border-radius:var(--v3-control-radius);background:#0f151d;color:var(--v3-control-text);padding:0 12px;outline:0;box-shadow:none;font-size:13px;line-height:1.5}.ui-v3 textarea:not([class]),.ui-v3 textarea.ui-field{padding-block:10px;resize:vertical}.ui-v3 select:not([class]),.ui-v3 select.ui-field{padding-left:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23a8b1bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 9px center;background-size:17px 17px}.ui-v3 :is(input,textarea)::placeholder{color:#7f8a99;opacity:1}.ui-v3 :is(input[type="checkbox"],input[type="radio"]){accent-color:var(--v3-orange)}.ui-v3 input[type="file"]::file-selector-button{border:1px solid var(--v3-control-border);border-radius:10px;background:var(--v3-control-bg);color:var(--v3-control-text);min-height:36px;padding:0 10px;margin-inline-end:8px;font:inherit;font-weight:800;cursor:pointer}.ui-v3 :is(input,textarea,select):-webkit-autofill{-webkit-text-fill-color:var(--v3-control-text)!important;-webkit-box-shadow:0 0 0 1000px #0f151d inset!important;transition:background-color 9999s ease-out 0s}
+.ui-v3 :is(.ui-button,.ui-icon-button,button,input,textarea,select):focus-visible{outline:2px solid rgba(255,122,0,.82)!important;outline-offset:2px!important}.ui-v3 :is(.network-banner,.update-toast,.broadcast-toast) .ui-button{flex:none}.ui-v3 .broadcast-toast>a.ui-button{min-width:max-content}.ui-v3 :is(.broadcast-close,.pwa-modal-close).ui-icon-button{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.12)}
 
-.ui-v3 :is(.ui-button,.ui-icon-button,button,input,textarea,select):focus-visible{
-  outline:2px solid rgba(255,122,0,.82)!important;
-  outline-offset:2px!important;
-}
-
-/* Platform notices use the same compact control language. */
-.ui-v3 :is(.network-banner,.update-toast,.broadcast-toast) .ui-button{flex:none}
-.ui-v3 .broadcast-toast>a.ui-button{min-width:max-content}
-.ui-v3 :is(.broadcast-close,.pwa-modal-close).ui-icon-button{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.12)}
-
-/* Prevent iOS Safari from zooming the viewport when focusing small text fields. */
-@media(max-width:720px){
-  .ui-v3 :is(
-    input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
-    textarea,
-    select
-  ){font-size:16px!important}
-  .ui-v3 .ui-button{min-height:38px;font-size:12px}
-  .ui-v3 .ui-button.ui-compact{min-height:34px;font-size:11px}
-  .ui-v3 .ui-icon-button{width:38px;height:38px;min-width:38px;min-height:38px}
-}
-
-@media(prefers-reduced-motion:reduce){
-  .ui-v3 :is(.ui-button,.ui-icon-button){transition:none!important}
-}
+@media(max-width:720px){.ui-v3 :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),textarea,select){font-size:16px!important}.ui-v3 .ui-button{min-height:42px;font-size:12px}.ui-v3 .ui-button.ui-compact{min-height:36px;font-size:11px}.ui-v3 .ui-icon-button{width:42px;height:42px;min-width:42px;min-height:42px}}
+@media(prefers-reduced-motion:reduce){.ui-v3 :is(.ui-button,.ui-icon-button){transition:none!important}}
