@@ -63,7 +63,10 @@ try{
   const room=(await pool.query("SELECT max_members FROM rooms WHERE id=$1",[d.room.id])).rows[0];
   if(Number(room?.max_members)!==3)throw new Error("room default capacity control was not applied by database trigger");
 
-  if(!String(process.env.TURNSTILE_SECRET_KEY||"").trim()){
+  const turnstileConfigured=Boolean(String(process.env.TURNSTILE_SECRET_KEY||"").trim()&&String(process.env.TURNSTILE_SITE_KEY||"").trim());
+  const captchaConfig=await call("/api/auth/captcha-config");
+  if(!turnstileConfigured){
+    if(captchaConfig.enabled!==false||captchaConfig.siteKey!=="")throw new Error("captcha config must fail closed without both Turnstile keys");
     await call("/api/admin/advanced/settings",{token:adminToken,method:"PATCH",body:{key:"captcha_escalation_enabled",value:true,reason:"capability guard"},status:409,error:"TURNSTILE_NOT_CONFIGURED"});
   }
 
