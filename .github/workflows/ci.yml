@@ -81,6 +81,10 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --no-audit --no-fund
+      - name: Runtime route ownership inventory
+        env:
+          ROUTE_INVENTORY_OUT: /tmp/marbo3a-runtime-route-inventory.json
+        run: npm run test:routes
       - name: Syntax check every backend module
         shell: bash
         run: |
