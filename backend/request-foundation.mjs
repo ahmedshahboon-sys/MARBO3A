@@ -8,7 +8,7 @@ import {operationalControls} from "./operational-controls.mjs";
 const prior=http.createServer.bind(http);
 const allowedOrigin=origin=>!origin||origin==="https://marbo3a.ly"||origin==="https://www.marbo3a.ly"||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 async function maintenanceState(){
-  const {settings}=await operationalControls();
+  const {settings}=await operationalControls({fresh:true});
   return {
     active:settings.maintenance_mode===true,
     message:typeof settings.maintenance_message==="string"?settings.maintenance_message:"جاري تحديث مربوعة، بنرجعولك خلال دقائق.",
