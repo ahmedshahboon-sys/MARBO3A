@@ -32,10 +32,15 @@ Closed during this audit:
 - `/api/notifications/unread-count` had duplicate compatibility registrations in `v1-social-extra.mjs` and `social-experience.mjs`. The later duplicate was retired; `v1-social-extra.mjs` is the single transitional owner until the notification domain is migrated explicitly. `tests/architecture.test.mjs` guards against reintroducing the duplicate.
 - The comment-preview regression test no longer uses an unrelated notification route as a source-code boundary.
 
-Known transitional overlaps that must not be deleted blindly:
+Group 1 route-ownership consolidation — 2026-09-19:
 
-- `/api/chats` exists in multiple historical/explicit layers with different response enrichment and privacy behavior. It requires a dedicated messaging-domain migration and runtime regression coverage before retirement of any owner.
-- `/api/admin/readiness` exists in more than one compatibility layer with non-identical readiness checks. It requires an admin/operations-domain migration rather than route-order surgery.
+- Messaging list/history/forwarding and chat creation now have one canonical owner in `routes/core-messaging.mjs`; the old message-media and release-hardening registrations were retired after runtime authorization coverage was added.
+- Session list/revoke/logout-other-devices remain canonical in `session-control.mjs`; the older `core-extensions.mjs` registrations were retired.
+- Password reset/change-password remain canonical in `security-completion.mjs`; their weaker compatibility copies were retired.
+- Admin readiness/system use `routes/core-admin-control.mjs`; audited user-status/report actions use `audit-completion.mjs`.
+- Generic upload ownership is `experience-v2.mjs`.
+- Privacy v2 and the legacy `/api/privacy` path share the same full privacy model through `routes/fgh-social.mjs`.
+- The CI route-ownership guard freezes every remaining compatibility duplicate by exact owner set and fails on undeclared additions or owner drift.
 
 Rules for the remaining migration:
 
@@ -52,10 +57,10 @@ Security/session rules established in this round:
 - `durable_sessions` is the authority for session validity and absolute expiry. Redis `session:*` entries are a cache and must not extend a session beyond `durable_sessions.expires_at`.
 - Session creation is fail-closed: a token is not usable unless its durable row is written successfully. Session destruction and security revocation delete durable authorization first, then clear Redis cache entries.
 - `user_sessions` is device metadata only (user-agent/IP/history). It must not be used as the source of truth for deciding whether a session exists or is revocable.
-- `/api/account/sessions`, `/api/account/sessions/:id` and `/api/account/logout-all` are currently owned at runtime by `session-control.mjs`; the older copies in `core-extensions.mjs` are shadowed compatibility routes and must not be edited as if they were authoritative.
-- `/api/auth/reset-password` and `/api/account/change-password` are currently owned at runtime by `security-completion.mjs`; the older copies in `platform-extra.mjs`/`core-extensions.mjs` are shadowed compatibility implementations pending domain migration.
-- `/api/admin/users/:id/status` and report-driven freeze/ban behavior are currently reached through `audit-completion.mjs` before the older status handler. Its revocation path must remain durable-first.
+- `/api/account/sessions`, `/api/account/sessions/:id` and `/api/account/logout-all` are owned by `session-control.mjs`; the former `core-extensions.mjs` duplicates were retired in Group 1.
+- `/api/auth/reset-password` and `/api/account/change-password` are owned by `security-completion.mjs`; the former `platform-extra.mjs`/`core-extensions.mjs` copies were retired in Group 1.
+- `/api/admin/users/:id/status` and report-driven moderation are owned by `audit-completion.mjs`; the older status/report-action handlers were retired. Its revocation path remains durable-first.
 - `request-foundation.mjs` owns request-wide security middleware that must execute before compatibility routes: origin/CORS checks, rate limits and OAuth-session normalization.
 - Password-reset verification and 2FA verification are bounded-attempt challenges. Password-reset request responses intentionally do not reveal whether the supplied email exists.
 
-Remaining migration rule: do not remove the shadowed security routes only because a stronger runtime owner exists. Retire them when their containing historical module has no remaining required routes and the explicit replacement has integration coverage.
+Remaining migration rule: retire an allowlisted compatibility duplicate only after its effective runtime behavior and authorization are preserved in the selected owner and covered by regression/runtime tests.
