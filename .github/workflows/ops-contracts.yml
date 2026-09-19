@@ -21,6 +21,8 @@ jobs:
           bash -n ops/deploy-production.sh
           bash -n ops/disk-monitor.sh
           bash -n ops/audit-foundation.sh
+          bash -n ops/setup-turn.sh
+          bash -n ops/audit-turn-runtime.sh
       - name: Validate compose gate topology
         shell: bash
         run: |
@@ -36,6 +38,16 @@ jobs:
           ports=s['gate'].get('ports') or []
           assert any(str(p.get('published'))=='3000' and str(p.get('target'))=='8080' for p in ports), ports
           PY
+      - name: Validate TURN relay capacity wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '49152-49663:49152-49663/udp' compose.yml
+          grep -q '49152-49663:49152-49663/tcp' compose.yml
+          grep -q -- '--min-port=49152' compose.yml
+          grep -q -- '--max-port=49663' compose.yml
+          grep -q '49152:49663/udp' ops/setup-turn.sh
+          grep -q '49152:49663/tcp' ops/setup-turn.sh
       - name: Validate maintenance nginx config
         shell: bash
         run: |
