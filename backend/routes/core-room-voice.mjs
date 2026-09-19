@@ -1,8 +1,10 @@
 import {pool,requireAuth,isAdmin,turnConfig,emitUser,emitRoom,actionRateLimit,rejectRateLimit} from "../runtime.mjs";
+import {operationalSetting} from "../operational-controls.mjs";
 
 const MAX_PARTICIPANTS=Math.max(4,Math.min(100,Number(process.env.ROOM_VOICE_MAX_PARTICIPANTS)||24));
 const DEFAULT_SEATS=Math.max(1,Math.min(16,Number(process.env.ROOM_VOICE_DEFAULT_SEATS)||8));
 const ACTIVE_SECONDS=20;
+async function voiceParticipantLimit(){return Math.max(4,Math.min(MAX_PARTICIPANTS,Number(await operationalSetting("voice_participant_max"))||MAX_PARTICIPANTS))}
 
 async function access(roomId,u){
   const room=(await pool.query(`SELECT id,is_public,visibility,owner_id,name,join_policy,max_members,COALESCE(speaker_seat_count,$2)::int speaker_seat_count FROM rooms WHERE id=$1`,[roomId,DEFAULT_SEATS])).rows[0];
@@ -86,18 +88,18 @@ export function registerCoreRoomVoice(app){
   app.get("/api/rooms/:id/voice/state",async(req,res)=>{try{
     const u=await requireAuth(req,res);if(!u)return;const roomId=Number(req.params.id),a=await access(roomId,u);if(!a.ok)return deny(res,a);await purge(roomId);
     const lockedSeats=(await pool.query(`SELECT seat_index FROM room_voice_seat_locks WHERE room_id=$1 ORDER BY seat_index`,[roomId])).rows.map(x=>Number(x.seat_index));
-    const rows=await participants(roomId),rtc=turnConfig(u.id),seatCount=Math.max(1,Math.min(16,Number(a.room.speaker_seat_count)||DEFAULT_SEATS));
-    res.json({ok:true,viewerId:u.id,manager:a.manager,roomName:a.room.name,participants:rows,lockedSeats,iceServers:rtc.iceServers,turnConfigured:rtc.turnConfigured,tlsConfigured:rtc.tlsConfigured,forceRelay:rtc.forceRelay,maxSpeakers:seatCount,seatCount,maxParticipants:MAX_PARTICIPANTS,scaleMode:"p2p-small-room-r1"});
+    const rows=await participants(roomId),rtc=turnConfig(u.id),seatCount=Math.max(1,Math.min(16,Number(a.room.speaker_seat_count)||DEFAULT_SEATS)),maxParticipants=await voiceParticipantLimit();
+    res.json({ok:true,viewerId:u.id,manager:a.manager,roomName:a.room.name,participants:rows,lockedSeats,iceServers:rtc.iceServers,turnConfigured:rtc.turnConfigured,tlsConfigured:rtc.tlsConfigured,forceRelay:rtc.forceRelay,maxSpeakers:seatCount,seatCount,maxParticipants,scaleMode:"p2p-small-room-r1"});
   }catch(e){console.error("voice state",e);res.status(500).json({ok:false,error:"VOICE_STATE_FAILED"})}});
 
   app.post("/api/rooms/:id/voice/join",async(req,res)=>{try{
     const u=await requireAuth(req,res);if(!u)return;const rate=await actionRateLimit("voice-join",u.id,{limit:12,windowSeconds:60});if(!rate.allowed)return rejectRateLimit(res,rate,"VOICE_JOIN_RATE_LIMITED");
     const roomId=Number(req.params.id),a=await access(roomId,u);if(!a.ok)return deny(res,a);await purge(roomId);
-    const exists=(await pool.query(`SELECT forced_muted FROM room_voice_presence WHERE room_id=$1 AND user_id=$2`,[roomId,u.id])).rows[0];
-    if(!exists&&await activeCount(roomId)>=MAX_PARTICIPANTS)return res.status(409).json({ok:false,error:"VOICE_ROOM_FULL",maxParticipants:MAX_PARTICIPANTS});
+    const exists=(await pool.query(`SELECT forced_muted FROM room_voice_presence WHERE room_id=$1 AND user_id=$2`,[roomId,u.id])).rows[0],maxParticipants=await voiceParticipantLimit();
+    if(!exists&&await activeCount(roomId)>=maxParticipants)return res.status(409).json({ok:false,error:"VOICE_ROOM_FULL",maxParticipants});
     const row=(await pool.query(`INSERT INTO room_voice_presence(room_id,user_id,role,seat_index,requested,muted,forced_muted,last_seen) VALUES($1,$2,'listener',NULL,FALSE,FALSE,FALSE,NOW()) ON CONFLICT(room_id,user_id) DO UPDATE SET role='listener',seat_index=NULL,requested=FALSE,muted=room_voice_presence.forced_muted,forced_muted=room_voice_presence.forced_muted,last_seen=NOW() RETURNING forced_muted,muted`,[roomId,u.id])).rows[0];
     emitRoom(roomId,"roomvoice:state",{roomId,reason:"join-reset",userId:u.id});
-    res.json({ok:true,seatCount:Number(a.room.speaker_seat_count||DEFAULT_SEATS),maxParticipants:MAX_PARTICIPANTS,forcedMuted:Boolean(row?.forced_muted),muted:Boolean(row?.muted)});
+    res.json({ok:true,seatCount:Number(a.room.speaker_seat_count||DEFAULT_SEATS),maxParticipants,forcedMuted:Boolean(row?.forced_muted),muted:Boolean(row?.muted)});
   }catch(e){console.error("voice join",e);res.status(500).json({ok:false,error:"VOICE_JOIN_FAILED"})}});
 
   app.post("/api/rooms/:id/voice/heartbeat",async(req,res)=>{try{
