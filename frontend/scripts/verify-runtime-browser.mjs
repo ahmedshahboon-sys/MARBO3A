@@ -35,7 +35,7 @@ let browser;
 try{
   await waitHttp(origin+"/");
   browser=child(chrome,[
-    "--headless=new","--no-sandbox","--disable-gpu","--disable-background-networking","--no-first-run",
+    "--headless=new","--no-sandbox","--disable-gpu","--no-first-run",
     `--remote-debugging-port=${chromePort}`,`--user-data-dir=${userDir}`,"about:blank"
   ]);
   await waitHttp(`http://127.0.0.1:${chromePort}/json/version`);
@@ -132,7 +132,8 @@ try{
     const r=await fetch(origin+src);
     if(!r.ok)fail(`PWA asset ${src} returned ${r.status}`);
   }
-  const sw=await evaluate(`navigator.serviceWorker?navigator.serviceWorker.getRegistration().then(r=>Boolean(r)):Promise.resolve(false)`,true);
+  let sw=false;
+  for(let i=0;i<20&&!sw;i++){sw=await evaluate(`navigator.serviceWorker?navigator.serviceWorker.getRegistration().then(r=>Boolean(r)):Promise.resolve(false)`,true);if(!sw)await sleep(250)}
   if(!sw)fail("service worker did not register on runtime browser smoke");
 
   cdp.close();
