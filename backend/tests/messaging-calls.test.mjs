@@ -11,6 +11,10 @@ test("rich direct messages emit realtime delivery and validate reply ownership",
   assert.match(src,/direct:new/);
   assert.match(src,/conversation_id=\$2/);
   assert.match(src,/INVALID_REPLY_TARGET/);
+  assert.match(src,/directSendGate/);
+  assert.match(src,/USER_BLOCKED/);
+  assert.match(src,/MESSAGE_REQUEST_PENDING/);
+  assert.match(src,/PRIVACY_RESTRICTED/);
 });
 
 test("message forwarding requires access to the source message scope",()=>{
@@ -53,4 +57,20 @@ test("voice recorder keeps one pointer target mounted while recording",()=>{
   assert.match(src,/document\.addEventListener\("pointerup",upGlobal/);
   assert.match(src,/finish\(true\)/);
   assert.match(src,/finish\(false\)/);
+});
+
+
+test("deleted messages are not resurrected by edit",()=>{
+  const src=read("routes/core-messaging.mjs");
+  assert.match(src,/SELECT \* FROM direct_messages WHERE id=\$1 AND deleted_at IS NULL/);
+  assert.match(src,/UPDATE direct_messages SET body=\$1,edited_at=NOW\(\) WHERE id=\$2 AND deleted_at IS NULL/);
+  assert.match(src,/SELECT \* FROM messages WHERE id=\$1 AND deleted_at IS NULL/);
+});
+
+
+test("legacy messaging and calls wrappers are retired",()=>{
+  const boot=read("bootstrap.mjs"),routes=read("routes/index.mjs"),calls=read("routes/core-calls.mjs");
+  assert.doesNotMatch(boot,/direct-extensions\.mjs|calls\.mjs/);
+  assert.match(routes,/registerCoreCalls/);
+  assert.ok((calls.match(/CALL_PRIVACY_RESTRICTED/g)||[]).length>=4);
 });
