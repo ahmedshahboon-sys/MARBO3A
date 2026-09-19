@@ -29,7 +29,7 @@ function child(name,args,opts={}){
   return p;
 }
 
-const next=child("npm",["start","--","-p","3100"],{env:{...process.env,NEXT_TELEMETRY_DISABLED:"1"}});
+const next=child(process.execPath,["node_modules/next/dist/bin/next","start","-p","3100"],{env:{...process.env,NEXT_TELEMETRY_DISABLED:"1"}});
 const userDir=fs.mkdtempSync(path.join(os.tmpdir(),"marbo3a-chrome-"));
 let browser;
 try{
@@ -147,3 +147,4 @@ try{
 }
 if(failures.length)process.exit(1);
 console.log(`Runtime browser OK · ${notes.length} route/viewport/mode cases · console/hydration/network/focus/PWA checks passed`);
+process.exit(0);
