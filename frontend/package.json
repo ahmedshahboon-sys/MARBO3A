@@ -14,7 +14,9 @@
     "test:theme": "node scripts/verify-theme-contracts.mjs",
     "test:core-surfaces": "node scripts/verify-core-surfaces.mjs",
     "test:chat-call": "node scripts/verify-chat-call-contracts.mjs",
-    "test:admin-secondary": "node scripts/verify-admin-secondary-contracts.mjs"
+    "test:admin-secondary": "node scripts/verify-admin-secondary-contracts.mjs",
+    "test:runtime-browser": "node scripts/verify-runtime-browser.mjs",
+    "test:final": "npm run test:contracts && npm run test:responsive && npm run test:runtime-browser"
   },
   "dependencies": {
     "heic2any": "0.0.4",
