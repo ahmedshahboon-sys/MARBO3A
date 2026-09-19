@@ -1,8 +1,9 @@
-export const liveToken=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
+import {sessionMarker,cookieHeaders} from "../webSession";
+export const liveToken=()=>sessionMarker();
 
 export async function liveApi(path,options={}){
-  const headers={...(options.headers||{})},token=liveToken();
-  if(token&&token!=="cookie")headers.authorization=`Bearer ${token}`;
+  liveToken();
+  const headers=cookieHeaders(options.headers||{});
   if(options.body&&!(options.body instanceof FormData)&&!headers["content-type"])headers["content-type"]="application/json";
   const response=await fetch(path,{...options,headers,cache:"no-store",credentials:"same-origin"});
   const data=await response.json().catch(()=>({}));
