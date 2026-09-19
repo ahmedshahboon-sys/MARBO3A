@@ -11,6 +11,7 @@ mustNot("app/settings/privacy/page.js",["/api/privacy/v2","fetch("],"duplicate p
 must("app/AccountSecurityPanel.js",["/api/account/deactivate","تعطيل الحساب مؤقتًا","7 أيام","clearCookieSession"]);
 must("app/ThemeRuntime.js",["dataset.reducedMotion","dataset.dataSaver","dataset.autoplayMedia","style.fontSize","marbo3a_user_preferences"]);
 must("app/MediaGallery.js",["dataSaver","autoplay&&!dataSaver","preload={dataSaver?\"none\":\"metadata\"}"]);
-must("app/chat/[id]/page.js",["/api/settings/muted-conversations/","كتم إشعارات المحادثة"]);\nmust("app/ui-v3-settings.css",['html[data-reduced-motion="true"]',"settings-inline-form"]);
+must("app/chat/[id]/page.js",["/api/settings/muted-conversations/","كتم إشعارات المحادثة"]);
+must("app/ui-v3-settings.css",['html[data-reduced-motion="true"]',"settings-inline-form"]);
 if(failed)process.exit(1);
 console.log("Group 8 unified settings/privacy frontend contracts OK");
