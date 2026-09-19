@@ -20,7 +20,7 @@ function applyTheme(theme,media){
 export default function ThemeRuntime(){
   useEffect(()=>{
     const media=window.matchMedia("(prefers-color-scheme: light)");
-    let preference=validTheme(localStorage.getItem(THEME_KEY)||"dark");
+    let preference=validTheme(document.documentElement.dataset.themePreference||localStorage.getItem(THEME_KEY)||"dark");
     applyTheme(preference,media);
 
     const onSystemChange=()=>{if(preference==="system")applyTheme(preference,media)};
