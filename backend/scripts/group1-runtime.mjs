@@ -93,6 +93,19 @@ try{
   const moderationAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM moderation_actions WHERE report_id=$1 AND action='dismiss'`,[report.id])).rows[0]?.c||0);
   if(moderationAudit<1)throw new Error("Canonical report action missing moderation audit");
 
+  const changeToken=crypto.randomBytes(32).toString("hex");
+  await redis.set(`session:${changeToken}`,String(A.id),{EX:900});
+  await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+make_interval(secs=>900),NOW())`,[tokenHash(changeToken),A.id]);
+  await api("/api/account/change-password",{token:A.token,method:"POST",body:{currentPassword:A.password,newPassword:"Group1!Changed456"}});
+  await api("/api/auth/me",{token:changeToken,status:401});
+  await api("/api/auth/me",{token:A.token});
+
+  const resetUser=await makeUser("Group1Reset");
+  const resetCode="654321",resetKey=crypto.createHash("sha256").update(`${resetUser.id}:${resetCode}`).digest("hex");
+  await redis.set(`pwdreset:${resetUser.id}`,resetKey,{EX:600});
+  await api("/api/auth/reset-password",{method:"POST",body:{email:resetUser.email,code:resetCode,password:"Group1!Reset789"}});
+  await api("/api/auth/me",{token:resetUser.token,status:401});
+
   console.log("group1 runtime authorization ok");
 }finally{
   await redis.quit().catch(()=>{});
