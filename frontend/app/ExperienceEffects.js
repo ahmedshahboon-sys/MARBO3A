@@ -10,7 +10,7 @@ export default function ExperienceEffects(){
  const prefs=useRef({...defaults}),audio=useRef(null),unlocked=useRef(false),meId=useRef(null);
  useEffect(()=>{
    const t=token();if(!t)return;
-   const headers=t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{ };
+   const headers=t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{ };
    Promise.allSettled([
      fetch("/api/experience/preferences",{headers,credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null),
      fetch("/api/settings",{headers,credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null),
