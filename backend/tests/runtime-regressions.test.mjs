@@ -125,7 +125,27 @@ test("saved post queries enforce privacy and blocks in SQL without per-row check
   assert.match(src,/who_can_see_posts/);
   assert.match(src,/NOT EXISTS\(SELECT 1 FROM user_blocks/);
   assert.match(src,/friends_of_friends/);
-  assert.match(src,/JOIN friendships mine/);
+  assert.match(src,/FROM friendships (mine|f)/);
   assert.match(src,/\$\{savedVisibilitySql\}/);
   assert.doesNotMatch(src,/visibleSavedRows/);
+});
+
+test("advanced search respects blocks, profile privacy, and post audiences",()=>{
+  const src=read("experience-v2.mjs");
+  const start=src.indexOf('app.get("/api/search/advanced"');
+  assert.ok(start>=0,"advanced search route must exist");
+  const route=src.slice(start);
+  assert.match(route,/NOT EXISTS\(SELECT 1 FROM user_blocks/);
+  assert.match(route,/b\.blocker_id=\$2 AND b\.blocked_id=u\.id/);
+  assert.match(route,/b\.blocker_id=u\.id AND b\.blocked_id=\$2/);
+  assert.match(route,/COALESCE\(p\.show_city,TRUE\)=TRUE AND COALESCE\(l\.city,''\) ILIKE \$1/);
+  assert.match(route,/COALESCE\(p\.show_city,TRUE\)=TRUE AND LOWER\(COALESCE\(l\.city,''\)\)=LOWER\(\$4\)/);
+  assert.match(route,/COALESCE\(p\.show_online,TRUE\) show_online/);
+  assert.match(route,/visiblePresenceIds=rows\.filter\(x=>x\.show_online\)/);
+  assert.match(route,/online:Boolean\(show_online\)&&Boolean\(presence/);
+  assert.match(route,/COALESCE\(pp\.who_can_see_posts,'everyone'\)/);
+  assert.match(route,/friends_of_friends/);
+  assert.match(route,/FROM friendships mine JOIN friendships theirs/);
+  assert.match(route,/b\.blocker_id=\$3 AND b\.blocked_id=p\.user_id/);
+  assert.match(route,/b\.blocker_id=p\.user_id AND b\.blocked_id=\$3/);
 });

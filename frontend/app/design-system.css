@@ -5,10 +5,10 @@
 :root{
   --ui-font:var(--font-app),Arial,sans-serif;
   --ui-page-title:22px;--ui-section-title:18px;--ui-card-title:15px;
-  --ui-body:14px;--ui-secondary:12px;--ui-meta:10px;--ui-caption:9px;
+  --ui-body:14px;--ui-secondary:13px;--ui-meta:12px;--ui-caption:12px;
   --ui-weight-regular:400;--ui-weight-medium:500;--ui-weight-semibold:600;--ui-weight-bold:700;
   --ui-line-tight:1.28;--ui-line-normal:1.55;--ui-line-relaxed:1.7;
-  --ui-btn-h:42px;--ui-btn-compact:34px;--ui-input-h:44px;--ui-icon:40px;
+  --ui-btn-h:44px;--ui-btn-compact:44px;--ui-input-h:44px;--ui-icon:44px;
   --ui-radius-sm:10px;--ui-radius:12px;--ui-card-radius:18px;--ui-modal-radius:20px;
   --ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-5:20px;--ui-space-6:24px;--ui-space-8:32px;
   --ui-gap:12px;
@@ -73,4 +73,4 @@ html[data-theme="light"] :is(input,textarea,select,.secondary-action,.safety-lab
 html[data-theme="light"] :is(.sf-muted,small,.muted,.secondary-text){color:var(--ui-muted)!important}
 html[data-theme="light"] .feature-block select,html[data-theme="light"] .dialog-field input{background:var(--ui-surface-2)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
 
-@media(max-width:760px){:root{--ui-page-title:20px;--ui-section-title:16px;--ui-body:13px;--ui-card-title:13px;--ui-secondary:11px;--ui-btn-h:40px;--ui-icon:38px}.sf-top{min-height:58px!important}.debug-record-state{grid-template-columns:10px 1fr}.debug-record-state span{grid-column:2}.feature-actions{width:100%}.room-member>.feature-actions{margin-top:8px}.room-member>.feature-actions>button{flex:1 1 auto}.sf-profile-actions{align-items:stretch}.sf-profile-actions>*{min-width:0}.safety-labeled,.sf-profile-actions .share-qr>button{width:100%}}
+@media(max-width:760px){:root{--ui-page-title:20px;--ui-section-title:16px;--ui-body:13px;--ui-card-title:13px;--ui-secondary:12px;--ui-btn-h:44px;--ui-icon:44px}.sf-top{min-height:58px!important}.debug-record-state{grid-template-columns:10px 1fr}.debug-record-state span{grid-column:2}.feature-actions{width:100%}.room-member>.feature-actions{margin-top:8px}.room-member>.feature-actions>button{flex:1 1 auto}.sf-profile-actions{align-items:stretch}.sf-profile-actions>*{min-width:0}.safety-labeled,.sf-profile-actions .share-qr>button{width:100%}}

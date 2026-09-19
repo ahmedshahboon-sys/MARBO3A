@@ -46,8 +46,8 @@
 .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h3{font-size:14px!important;line-height:1.3!important}
 .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) :is(p,label,li){line-height:1.42}
 .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) small{line-height:1.3}
-.ui-v3 :where(button,.btn,.button,[role="button"]){min-height:34px}
-.ui-v3 :where(input:not([type="checkbox"]):not([type="radio"]),textarea,select){min-height:38px;font-size:13px}
+.ui-v3 :where(button,.btn,.button,[role="button"]){min-height:44px}
+.ui-v3 :where(input:not([type="checkbox"]):not([type="radio"]),textarea,select){min-height:44px;font-size:13px}
 .ui-v3 textarea{line-height:1.42}
 .ui-v3 :where(.sf-card,.settings-card,.profile-card,.feature-card,.admin-card,.room-card,.friend-card,.search-card,.privacy-card,.security-card,.more-card,.panel-card){border-radius:var(--app-r-lg)!important;padding:var(--app-space-3)!important}
 
@@ -143,19 +143,19 @@ body.story-overlay-open{overscroll-behavior:none!important;touch-action:none!imp
 .ui-v3 .messages-v3-title{min-height:40px!important;margin:0 0 4px!important;padding:0 2px!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
 .ui-v3 .messages-v3-title h1{font-size:19px!important}
 .ui-v3 .messages-v3-title>div{gap:5px!important}.ui-v3 .messages-v3-title>div>svg{width:19px!important;height:19px!important}
-.ui-v3 .messages-v3-title>small{font-size:8px!important}
+.ui-v3 .messages-v3-title>small{font-size:12px!important}
 .ui-v3 .messages-v3-page .sf-inbox{padding:6px!important;border-radius:14px!important}
-.ui-v3 .messages-v3-page .inbox-tabs{height:38px!important;min-height:38px!important;margin-bottom:6px!important;border-radius:12px!important}
-.ui-v3 .messages-v3-page .inbox-tabs button{min-height:32px!important;height:32px!important;font-size:10px!important;padding-inline:6px!important}
-.ui-v3 .messages-v3-page .sf-inbox-title{margin:1px 2px 5px!important}.ui-v3 .messages-v3-page .sf-inbox-title h2{font-size:15px!important}.ui-v3 .messages-v3-page .sf-inbox-title small{font-size:8px!important}
-.ui-v3 .messages-v3-page .sf-new-chat{width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important}
+.ui-v3 .messages-v3-page .inbox-tabs{min-height:50px!important;margin-bottom:8px!important;border-radius:14px!important}
+.ui-v3 .messages-v3-page .inbox-tabs button{min-height:44px!important;height:44px!important;font-size:12px!important;padding-inline:8px!important}
+.ui-v3 .messages-v3-page .sf-inbox-title{margin:2px 2px 7px!important}.ui-v3 .messages-v3-page .sf-inbox-title h2{font-size:17px!important}.ui-v3 .messages-v3-page .sf-inbox-title small{font-size:12px!important}
+.ui-v3 .messages-v3-page .sf-new-chat{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
 .ui-v3 .messages-v3-page .sf-new-chat span{display:none!important}
-.ui-v3 .messages-v3-page .sf-search{height:36px!important;min-height:36px!important;margin:4px 0 6px!important;border-radius:11px!important}
-.ui-v3 .messages-v3-page .sf-search input{height:34px!important;min-height:34px!important;font-size:11px!important}
-.ui-v3 .messages-v3-page .sf-chat-row{min-height:54px!important;padding:5px 6px!important;margin-bottom:4px!important;border-radius:11px!important;gap:7px!important}
-.ui-v3 .messages-v3-page .sf-chat-row .sf-avatar{width:34px!important;height:34px!important;min-width:34px!important}
-.ui-v3 .messages-v3-page .sf-chat-row-head b{font-size:11px!important}.ui-v3 .messages-v3-page .sf-chat-row-head time,.ui-v3 .messages-v3-page .chat-peer-presence{font-size:7px!important}.ui-v3 .messages-v3-page .sf-chat-row p{font-size:9px!important;line-height:1.25!important;margin-top:1px!important}
-.ui-v3 .call-history-row{min-height:56px!important;padding:6px!important;border-radius:11px!important}.ui-v3 .call-history-avatar{width:34px!important;height:34px!important}.ui-v3 .call-history-main b{font-size:11px!important}.ui-v3 .call-history-main span,.ui-v3 .call-history-main small{font-size:8px!important}
+.ui-v3 .messages-v3-page .sf-search{min-height:46px!important;margin:5px 0 8px!important;border-radius:12px!important}
+.ui-v3 .messages-v3-page .sf-search input{min-height:44px!important;font-size:13px!important}
+.ui-v3 .messages-v3-page .sf-chat-row{min-height:72px!important;padding:9px 10px!important;margin-bottom:6px!important;border-radius:14px!important;gap:10px!important}
+.ui-v3 .messages-v3-page .sf-chat-row .sf-avatar{width:46px!important;height:46px!important;min-width:46px!important}
+.ui-v3 .messages-v3-page .sf-chat-row-head b{font-size:14px!important}.ui-v3 .messages-v3-page .sf-chat-row-head time,.ui-v3 .messages-v3-page .chat-peer-presence{font-size:12px!important}.ui-v3 .messages-v3-page .sf-chat-row p{font-size:13px!important;line-height:1.4!important;margin-top:2px!important}
+.ui-v3 .call-history-row{min-height:72px!important;padding:9px!important;border-radius:14px!important}.ui-v3 .call-history-avatar{width:46px!important;height:46px!important}.ui-v3 .call-history-main b{font-size:14px!important}.ui-v3 .call-history-main span,.ui-v3 .call-history-main small{font-size:12px!important}
 
 /* Notifications. */
 body.ui-v3:has(.notifications-panel) .social-page .sf-top{display:none!important}
@@ -202,7 +202,7 @@ body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!imp
   .ui-v3 .v3-brand-lockup>img{width:37px!important;height:37px!important}.ui-v3 .v3-brand-copy>b{font-size:18px!important}.ui-v3 .v3-brand-copy>em{display:none!important}
   .ui-v3 .social-dock-track{padding-inline:3px!important}.ui-v3 .social-dock :where(a,button){font-size:8px!important;padding-inline:2px!important}.ui-v3 .social-dock svg{width:20px!important;height:20px!important}
   .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h1{font-size:19px!important}
-  .ui-v3 .messages-v3-page .sf-chat-row,.ui-v3 .notification-row{min-height:52px!important}
+  .ui-v3 .messages-v3-page .sf-chat-row{min-height:72px!important}.ui-v3 .notification-row{min-height:52px!important}
   .ui-v3 .room-community-shell{width:calc(100% - 10px)!important}
   .reaction-hold-palette>button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;font-size:25px!important}
 }

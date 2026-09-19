@@ -7,3 +7,21 @@
 .social-login-block{display:grid;gap:10px;margin:0 0 14px}.social-login-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.social-login-btn{appearance:none;-webkit-appearance:none;min-width:0;min-height:46px;padding:0 10px;border:1px solid #33404f;border-radius:13px;background:#10161e;color:#f3f5f8;font:inherit;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 22px rgba(0,0,0,.16);white-space:nowrap}.social-login-btn svg{width:20px;height:20px;flex:none}.social-login-btn.facebook{background:#1877f2;color:#fff;border-color:#3185f3}.social-login-btn:disabled{opacity:.48;cursor:not-allowed}.social-login-divider{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:9px;color:#7f8997;font-size:10px}.social-login-divider:before,.social-login-divider:after{content:"";height:1px;background:#29323e}.social-login-divider span{padding:0 4px}.social-browser-note{margin:0;padding:8px 10px;border:1px solid #5a4926;border-radius:10px;background:#221d12;color:#e7c980;font-size:9px;line-height:1.65}.social-complete-preview{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px;border:1px solid #2b3542;border-radius:14px;background:#0c1219}.social-complete-preview img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#151c25}.social-complete-preview b{display:block;font-size:13px}.social-complete-preview small{display:block;margin-top:3px;color:#8e98a6;font-size:9px;direction:ltr;text-align:right;overflow-wrap:anywhere}.username-state{font-size:9px;font-weight:700}.username-state.ok{color:#72d79c}.username-state.bad{color:#ff9b9b}
 @media(max-width:520px){.auth-v1-page{place-items:start center!important;padding:calc(env(safe-area-inset-top,0px) + 72px) 12px calc(env(safe-area-inset-bottom,0px) + 22px)!important}.auth-v1-card{padding:18px 15px 17px;border-radius:22px}.auth-v1-card>header{grid-template-columns:62px minmax(0,1fr);gap:12px;margin-bottom:15px}.auth-v1-card>header>img{width:62px;height:62px;border-radius:18px}.auth-v1-card>header h1{font-size:24px!important}.auth-v1-card>header p{font-size:11px}.auth-v1-tabs button{font-size:11px}.auth-v1-form input,.auth-v1-form select{height:46px;font-size:13px}.auth-v1-card>footer{gap:8px}.social-login-buttons{grid-template-columns:1fr}.social-login-btn{min-height:45px}}
 @media(max-height:680px) and (orientation:landscape){.auth-v1-page{place-items:start center!important;padding-top:68px!important}.auth-v1-card{padding:16px}.auth-v1-card>header{grid-template-columns:52px minmax(0,1fr);margin-bottom:10px}.auth-v1-card>header>img{width:52px;height:52px}.auth-v1-form{gap:8px}.auth-v1-form input,.auth-v1-form select{height:42px}.auth-v1-card>footer{margin-top:10px;padding-top:10px}.social-login-btn{min-height:40px}}
+
+/* Auth is a product surface: keep its hierarchy aligned with the shared tokens. */
+.auth-v1-page{background:radial-gradient(circle at 85% 5%,var(--ui-accent-soft),transparent 28%),linear-gradient(180deg,var(--ui-bg-elevated),var(--ui-bg))}
+.auth-v1-card{border-color:var(--ui-border);background:color-mix(in srgb,var(--ui-surface) 96%,transparent);box-shadow:var(--ui-shadow)}
+.auth-v1-card>header{margin-bottom:var(--ui-space-4)}
+.auth-v1-card>header p{color:var(--ui-muted);font-size:13px}
+.auth-v1-tabs{border-color:var(--ui-border);background:var(--ui-bg-elevated)}
+.auth-v1-tabs button{min-height:44px;font-size:13px;color:var(--ui-text-2)}
+.auth-v1-tabs button.active{background:var(--ui-accent);color:#151515}
+.auth-v1-form label{color:var(--ui-text-2);font-size:13px}
+.auth-v1-secondary{min-height:44px}
+.auth-v1-error,.auth-v1-ok{font-size:12px}
+.auth-v1-card>footer{border-color:var(--ui-border);color:var(--ui-muted);font-size:12px}
+.auth-v1-card>footer a{min-height:44px;display:inline-flex;align-items:center;color:var(--ui-text-2)}
+.auth-v1-discover{border-color:var(--ui-border);background:var(--ui-surface-2)}
+.auth-v1-discover a{min-height:44px}
+html[data-theme="light"] .auth-v1-card{background:var(--ui-surface)}
+@media(max-width:520px){.auth-v1-card>header p{font-size:12px}.auth-v1-tabs button{font-size:13px}.social-login-btn{min-height:44px;font-size:12px}}

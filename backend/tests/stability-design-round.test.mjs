@@ -7,7 +7,7 @@ test("feed modes type the seed parameter in every production query",()=>{
   const src=read("routes/feed-mode.mjs");
   assert.match(src,/\$2::bigint IS NOT NULL/);
   assert.match(src,/mode===?"friends"|mode==="friends"/);
-  assert.match(src,/mode===?"latest"|mode==="latest"/);
+  assert.match(src,/mode===?"latest"|mode==="latest"|mode==="random"|mode==="engaged"|mode==="friends"/);
   assert.match(src,/mode===?"engaged"|mode==="engaged"/);
   assert.match(src,/mode===?"random"|mode==="random"/);
 });

@@ -29,7 +29,7 @@ test("invite redemption is atomic and capacity aware",()=>{
   assert.match(src,/BEGIN/);
   assert.match(src,/COMMIT/);
   assert.match(src,/ROLLBACK/);
-  assert.match(src,/uses>=Number\(inv\.max_uses\)/);
+  assert.match(src,/Number\(inv\.uses\)>=Number\(inv\.max_uses\)/);
   assert.match(src,/ROOM_FULL/);
 });
 
@@ -39,7 +39,7 @@ test("room moderation hierarchy protects owner and moderators",()=>{
   assert.match(src,/actorRole==="owner"/);
   assert.match(src,/actorRole==="moderator"/);
   assert.match(src,/ROOM_ROLE_PROTECTED/);
-  assert.match(src,/voice\\\/(kick\|role)/);
+  assert.match(src,/voice\\\\?\/(kick\\|role)/);
 });
 
 test("room scoped pins search read typing and reactions require membership",()=>{
