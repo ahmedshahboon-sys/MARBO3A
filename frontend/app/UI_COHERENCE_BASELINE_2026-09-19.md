@@ -135,3 +135,18 @@ These failures are outside the Group 0 UI documentation change and are recorded 
 Group 0 baseline capture itself is complete and reproducible, but the transition gate to Group 1 is **not green** because the repository-wide rule requires successful build/tests before beginning the next group.
 
 No UI repair, API change, database change, permission change, runtime behavior change or production deployment has been made.
+
+
+## Group 0 blocker repairs
+
+The pre-existing baseline blockers were repaired before any Group 1 UI coherence work:
+
+- Replaced the native `window.prompt` in TV channel deletion with the existing `AppDialog`, preserving the mandatory deletion reason and audit payload.
+- Corrected three stale backend source-contract matchers that produced false failures despite the protected behavior being present.
+- Updated the foundation smoke harness to seed `durable_sessions` as well as Redis, matching the current durable-session authority.
+- Kept historical migration filenames immutable and updated CI to explicitly grandfather only the existing duplicate prefix sets:
+  - `021_group13_performance.sql` + `021_stories.sql`
+  - `034_room_rail_admin_controls.sql` + `034_site_font.sql`
+  Any new duplicate prefix or change to either historical set remains a CI failure.
+
+These fixes are baseline/CI repairs only. Group 1 CSS ownership work has not started yet.
