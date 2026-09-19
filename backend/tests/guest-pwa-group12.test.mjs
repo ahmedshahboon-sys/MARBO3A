@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 const frontend=p=>fs.readFileSync(new URL(`../../frontend/${p}`,import.meta.url),'utf8');
 
 test('guest public feed fallback uses current reactions and active public accounts',()=>{
-  const src=read('guest-explore.mjs');
+  const src=read('routes/core-feed.mjs');
   assert.match(src,/post_reactions/);
   assert.match(src,/u\.account_status='active'/);
   assert.match(src,/who_can_see_posts,'everyone'\)='everyone'/);
