@@ -29,6 +29,8 @@ jobs:
           bash -n ops/audit-turn-runtime.sh
           bash -n ops/backup-database.sh
           bash -n ops/verify-backup-restore.sh
+      - name: Validate Group 10 supply-chain contracts
+        run: node scripts/group10-supply-chain-contracts.mjs
       - name: Validate compose gate topology
         shell: bash
         run: |
