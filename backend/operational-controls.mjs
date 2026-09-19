@@ -1,5 +1,7 @@
 import {pool} from "./runtime.mjs";
 
+const VOICE_HARD_MAX=Math.max(4,Math.min(100,Number(process.env.ROOM_VOICE_MAX_PARTICIPANTS)||24));
+
 export const ALLOWED_MEDIA_TYPES=Object.freeze([
   "image/jpeg","image/png","image/webp","image/gif",
   "video/mp4","video/webm","video/quicktime",
@@ -9,7 +11,7 @@ export const ALLOWED_MEDIA_TYPES=Object.freeze([
 
 export const SETTING_SPECS=Object.freeze({
   registration_enabled:{type:"boolean",default:true,group:"security"},
-  login_rate_limit_15m:{type:"integer",min:5,max:240,default:30,group:"security"},
+  login_rate_limit_15m:{type:"integer",min:5,max:120,default:30,group:"security"},
   captcha_escalation_enabled:{type:"boolean",default:false,group:"security"},
   captcha_escalation_threshold:{type:"integer",min:2,max:20,default:6,group:"security"},
   new_account_restrictions_enabled:{type:"boolean",default:true,group:"security"},
@@ -32,7 +34,7 @@ export const SETTING_SPECS=Object.freeze({
   room_default_max_members:{type:"integer",min:2,max:500,default:100,group:"rooms"},
   room_max_members_cap:{type:"integer",min:2,max:500,default:500,group:"rooms"},
   room_invite_limit_per_hour:{type:"integer",min:1,max:240,default:60,group:"rooms"},
-  voice_participant_max:{type:"integer",min:4,max:100,default:24,group:"rooms"},
+  voice_participant_max:{type:"integer",min:4,max:VOICE_HARD_MAX,default:Math.min(24,VOICE_HARD_MAX),group:"rooms"},
 
   live_create_limit_per_hour:{type:"integer",min:1,max:12,default:4,group:"realtime"},
   live_max_viewers:{type:"integer",min:1,max:8,default:8,group:"realtime"},
@@ -90,10 +92,10 @@ export function operationalSettingMeta(){
 
 export async function operationalControls({fresh=false}={}){
   if(!fresh&&cache.settings&&Date.now()-cache.at<CACHE_MS)return cache;
-  const keys=Object.keys(SETTING_SPECS),featureKeys=Object.keys(FEATURE_SPECS);
+  const keys=Object.keys(SETTING_SPECS),passiveKeys=["maintenance_started_at"],queryKeys=[...keys,...passiveKeys],featureKeys=Object.keys(FEATURE_SPECS);
   try{
     const [settingsRows,featureRows]=await Promise.all([
-      pool.query(`SELECT key,value FROM admin_system_settings WHERE key=ANY($1::text[])`,[keys]),
+      pool.query(`SELECT key,value FROM admin_system_settings WHERE key=ANY($1::text[])`,[queryKeys]),
       pool.query(`SELECT key,enabled FROM feature_flags WHERE key=ANY($1::text[])`,[featureKeys])
     ]);
     const settings=Object.fromEntries(keys.map(k=>[k,SETTING_SPECS[k].default]));
