@@ -1,15 +1,9 @@
 import {pool,requireAdmin,sessionUser,clean} from "../runtime.mjs";
+import {SETTING_SPECS,FEATURE_SPECS,parseOperationalSetting,operationalSettingMeta,invalidateOperationalControls} from "../operational-controls.mjs";
 
 const LY_TZ="Africa/Tripoli";
-const SETTINGS={
-  registration_enabled:{type:"boolean"},
-  rooms_enabled:{type:"boolean"},
-  upload_max_mb:{type:"integer",min:1,max:8},
-  story_lifetime_hours:{type:"integer",min:1,max:72},
-  pinned_post_limit:{type:"integer",min:0,max:1},
-  site_font:{type:"enum",values:["readex","cairo"]}
-};
-const FLAGS=new Set(["engagement","map","calls","voice_rooms","guest_explore"]);
+const SETTINGS=SETTING_SPECS;
+const FLAGS=new Set(Object.keys(FEATURE_SPECS));
 const MOD_TYPES=new Set(["posts","images","stories","comments","rooms","reports","reported_messages"]);
 const safeInt=(v,min=1,max=1_000_000)=>{const n=Number(v);return Number.isSafeInteger(n)&&n>=min&&n<=max?n:null};
 const n=row=>Number(row?.c||0);
@@ -20,7 +14,7 @@ const auditReason=v=>clean(v,500);
 async function writeChangeAudit(adminId,action,entityType,entityId,beforeState,afterState,reason=""){
   await pool.query(`INSERT INTO admin_change_audit(admin_id,action,entity_type,entity_id,before_state,after_state,reason) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7)`,[adminId,clean(action,120),clean(entityType,80),entityId==null?null:String(entityId),beforeState==null?null:JSON.stringify(beforeState),afterState==null?null:JSON.stringify(afterState),auditReason(reason)]);
 }
-function parseSetting(key,value){const spec=SETTINGS[key];if(!spec)return{ok:false};if(spec.type==="boolean")return typeof value==="boolean"?{ok:true,value}:{ok:false};if(spec.type==="enum")return spec.values.includes(String(value))?{ok:true,value:String(value)}:{ok:false};const x=Number(value);return Number.isInteger(x)&&x>=spec.min&&x<=spec.max?{ok:true,value:x}:{ok:false}}
+const parseSetting=parseOperationalSetting;
 async function systemSettings(){const rows=(await pool.query(`SELECT key,value,description,updated_at,updated_by FROM admin_system_settings WHERE key=ANY($1::text[]) ORDER BY key`,[Object.keys(SETTINGS)])).rows;return Object.fromEntries(rows.map(r=>[r.key,{value:r.value,description:r.description,updatedAt:r.updated_at,updatedBy:r.updated_by}]))}
 async function featureFlags(){return(await pool.query(`SELECT key,enabled,description,updated_at,updated_by FROM feature_flags WHERE key=ANY($1::text[]) ORDER BY key`,[[...FLAGS]])).rows}
 
@@ -73,11 +67,37 @@ export function registerGroupOAdmin(app){
 
   app.post("/api/admin/advanced/moderation/:type/:id/action",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;const type=String(req.params.type),id=safeInt(req.params.id),reason=auditReason(req.body?.reason);if(!id||reason.length<3||!["post","image","story","comment","room"].includes(type))return res.status(400).json({ok:false,error:"MODERATION_INPUT_INVALID"});let before,after;if(type==="post"){before=(await pool.query(`SELECT id,user_id,body,image_url,deleted_at FROM posts WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"CONTENT_NOT_FOUND"});after=(await pool.query(`UPDATE posts SET deleted_at=COALESCE(deleted_at,NOW()) WHERE id=$1 RETURNING id,user_id,body,image_url,deleted_at`,[id])).rows[0]}else if(type==="image"){before=(await pool.query(`SELECT id,user_id,body,image_url,deleted_at FROM posts WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"CONTENT_NOT_FOUND"});after=(await pool.query(`UPDATE posts SET image_url=NULL WHERE id=$1 RETURNING id,user_id,body,image_url,deleted_at`,[id])).rows[0]}else if(type==="story"){before=(await pool.query(`SELECT id,user_id,kind,text_body,media_url,deleted_at FROM stories WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"CONTENT_NOT_FOUND"});after=(await pool.query(`UPDATE stories SET deleted_at=COALESCE(deleted_at,NOW()) WHERE id=$1 RETURNING id,user_id,kind,text_body,media_url,deleted_at`,[id])).rows[0]}else if(type==="comment"){before=(await pool.query(`SELECT id,post_id,user_id,body,deleted_at FROM post_comments WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"CONTENT_NOT_FOUND"});after=(await pool.query(`UPDATE post_comments SET body='',deleted_at=COALESCE(deleted_at,NOW()) WHERE id=$1 RETURNING id,post_id,user_id,body,deleted_at`,[id])).rows[0]}else{before=(await pool.query(`SELECT id,owner_id,name,visibility,join_policy,is_public FROM rooms WHERE id=$1`,[id])).rows[0];if(!before)return res.status(404).json({ok:false,error:"CONTENT_NOT_FOUND"});after=(await pool.query(`UPDATE rooms SET visibility='private',join_policy='invite',is_public=FALSE WHERE id=$1 RETURNING id,owner_id,name,visibility,join_policy,is_public`,[id])).rows[0]}await writeChangeAudit(admin.id,"moderation_remove",type,id,before,after,reason);res.json({ok:true,type,id,before,after})}catch(e){console.error("advanced moderation action",e);res.status(500).json({ok:false,error:"ADVANCED_MODERATION_ACTION_FAILED"})}});
 
-  app.get("/api/admin/advanced/settings",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;res.json({ok:true,settings:await systemSettings(),features:await featureFlags(),limits:{uploadMaxMb:[1,8],storyLifetimeHours:[1,72],pinnedPostLimit:[0,1]}})}catch(e){console.error("advanced settings",e);res.status(500).json({ok:false,error:"ADVANCED_SETTINGS_FAILED"})}});
+  app.get("/api/admin/advanced/settings",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;res.json({ok:true,settings:await systemSettings(),features:await featureFlags(),schema:operationalSettingMeta(),capabilities:{turnstileConfigured:Boolean(String(process.env.TURNSTILE_SECRET_KEY||"").trim())}})}catch(e){console.error("advanced settings",e);res.status(500).json({ok:false,error:"ADVANCED_SETTINGS_FAILED"})}});
 
-  app.patch("/api/admin/advanced/settings",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;const key=String(req.body?.key||""),parsed=parseSetting(key,req.body?.value),reason=auditReason(req.body?.reason);if(!parsed.ok||reason.length<3)return res.status(400).json({ok:false,error:"SETTING_INPUT_INVALID"});const before=(await pool.query(`SELECT key,value,description,updated_at,updated_by FROM admin_system_settings WHERE key=$1`,[key])).rows[0];if(!before)return res.status(404).json({ok:false,error:"SETTING_NOT_FOUND"});const after=(await pool.query(`UPDATE admin_system_settings SET value=$2::jsonb,updated_by=$3,updated_at=NOW() WHERE key=$1 RETURNING key,value,description,updated_at,updated_by`,[key,JSON.stringify(parsed.value),admin.id])).rows[0];await writeChangeAudit(admin.id,"system_setting_change","system_setting",key,before,after,reason);res.json({ok:true,setting:after})}catch(e){console.error("setting change",e);res.status(500).json({ok:false,error:"SETTING_CHANGE_FAILED"})}});
+  app.patch("/api/admin/advanced/settings",async(req,res)=>{try{
+    const admin=await requireAdmin(req,res);if(!admin)return;
+    const key=String(req.body?.key||""),parsed=parseSetting(key,req.body?.value),reason=auditReason(req.body?.reason);
+    if(!parsed.ok||reason.length<3)return res.status(400).json({ok:false,error:parsed.error||"SETTING_INPUT_INVALID"});
+    if(key==="captcha_escalation_enabled"&&parsed.value===true&&!String(process.env.TURNSTILE_SECRET_KEY||"").trim())return res.status(409).json({ok:false,error:"TURNSTILE_NOT_CONFIGURED"});
+    const before=(await pool.query(`SELECT key,value,description,updated_at,updated_by FROM admin_system_settings WHERE key=$1`,[key])).rows[0];
+    if(!before)return res.status(404).json({ok:false,error:"SETTING_NOT_FOUND"});
+    if(key==="room_default_max_members"||key==="room_max_members_cap"){
+      const rows=(await pool.query(`SELECT key,value FROM admin_system_settings WHERE key IN ('room_default_max_members','room_max_members_cap')`)).rows;
+      const current=Object.fromEntries(rows.map(x=>[x.key,Number(x.value)]));
+      const nextDefault=key==="room_default_max_members"?Number(parsed.value):Number(current.room_default_max_members||100);
+      const nextCap=key==="room_max_members_cap"?Number(parsed.value):Number(current.room_max_members_cap||500);
+      if(nextDefault>nextCap)return res.status(409).json({ok:false,error:"ROOM_DEFAULT_EXCEEDS_CAP"});
+    }
+    if(["upload_max_image_mb","upload_max_video_mb","upload_max_audio_mb"].includes(key)){
+      const global=Number((await pool.query(`SELECT value FROM admin_system_settings WHERE key='upload_max_mb'`)).rows[0]?.value||8);
+      if(Number(parsed.value)>global)return res.status(409).json({ok:false,error:"UPLOAD_TYPE_LIMIT_EXCEEDS_GLOBAL"});
+    }
+    if(key==="upload_max_mb"){
+      const rows=(await pool.query(`SELECT value FROM admin_system_settings WHERE key IN ('upload_max_image_mb','upload_max_video_mb','upload_max_audio_mb')`)).rows;
+      if(rows.some(x=>Number(x.value)>Number(parsed.value)))return res.status(409).json({ok:false,error:"GLOBAL_UPLOAD_LIMIT_BELOW_TYPE_LIMIT"});
+    }
+    const after=(await pool.query(`UPDATE admin_system_settings SET value=$2::jsonb,updated_by=$3,updated_at=NOW() WHERE key=$1 RETURNING key,value,description,updated_at,updated_by`,[key,JSON.stringify(parsed.value),admin.id])).rows[0];
+    invalidateOperationalControls();
+    await writeChangeAudit(admin.id,"system_setting_change","system_setting",key,before,after,reason);
+    res.json({ok:true,setting:after});
+  }catch(e){console.error("setting change",e);res.status(500).json({ok:false,error:"SETTING_CHANGE_FAILED"})}});
 
-  app.patch("/api/admin/advanced/features/:key",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;const key=String(req.params.key),reason=auditReason(req.body?.reason);if(!FLAGS.has(key)||typeof req.body?.enabled!=="boolean"||reason.length<3)return res.status(400).json({ok:false,error:"FEATURE_INPUT_INVALID"});const before=(await pool.query(`SELECT key,enabled,description,updated_at,updated_by FROM feature_flags WHERE key=$1`,[key])).rows[0];if(!before)return res.status(404).json({ok:false,error:"FEATURE_NOT_FOUND"});const after=(await pool.query(`UPDATE feature_flags SET enabled=$2,updated_by=$3,updated_at=NOW() WHERE key=$1 RETURNING key,enabled,description,updated_at,updated_by`,[key,req.body.enabled,admin.id])).rows[0];await writeChangeAudit(admin.id,"feature_flag_change","feature_flag",key,before,after,reason);res.json({ok:true,feature:after})}catch(e){console.error("feature change",e);res.status(500).json({ok:false,error:"FEATURE_CHANGE_FAILED"})}});
+  app.patch("/api/admin/advanced/features/:key",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;const key=String(req.params.key),reason=auditReason(req.body?.reason);if(!FLAGS.has(key)||typeof req.body?.enabled!=="boolean"||reason.length<3)return res.status(400).json({ok:false,error:"FEATURE_INPUT_INVALID"});const before=(await pool.query(`SELECT key,enabled,description,updated_at,updated_by FROM feature_flags WHERE key=$1`,[key])).rows[0];if(!before)return res.status(404).json({ok:false,error:"FEATURE_NOT_FOUND"});const after=(await pool.query(`UPDATE feature_flags SET enabled=$2,updated_by=$3,updated_at=NOW() WHERE key=$1 RETURNING key,enabled,description,updated_at,updated_by`,[key,req.body.enabled,admin.id])).rows[0];invalidateOperationalControls();await writeChangeAudit(admin.id,"feature_flag_change","feature_flag",key,before,after,reason);res.json({ok:true,feature:after})}catch(e){console.error("feature change",e);res.status(500).json({ok:false,error:"FEATURE_CHANGE_FAILED"})}});
 
   app.get("/api/admin/advanced/audit",async(req,res)=>{try{const admin=await requireAdmin(req,res);if(!admin)return;const q=clean(req.query.q,100),entity=clean(req.query.entityType,80),limit=Math.min(250,Math.max(20,Number(req.query.limit)||100)),like=`%${q}%`;const rows=(await pool.query(`SELECT a.id,a.action,a.entity_type,a.entity_id,a.before_state,a.after_state,a.reason,a.created_at,a.admin_id,u.username admin_username,u.display_name admin_display_name FROM admin_change_audit a LEFT JOIN users u ON u.id=a.admin_id WHERE ($1='' OR a.action ILIKE $3 OR a.reason ILIKE $3 OR COALESCE(a.entity_id,'') ILIKE $3 OR COALESCE(u.username,'') ILIKE $3) AND ($2='' OR a.entity_type=$2) ORDER BY a.id DESC LIMIT $4`,[q,entity,like,limit])).rows;res.json({ok:true,audit:rows})}catch(e){console.error("advanced audit",e);res.status(500).json({ok:false,error:"ADVANCED_AUDIT_FAILED"})}});
 
