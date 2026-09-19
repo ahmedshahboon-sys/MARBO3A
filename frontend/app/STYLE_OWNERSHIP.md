@@ -31,8 +31,8 @@ Each shared concern has one final owner. Route files may consume shared tokens a
 
 The legacy V3 geometry values were centralized without changing their effective cascade:
 - base: `72px / 78px`;
-- <=720px: `66px / 72px`;
-- <=520px: header `68px`, dock remains `72px`.
+- <=720px: `66px / 78px`;
+- <=520px: header `68px`, dock remains `78px`.
 
 Group 2 owns the decision to converge those compatibility values with `--app-header-h` / `--app-dock-h`; Group 1 does not guess new geometry.
 

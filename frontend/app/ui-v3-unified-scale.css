@@ -20,7 +20,7 @@
    These values reproduce the effective pre-Group-1 cascade exactly.
    Group 2 will decide the final unified geometry and retire --v3-* consumers. */
 body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
-@media(max-width:720px){body.ui-v3{--v3-header-h:66px;--v3-dock-h:72px}}
+@media(max-width:720px){body.ui-v3{--v3-header-h:66px}}
 @media(max-width:520px){body.ui-v3{--v3-header-h:68px}}
 
 

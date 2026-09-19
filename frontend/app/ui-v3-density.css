@@ -7,8 +7,6 @@ body.ui-v3{
   --v3-density-icon-hit:40px;
   --v3-density-radius:16px;
   --v3-density-gap:10px;
-  --v3-header-h:92px;
-  --v3-dock-h:100px;
   --v3-radius:18px;
 }
 
@@ -188,8 +186,6 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:12px!important;bor
 
 @media(max-width:720px){
   body.ui-v3{
-    --v3-header-h:70px;
-    --v3-dock-h:82px;
     --v3-density-control:38px;
     --v3-density-icon-hit:38px;
   }

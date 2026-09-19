@@ -1,9 +1,7 @@
 /* MARBO3A V3 canonical navigation and public-about layer.
-   This is the final authority for the persistent bottom dock geometry and
-   the About page. Keep it loaded after production QA so the dock does not
-   drift between routes or devices. */
-
-body.ui-v3{--v3-dock-h:78px!important}
+   Persistent dock geometry is owned by ui-v3-unified-scale.css. This file
+   owns navigation presentation/states and the About page without redefining
+   protected geometry tokens. */
 
 .ui-v3 .social-dock{
   position:fixed!important;
