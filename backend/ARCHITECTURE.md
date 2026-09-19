@@ -7,6 +7,7 @@
 - `routes/auth-registration.mjs` — registration and verification entry flows.
 - `routes/auth-session.mjs` — login, current session and logout/session ownership.
 - `routes/core-social.mjs` — friends, search, notifications and core profile social actions.
+- `routes/core-feed.mjs` — canonical smart/public feed, post reactions, threaded comments/replies and authenticated social-profile feed.
 - `routes/core-messaging.mjs` — direct conversation/message core API.
 - `routes/core-rooms.mjs` — room membership/core room API.
 - `routes/core-admin-rooms.mjs` — role-protected room administration.
@@ -64,3 +65,14 @@ Security/session rules established in this round:
 - Password-reset verification and 2FA verification are bounded-attempt challenges. Password-reset request responses intentionally do not reveal whether the supplied email exists.
 
 Remaining migration rule: retire an allowlisted compatibility duplicate only after its effective runtime behavior and authorization are preserved in the selected owner and covered by regression/runtime tests.
+
+## Group 4 core social lifecycle — 2026-09-19
+
+- `routes/core-feed.mjs` is the canonical owner for the smart authenticated feed, public feed, post reactions, threaded comments/replies, comment reactions and `/api/social/profile/:username`.
+- The Group 4 migration retired the shadowed feed/profile registrations from `r1-core-experience.mjs`, `social-experience.mjs`, `feed-extensions.mjs`, `fgh-privacy-compat.mjs`, `guest-explore.mjs` and the obsolete `fgh-regression-hotfix.mjs` wrapper.
+- Authenticated feed candidates now exclude disabled accounts and both directions of user blocks before ranking/pagination. Public feed candidates exclude disabled accounts before ranking.
+- Direct post/deep-link interaction privacy remains fail-closed through `r1-safety.mjs` as defense in depth; inaccessible posts return `POST_NOT_FOUND` rather than leaking their existence.
+- `routes/core-social.mjs` is the sole friend-removal owner and excludes blocked accounts from search, incoming/friend lists and suggestions.
+- Social profile detail and mutual-friend endpoints reject blocked relationships; mutual-friend visibility follows `who_can_see_friends`; deleted posts cannot be re-pinned.
+- `scripts/group4-social-lifecycle.mjs` exercises feed visibility, public IDs/deep links, block/privacy boundaries, reactions, threaded comments, saved visibility, pin cleanup and audited friend removal against a live CI database.
+
