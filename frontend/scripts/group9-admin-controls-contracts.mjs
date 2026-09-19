@@ -9,5 +9,10 @@ must("app/admin/advanced/AdvancedAdmin.js",[
   "voice_participant_max","live_max_viewers","maintenance_mode","push","Release SHA"
 ]);
 must("app/admin/advanced/AdvancedAdmin.js",["controlReason","reason:controlReason.trim()","Before / After / Admin / Time / Reason"]);
+must("app/page.js",[
+  "/api/auth/captcha-config","TurnstileChallenge","challenges.cloudflare.com/turnstile",
+  "captchaNeeded","captchaToken","captchaBody","authFailure","CAPTCHA_REQUIRED","CAPTCHA_INVALID"
+],"auth Turnstile escalation");
+
 if(failed)process.exit(1);
 console.log("Group 9 admin operational control frontend contracts OK");
