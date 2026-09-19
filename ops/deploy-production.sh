@@ -7,6 +7,7 @@ if [ ! -f .env ]; then echo "ERROR: .env missing" >&2; exit 1; fi
 if [ -z "$PREVIOUS" ]; then PREVIOUS="$(git rev-parse HEAD^1 2>/dev/null || true)"; fi
 chmod 600 .env
 set -a; . ./.env; set +a
+export MARBO3A_RELEASE_SHA="$(git rev-parse HEAD)"
 mkdir -p .runtime/maintenance .deploy-backups
 exec 9>"$ROOT/.runtime/deploy.lock"
 if ! flock -n 9; then echo "ERROR: another MARBO3A deploy/maintenance operation is active" >&2; exit 1; fi
@@ -54,6 +55,7 @@ rollback(){
   if [ -n "$PREVIOUS" ]; then
     echo "[rollback] restoring application code to $PREVIOUS"
     git reset --hard "$PREVIOUS" || true
+    export MARBO3A_RELEASE_SHA="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
     if grep -qE '^  gate:' compose.yml 2>/dev/null; then
       docker compose build api web || true
       docker compose up -d api web gate || true
