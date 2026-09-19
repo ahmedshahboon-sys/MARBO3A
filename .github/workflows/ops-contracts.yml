@@ -23,6 +23,8 @@ jobs:
           bash -n ops/audit-foundation.sh
           bash -n ops/setup-turn.sh
           bash -n ops/audit-turn-runtime.sh
+          bash -n ops/backup-database.sh
+          bash -n ops/verify-backup-restore.sh
       - name: Validate compose gate topology
         shell: bash
         run: |
@@ -88,3 +90,6 @@ jobs:
           grep -q 'docker builder prune -af' ops/deploy-production.sh
           grep -q 'MARBO3A_DISK_WARN_PERCENT:-70' ops/disk-monitor.sh
           grep -q 'MARBO3A_DISK_CRITICAL_PERCENT:-85' ops/disk-monitor.sh
+          grep -q 'backup_success' ops/backup-database.sh
+          grep -q 'restore_success' ops/verify-backup-restore.sh
+          grep -q '/api/admin/operations' backend/routes/core-admin-control.mjs
