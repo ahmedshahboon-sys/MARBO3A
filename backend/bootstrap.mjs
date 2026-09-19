@@ -19,8 +19,6 @@ const modules=[
   "./release-hardening.mjs",
   "./media-social.mjs",
   // rtc/rooms
-  "./room-voice.mjs",
-  "./room-voice-discovery.mjs",
   // compatibility/product routes
   "./launch-completion.mjs",
   "./v1-social-extra.mjs",
@@ -47,7 +45,6 @@ const modules=[
   // R1 owns smart feed ranking, sponsored posts, threaded comments/reactions and room voice recovery/moderation.
   "./r1-core-experience.mjs",
   // Preserve a moderator force-mute if the member reconnects or navigates away and back.
-  "./r1-voice-preserve-mute.mjs",
   // R1 safety middleware registers ahead of R1 routes and preserves blocking/orphan-reply guarantees.
   "./r1-safety.mjs",
   // Request observability wraps the historical route chain, while request-foundation remains
