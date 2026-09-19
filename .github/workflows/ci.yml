@@ -166,8 +166,12 @@ jobs:
             exit 1
           fi
       - run: npm run build
+      - name: Explicit frontend contract suite
+        run: npm run test:contracts
       - name: Responsive geometry matrix
         run: npm run test:responsive
+      - name: Runtime browser and PWA smoke
+        run: npm run test:runtime-browser
       - name: Verify generated PWA assets
         shell: bash
         run: |
