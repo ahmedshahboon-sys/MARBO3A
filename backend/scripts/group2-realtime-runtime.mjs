@@ -65,8 +65,8 @@ class PollSocket{
     throw new Error("socket namespace did not connect");
   }
   async emitAck(event,payload){
-    const id=this.seq++,prefix=`3${id}`;
-    await this.post(`2${id}${JSON.stringify([event,payload])}`);
+    const id=this.seq++,prefix=`43${id}`;
+    await this.post(`42${id}${JSON.stringify([event,payload])}`);
     for(let i=0;i<6;i++){
       const packets=await this.poll();
       const ack=packets.find(x=>x.startsWith(prefix));
