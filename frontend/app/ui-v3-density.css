@@ -190,17 +190,17 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:12px!important;bor
     --v3-density-icon-hit:38px;
   }
 
-  .ui-v3 .v3-global-header{min-height:70px!important;padding:calc(6px + env(safe-area-inset-top)) 12px 5px!important;gap:6px!important}
+  .ui-v3 .v3-global-header{min-height:var(--app-header-total-h)!important;padding:var(--app-safe-top) 12px 0!important;gap:6px!important}
   .ui-v3 .v3-brand-lockup{gap:7px!important}
   .ui-v3 .v3-brand-lockup>img{width:36px!important;height:36px!important}
   .ui-v3 .v3-brand-copy>b{font-size:19px!important}
   .ui-v3 .v3-brand-copy>small{font-size:8px!important;letter-spacing:.2em!important;margin-top:3px!important}
   .ui-v3 .v3-brand-copy>em{font-size:7px!important;margin-top:3px!important}
-  .ui-v3 .v3-header-icon{width:38px!important;height:38px!important}
+  .ui-v3 .v3-header-icon{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
   .ui-v3 .v3-header-icon svg{width:21px!important;height:21px!important}
 
-  .ui-v3 .social-shell,.ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{width:calc(100% - 12px)!important}
-  .ui-v3 .social-shell,.ui-v3 .sf-simple-page,.ui-v3 .sf-profile-page{padding-bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 15px)!important}
+  .ui-v3 .social-shell,.ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{width:min(calc(100% - 12px),var(--app-page-max))!important;max-width:var(--app-page-max)!important}
+  .ui-v3 .social-shell,.ui-v3 .sf-simple-page,.ui-v3 .sf-profile-page{padding-bottom:var(--app-content-bottom-space)!important}
 
   .ui-v3 .feed-center{gap:8px!important}
   .ui-v3 .sf-composer.compact{padding:10px!important;border-radius:16px!important}

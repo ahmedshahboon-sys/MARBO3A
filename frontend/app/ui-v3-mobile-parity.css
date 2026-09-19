@@ -58,14 +58,14 @@ body.ui-v3{overflow-x:hidden}
   .ui-v3 .v3-brand-copy>small{font-size:9px!important;letter-spacing:.22em!important;margin-top:4px!important}
   .ui-v3 .v3-brand-copy>em{font-size:8px!important;margin-top:5px!important}
   .ui-v3 .v3-header-actions{gap:4px!important}
-  .ui-v3 .v3-header-icon{width:42px!important;height:42px!important}
+  .ui-v3 .v3-header-icon{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
   .ui-v3 .v3-header-icon svg{width:25px!important;height:25px!important}
 
   /* Shared canvas */
   .ui-v3 .social-shell,
   .ui-v3 .chat-social-shell,
-  .ui-v3 .room-chat-shell{width:calc(100% - 16px)!important;max-width:none!important}
-  .ui-v3 .social-shell,.ui-v3 .sf-simple-page,.ui-v3 .sf-profile-page{padding-bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 22px)!important}
+  .ui-v3 .room-chat-shell{width:min(calc(100% - 16px),var(--app-page-max))!important;max-width:var(--app-page-max)!important}
+  .ui-v3 .social-shell,.ui-v3 .sf-simple-page,.ui-v3 .sf-profile-page{padding-bottom:var(--app-content-bottom-space)!important}
 
   /* Home/feed */
   .ui-v3 .feed-shell{padding-top:2px!important}
