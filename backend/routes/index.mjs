@@ -4,6 +4,7 @@ import {registerAccountSecurity} from "./account-security.mjs";
 import {registerCoreRooms} from "./core-rooms.mjs";
 import {registerCoreMessaging} from "./core-messaging.mjs";
 import {registerCoreCalls} from "./core-calls.mjs";
+import {registerCoreRoomVoice} from "./core-room-voice.mjs";
 import {registerCoreSocial} from "./core-social.mjs";
 import {registerCoreFeed} from "./core-feed.mjs";
 import {registerCoreStories} from "./core-stories.mjs";
@@ -32,6 +33,7 @@ export function registerExplicitRoutes(app){
   registerCoreRooms(app);
   registerCoreMessaging(app);
   registerCoreCalls(app);
+  registerCoreRoomVoice(app);
   registerCoreSocial(app);
   registerCoreLocation(app);
   registerCoreAdminRooms(app);
