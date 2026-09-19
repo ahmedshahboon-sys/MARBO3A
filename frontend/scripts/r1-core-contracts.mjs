@@ -25,7 +25,7 @@ const explore=read("app/explore/page.js");for(const t of ["feedSeed","&seed=","Ù
 const runtime=read("app/AppRuntime.js");must(runtime,"RoomVoiceR1Runtime","R1 runtime mount");
 const layout=read("app/layout.js");must(layout,'import "./r1-core.css"','R1 styles');must(layout,'import "./r1-admin.css"','R1 admin styles');
 const imports=[...layout.matchAll(/import\s+["']\.\/(.+?\.css)["'];/g)].map(x=>x[1]);
-const expectedTail=["ui-v3-unified-scale.css","ui-contract-lock.css","ui-contract-additions.css"];
+const expectedTail=["ui-v3-unified-scale.css","ui-contract-lock.css"];
 const actualTail=imports.slice(-expectedTail.length);
 if(actualTail.join("|")!==expectedTail.join("|"))throw new Error(`Final UI cascade must end with ${expectedTail.join(" -> ")}`);
 console.log("R1 core experience frontend contracts OK");
