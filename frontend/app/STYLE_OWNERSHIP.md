@@ -112,6 +112,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Debug toolbar horizontal overflow is local to the toolbar; the page itself remains clipped to the viewport.
 - Dangerous Admin/TV actions continue to use `AppDialog`; permissions, APIs and moderation behavior are unchanged.
 
+## Group 9 temporary-layer retirement — 2026-09-19
+
+- `InterfaceFixes.js` and `UiRoundFixes.js` have no runtime styling responsibility; their remaining rules were moved into owned CSS before retirement.
+- `ui-contract-additions.css` was merged into `ui-contract-lock.css` and is no longer a global layer.
+- Legacy brand references in Auth/room watermark now point directly to the approved PNG, allowing `r1-brand-override.css` to retire instead of rewriting assets at cascade time.
+- `verify-style-ownership.mjs` rejects runtime `<style jsx global>` injection, retired visual files, legacy brand paths, and a regression above 64 global CSS imports.
+- `ui-v3-final-audit.css` remains temporarily because it still contains compatibility selectors that require route-by-route visual proof before deletion.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
@@ -123,9 +131,8 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 
 ## Filename guard
 
-Do not add new global CSS files whose names contain `repair`, `fix`, `final` or `override`. The only grandfathered filename exceptions are:
+Do not add new global CSS files whose names contain `repair`, `fix`, `final` or `override`. The only grandfathered filename exception is:
 - `ui-v3-final-audit.css` — existing compatibility layer; retirement is staged.
-- `r1-brand-override.css` — existing brand compatibility redirect; retirement is staged.
 
 Any future exception requires a documented temporary reason and explicit ownership-contract/checker update rather than silently adding another cascade layer.
 
