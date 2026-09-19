@@ -4,7 +4,7 @@ import {useParams} from "next/navigation";
 import AppDialog from "../../../AppDialog";
 import {uploadMedia} from "../../../imageTools";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const t=token(),headers={...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}) ,...(options.headers||{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{}) ,...(options.headers||{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const human=e=>({ROOM_MODERATOR_ONLY:"تحتاج صلاحية مشرف",ROOM_OWNER_ONLY:"هذه العملية لمالك الغرفة فقط",TARGET_NOT_MEMBER:"العضو غير موجود في الغرفة",REQUEST_NOT_FOUND:"طلب الانضمام غير موجود",INVALID_ACTION:"الإجراء غير صالح",UNAUTHORIZED:"انتهت جلسة الدخول"}[e?.message]||e?.message||"تعذر تنفيذ العملية");
 const roleLabel=r=>r==="owner"?"المالك":r==="moderator"?"مشرف":"عضو";
 export default function RoomManage(){
