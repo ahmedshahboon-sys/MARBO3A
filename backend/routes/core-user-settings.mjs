@@ -73,7 +73,7 @@ export function registerCoreUserSettings(app){
   app.post("/api/settings/hidden-words",async(req,res)=>{try{
     const u=await requireAuth(req,res);if(!u)return;const word=wordClean(req.body?.word);
     if(word.length<2)return res.status(400).json({ok:false,error:"INVALID_HIDDEN_WORD"});
-    const row=(await pool.query(`INSERT INTO user_hidden_words(user_id,word) VALUES($1,$2) ON CONFLICT(user_id,LOWER(word)) DO UPDATE SET word=EXCLUDED.word RETURNING id,word,created_at`,[u.id,word])).rows[0];
+    const row=(await pool.query(`INSERT INTO user_hidden_words(user_id,word) VALUES($1,$2) ON CONFLICT (user_id,(LOWER(word))) DO UPDATE SET word=EXCLUDED.word RETURNING id,word,created_at`,[u.id,word])).rows[0];
     res.status(201).json({ok:true,hiddenWord:row});
   }catch(e){console.error("hidden word",e);res.status(500).json({ok:false,error:"HIDDEN_WORD_FAILED"})}});
 
