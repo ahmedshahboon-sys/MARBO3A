@@ -81,6 +81,13 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - The Bottom Dock remains five fixed destinations: المزيد، الأصحاب، الرئيسية، الرسائل، الغرف.
 - CSS may style navigation and provide a dataset fallback, but may not decide whether the global chrome exists via route-content `:has()`.
 
+## Group 5 theme/font contract — 2026-09-19
+
+- Theme and site-font preference are applied in `<head>` before first paint from local storage, then reconciled by the existing runtimes.
+- Readex Pro is the explicit default product font through `--font-app`; Cairo remains supported only when the saved/server font preference requests it.
+- Shared Admin/Profile/InterfaceFixes surfaces consume `--ui-*` theme tokens. Media/call viewing backdrops may remain intentionally dark.
+- Light and Dark share the same surface/border/text contracts, and nonessential motion respects `prefers-reduced-motion`.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
