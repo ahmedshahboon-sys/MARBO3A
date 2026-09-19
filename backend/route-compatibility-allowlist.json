@@ -1,0 +1,4 @@
+{
+  "description": "Temporary compatibility duplicates that are explicitly accepted while ownership is migrated. Owner sets are exact; adding another owner fails CI.",
+  "duplicates": {}
+}
