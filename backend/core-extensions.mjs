@@ -2,7 +2,6 @@ import http from "http";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import {promisify} from "util";
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -11,7 +10,6 @@ import webpush from "web-push";
 import {pool,redis,ensureRedis,tokenFrom,isAdmin,sessionUser,requireAuth,requireAdmin,clean,ipOf} from "./runtime.mjs";
 
 const priorCreateServer=http.createServer.bind(http);
-const scryptAsync=promisify(crypto.scrypt);
 const uploadsDir="/app/uploads";
 fs.mkdirSync(uploadsDir,{recursive:true});
 
@@ -22,8 +20,6 @@ async function userFrom(req){const u=await sessionUser(req);if(!u)return null;aw
 async function auth(req,res){const u=await requireAuth(req,res);if(!u)return null;await trackSession(req,u);return u}
 async function admin(req,res){const u=await requireAdmin(req,res);if(!u)return null;await trackSession(req,u);return u}
 async function audit(userId,action,details={}){await pool.query(`INSERT INTO audit_logs(user_id,level,category,action,details) VALUES($1,'INFO','CORE',$2,$3::jsonb)`,[userId,clean(action,200),JSON.stringify(details)]).catch(()=>{})}
-async function verifyPassword(password,stored){try{const[algo,saltHex,hashHex]=String(stored).split(":");if(algo!=="scrypt")return false;const d=await scryptAsync(password,Buffer.from(saltHex,"hex"),64);return crypto.timingSafeEqual(Buffer.from(hashHex,"hex"),Buffer.from(d))}catch{return false}}
-async function hashPassword(password){const salt=crypto.randomBytes(16),d=await scryptAsync(password,salt,64);return`scrypt:${salt.toString("hex")}:${Buffer.from(d).toString("hex")}`}
 
 function setupWebPush(){const pub=process.env.VAPID_PUBLIC_KEY,priv=process.env.VAPID_PRIVATE_KEY;if(pub&&priv){webpush.setVapidDetails(process.env.VAPID_SUBJECT||"mailto:admin@marbo3a.ly",pub,priv);return true}return false}
 const pushReady=setupWebPush();
@@ -44,12 +40,6 @@ http.createServer=function coreCreateServer(app,...args){
 
   // Enforce room safety and join policy before legacy handlers.
   app.use(async(req,res,next)=>{const m=req.path.match(/^\/api\/rooms\/(\d+)\/(join|messages)$/);if(!m)return next();const roomId=Number(m[1]),action=m[2],u=await auth(req,res);if(!u)return;const banned=(await pool.query(`SELECT 1 FROM room_bans WHERE room_id=$1 AND user_id=$2`,[roomId,u.id])).rows[0];if(banned)return res.status(403).json({ok:false,error:"ROOM_BANNED"});if(action==="join"&&req.method==="POST"){const room=(await pool.query(`SELECT join_policy,max_members,(SELECT COUNT(*)::int FROM room_members WHERE room_id=$1) members FROM rooms WHERE id=$1`,[roomId])).rows[0];if(!room)return res.status(404).json({ok:false,error:"ROOM_NOT_FOUND"});if(!isAdmin(u)&&room.join_policy!=="open")return res.status(403).json({ok:false,error:room.join_policy==="request"?"JOIN_REQUIRED":"INVITE_REQUIRED"});if(room.members>=room.max_members)return res.status(409).json({ok:false,error:"ROOM_FULL"})}if(action==="messages"&&req.method==="POST"){const muted=(await pool.query(`SELECT 1 FROM room_mutes WHERE room_id=$1 AND user_id=$2 AND (muted_until IS NULL OR muted_until>NOW())`,[roomId,u.id])).rows[0];if(muted)return res.status(403).json({ok:false,error:"ROOM_MUTED"});if(req.body?.replyToId||req.body?.attachmentUrl){const body=clean(req.body?.body,1000),reply=Number(req.body?.replyToId)||null,att=clean(req.body?.attachmentUrl,500)||null,type=clean(req.body?.attachmentType,30)||null;if(!body&&!att)return res.status(400).json({ok:false,error:"EMPTY_MESSAGE"});const row=(await pool.query(`INSERT INTO messages(room_id,user_id,body,reply_to_id,attachment_url,attachment_type) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,[roomId,u.id,body,reply,att,type])).rows[0];return res.status(201).json({ok:true,message:row})}}next()});
-
-
-  app.post("/api/account/request-email-change",async(req,res)=>{const u=await auth(req,res);if(!u)return;const email=String(req.body?.email||"").trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({ok:false,error:"INVALID_EMAIL"});if((await pool.query(`SELECT 1 FROM users WHERE LOWER(email)=LOWER($1) AND id<>$2`,[email,u.id])).rows[0])return res.status(409).json({ok:false,error:"EMAIL_IN_USE"});const code=String(crypto.randomInt(100000,1000000)),hash=crypto.createHash("sha256").update(`${u.id}:${email}:${code}`).digest("hex");await redis.set(`emailchange:${u.id}`,JSON.stringify({email,hash}),{EX:600});if(!process.env.BREVO_API_KEY)return res.status(503).json({ok:false,error:"EMAIL_NOT_CONFIGURED"});const r=await fetch("https://api.brevo.com/v3/smtp/email",{method:"POST",headers:{"content-type":"application/json","api-key":process.env.BREVO_API_KEY},body:JSON.stringify({sender:{name:"مربوعة",email:"no-reply@marbo3a.ly"},to:[{email}],subject:"تأكيد البريد الجديد في مربوعة",htmlContent:`<div dir=rtl><h2>مربوعة</h2><p>رمز تأكيد البريد الجديد:</p><b style="font-size:32px">${code}</b><p>صالح 10 دقائق.</p></div>`})});if(!r.ok)return res.status(502).json({ok:false,error:"EMAIL_SEND_FAILED"});res.json({ok:true})});
-  app.post("/api/account/confirm-email-change",async(req,res)=>{const u=await auth(req,res);if(!u)return;const code=String(req.body?.code||""),raw=await redis.get(`emailchange:${u.id}`);if(!raw)return res.status(400).json({ok:false,error:"CODE_EXPIRED"});const data=JSON.parse(raw),actual=crypto.createHash("sha256").update(`${u.id}:${data.email}:${code}`).digest("hex");if(actual!==data.hash)return res.status(400).json({ok:false,error:"INVALID_CODE"});await pool.query(`UPDATE users SET email=$1,updated_at=NOW() WHERE id=$2`,[data.email,u.id]);await redis.del(`emailchange:${u.id}`);await audit(u.id,"change_email",{email:data.email});res.json({ok:true,email:data.email})});
-  app.post("/api/account/delete",async(req,res)=>{const u=await auth(req,res);if(!u)return;if(isAdmin(u))return res.status(409).json({ok:false,error:"ADMIN_CANNOT_DELETE"});await pool.query(`UPDATE users SET pending_delete_at=NOW()+INTERVAL '7 days' WHERE id=$1`,[u.id]);await audit(u.id,"schedule_account_delete");res.json({ok:true,deleteAt:new Date(Date.now()+7*86400000).toISOString()})});
-  app.post("/api/account/cancel-delete",async(req,res)=>{const u=await auth(req,res);if(!u)return;await pool.query(`UPDATE users SET pending_delete_at=NULL WHERE id=$1`,[u.id]);await audit(u.id,"cancel_account_delete");res.json({ok:true})});
 
 
   app.get("/api/rooms/:id/manage",async(req,res)=>{const u=await auth(req,res);if(!u)return;const id=Number(req.params.id);if(!await canModerate(id,u))return res.status(403).json({ok:false,error:"ROOM_MODERATOR_ONLY"});const room=(await pool.query(`SELECT * FROM rooms WHERE id=$1`,[id])).rows[0],members=(await pool.query(`SELECT rm.user_id,rm.role,rm.joined_at,u.username,u.display_name FROM room_members rm JOIN users u ON u.id=rm.user_id WHERE rm.room_id=$1 ORDER BY CASE rm.role WHEN 'owner' THEN 0 WHEN 'moderator' THEN 1 ELSE 2 END,rm.joined_at`,[id])).rows,bans=(await pool.query(`SELECT b.*,u.username,u.display_name FROM room_bans b JOIN users u ON u.id=b.user_id WHERE room_id=$1`,[id])).rows,mutes=(await pool.query(`SELECT m.*,u.username,u.display_name FROM room_mutes m JOIN users u ON u.id=m.user_id WHERE room_id=$1 AND (muted_until IS NULL OR muted_until>NOW())`,[id])).rows;res.json({ok:true,room,members,bans,mutes})});
