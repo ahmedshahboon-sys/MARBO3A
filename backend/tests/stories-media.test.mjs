@@ -4,20 +4,20 @@ import fs from "node:fs";
 
 const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 
-test("story visibility rejects bidirectional blocks in both story owners",()=>{
-  const legacy=read("stories.mjs"),ijkl=read("ijkl-experience.mjs");
-  for(const src of [legacy,ijkl]){
-    assert.match(src,/user_blocks/);
-    assert.match(src,/blocker_id=\$1 AND blocked_id=\$2/);
-    assert.match(src,/(blocked_id=\$1 AND blocker_id=\$2|blocker_id=\$1 AND blocked_id=\$2)/);
-  }
-  assert.match(legacy,/if\(await blocked\(ownerId,viewerId\)\)return false/);
-  assert.match(ijkl,/if\(await blocked\(story\.user_id,viewer\.id\)\)return false/);
+test("canonical story visibility rejects bidirectional blocks",()=>{
+  const src=read("routes/core-stories.mjs");
+  assert.match(src,/user_blocks/);
+  assert.match(src,/blocker_id=\$1 AND blocked_id=\$2/);
+  assert.match(src,/blocked_id=\$1 AND blocker_id=\$2/);
+  assert.match(src,/if\(await blocked\(ownerId,viewerId\)\)return false/);
+  assert.match(src,/who_can_see_story/);
 });
 
-test("story creation only accepts local media with matching media kind",()=>{
+test("story creation accepts owned nested media paths and enforces matching media kind",()=>{
   const src=read("routes/core-stories.mjs");
-  assert.match(src,/const ownMediaUrl=/);\n  assert.match(src,/mediaKindFromUrl/);\n  assert.match(src,/parts\.every/);
+  assert.match(src,/const ownMediaUrl=/);
+  assert.match(src,/mediaKindFromUrl/);
+  assert.match(src,/parts\.every/);
   assert.match(src,/INVALID_STORY_MEDIA/);
   assert.match(src,/INVALID_STORY_MEDIA_TYPE/);
   assert.match(src,/startsWith\("image\/"\)/);
