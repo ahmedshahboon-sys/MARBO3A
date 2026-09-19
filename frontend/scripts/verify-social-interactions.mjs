@@ -16,7 +16,7 @@ const checks=[
   ["app/SocialFeed.js",["comments/preview","/reactions","const previous=post,next=","reaction-people"]],
   ["app/profile/edit/page.js",["USERNAME_COOLDOWN","7 أيام","usernameNextChangeAt"]],
   ["app/ui-v3-unified-scale.css",["--app-dock-h:62px",".sf-reaction-picker>button:not(:first-child)",".story-viewer{position:fixed",".room-community-compose{position:sticky",".voice-record-btn{touch-action:none"]],
-  ["app/InterfaceFixes.js",["settings-overlay","global-search-box:focus-within","chat-bubble","profile-v3-route"]]
+  ["app/ui-contract-lock.css",["settings-overlay","global-search-box:focus-within","chat-bubble","profile-v3-route"]]
 ];
 
 let failed=false;
