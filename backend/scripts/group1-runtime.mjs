@@ -77,6 +77,22 @@ try{
   const readiness=(await api("/api/admin/readiness",{token:admin.token})).data;
   if(!readiness.checks||typeof readiness.checks.database!=="boolean")throw new Error("Canonical admin readiness contract missing checks");
 
+  await api("/api/admin/system",{token:A.token,status:403,error:"ADMIN_ONLY"});
+  const system=(await api("/api/admin/system",{token:admin.token})).data.system;
+  if(!system||typeof system.uptimeSeconds!=="number")throw new Error("Canonical admin system contract missing");
+
+  await api(`/api/admin/users/${C.id}/status`,{token:A.token,method:"PATCH",body:{status:"frozen",reason:"group1 unauthorized check"},status:403,error:"ADMIN_ONLY"});
+  await api(`/api/admin/users/${C.id}/status`,{token:admin.token,method:"PATCH",body:{status:"frozen",reason:"group1 authorization matrix"}});
+  await api("/api/auth/me",{token:C.token,status:401});
+  const statusAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM admin_change_audit WHERE action='user_status_change' AND entity_id=$1`,[String(C.id)])).rows[0]?.c||0);
+  if(statusAudit<1)throw new Error("Admin status change missing change-audit row");
+
+  const report=(await pool.query(`INSERT INTO reports(reporter_id,target_type,target_id,reason,details) VALUES($1,'user',$2,'group1-test','runtime authorization matrix') RETURNING id`,[A.id,B.id])).rows[0];
+  await api(`/api/admin/reports/${report.id}/action`,{token:A.token,method:"POST",body:{action:"dismiss",reason:"not authorized"},status:403,error:"ADMIN_ONLY"});
+  await api(`/api/admin/reports/${report.id}/action`,{token:admin.token,method:"POST",body:{action:"dismiss",reason:"group1 dismissal"}});
+  const moderationAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM moderation_actions WHERE report_id=$1 AND action='dismiss'`,[report.id])).rows[0]?.c||0);
+  if(moderationAudit<1)throw new Error("Canonical report action missing moderation audit");
+
   console.log("group1 runtime authorization ok");
 }finally{
   await redis.quit().catch(()=>{});
