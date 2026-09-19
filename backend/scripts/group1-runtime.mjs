@@ -32,8 +32,8 @@ async function api(path,{token,method="GET",body,status,error}={}){
 try{
   const A=await makeUser("Group1A"),B=await makeUser("Group1B"),C=await makeUser("Group1C"),admin=await makeUser("Group1Admin","admin");
 
-  const ab=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1,$2),GREATEST($1,$2)) RETURNING id`,[A.id,B.id])).rows[0];
-  const bc=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1,$2),GREATEST($1,$2)) RETURNING id`,[B.id,C.id])).rows[0];
+  const ab=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1::bigint,$2::bigint),GREATEST($1::bigint,$2::bigint)) RETURNING id`,[A.id,B.id])).rows[0];
+  const bc=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1::bigint,$2::bigint),GREATEST($1::bigint,$2::bigint)) RETURNING id`,[B.id,C.id])).rows[0];
   const foreignDm=(await pool.query(`INSERT INTO direct_messages(conversation_id,sender_id,body) VALUES($1,$2,'foreign secret') RETURNING id`,[bc.id,B.id])).rows[0];
 
   await api(`/api/direct-messages/${foreignDm.id}/forward`,{token:A.token,method:"POST",body:{conversationId:ab.id},status:404,error:"MESSAGE_NOT_FOUND"});
