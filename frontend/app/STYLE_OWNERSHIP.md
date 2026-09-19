@@ -1,6 +1,6 @@
 # MARBO3A V3 style ownership
 
-`layout.js` owns the ordered global stylesheet list. The order is contractual while older V2/V3 compatibility layers are retired safely. The locked final cascade MUST end with `ui-v3-unified-scale.css` -> `ui-contract-lock.css` -> `ui-contract-additions.css`. Route/support styles must be imported before that tail.
+`layout.js` owns the ordered global stylesheet list. The order is contractual while older V2/V3 compatibility layers are retired safely. The locked final cascade MUST end with `ui-v3-unified-scale.css` -> `ui-contract-lock.css`. Route/support styles must be imported before that tail.
 
 ## Coherence repair ownership contract — 2026-09-19
 
@@ -116,10 +116,10 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
 - Contract enforcement and protected shared UI overrides: `ui-contract-lock.css`.
-- Final additive compatibility rules already accepted into the contract: `ui-contract-additions.css`.
+- Former `ui-contract-additions.css` rules are merged into the final owner `ui-contract-lock.css` to remove an unnecessary global layer.
 - Saved/system theme lifecycle: `ThemeRuntime.js`; route components must not own startup theme application.
 - Official visible mark: `/brand/official/marbo3a-mark.png`. Compatibility selectors may redirect stale references but may not redesign the mark.
-- Route-specific files must not become a later sizing override after `ui-contract-additions.css`.
+- Route-specific files must not become a later sizing override after `ui-contract-lock.css`.
 
 ## Filename guard
 
