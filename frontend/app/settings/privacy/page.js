@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import Link from "next/link";
 import Icon from "../../Icon";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const t=token(),headers={...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const headers={"x-marbo3a-session-mode":"cookie"};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const audienceOptions=<><option value="everyone">الجميع</option><option value="friends">الأصدقاء</option><option value="friends_of_friends">أصدقاء الأصدقاء</option><option value="nobody">لا أحد</option></>;
 const messageOptions=<><option value="everyone">الجميع</option><option value="friends">الأصدقاء</option><option value="nobody">لا أحد</option></>;
 const defaults={who_can_message:"friends",who_can_add:"everyone",show_last_seen:true,show_city:true,birth_visibility:"age",who_can_see_posts:"everyone",who_can_see_story:"everyone",who_can_reply_story:"friends",who_can_call:"friends",who_can_see_friends:"friends",who_can_invite_room:"friends",show_online:true,read_receipts:true,message_requests_enabled:true};
