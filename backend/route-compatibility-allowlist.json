@@ -1,42 +1,19 @@
 {
   "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
   "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
-  "observedDuplicateCount": 44,
+  "observedDuplicateCount": 33,
   "duplicates": {
-    "DELETE /api/account/sessions/:id": [
-      "session-control.mjs",
-      "core-extensions.mjs"
-    ],
     "DELETE /api/friends/:userId": [
       "closure-routes.mjs",
       "routes/core-social.mjs"
-    ],
-    "GET /api/account/sessions": [
-      "session-control.mjs",
-      "core-extensions.mjs"
     ],
     "GET /api/admin/advanced/analytics": [
       "routes/stability-overrides.mjs",
       "routes/group-o-admin.mjs"
     ],
-    "GET /api/admin/readiness": [
-      "closure-routes.mjs",
-      "v1-social-extra.mjs",
-      "routes/core-admin-control.mjs"
-    ],
     "GET /api/admin/system": [
       "core-extensions.mjs",
       "routes/core-admin-control.mjs"
-    ],
-    "GET /api/chats": [
-      "message-media-fix.mjs",
-      "v1-social-extra.mjs",
-      "routes/fgh-social.mjs",
-      "routes/core-messaging.mjs"
-    ],
-    "GET /api/chats/:id/messages": [
-      "message-media-fix.mjs",
-      "routes/core-messaging.mjs"
     ],
     "GET /api/feed": [
       "r1-core-experience.mjs",
@@ -73,10 +50,6 @@
       "r1-core-experience.mjs",
       "guest-explore.mjs"
     ],
-    "GET /api/rooms/:id/messages": [
-      "message-media-fix.mjs",
-      "routes/core-messaging.mjs"
-    ],
     "GET /api/rooms/:id/voice/state": [
       "r1-core-experience.mjs",
       "room-voice.mjs"
@@ -106,10 +79,6 @@
       "security-completion.mjs",
       "core-extensions.mjs"
     ],
-    "POST /api/account/logout-all": [
-      "session-control.mjs",
-      "core-extensions.mjs"
-    ],
     "POST /api/admin/reports/:id/action": [
       "audit-completion.mjs",
       "core-extensions.mjs"
@@ -117,14 +86,6 @@
     "POST /api/auth/reset-password": [
       "security-completion.mjs",
       "platform-extra.mjs"
-    ],
-    "POST /api/chats/with/:userId": [
-      "release-hardening.mjs",
-      "routes/core-messaging.mjs"
-    ],
-    "POST /api/direct-messages/:id/forward": [
-      "message-media-fix.mjs",
-      "routes/core-messaging.mjs"
     ],
     "POST /api/feed/:id/comments": [
       "r1-core-experience.mjs",
@@ -149,10 +110,6 @@
     "POST /api/live/:id/signals": [
       "routes/live-hardening.mjs",
       "routes/live.mjs"
-    ],
-    "POST /api/messages/:id/forward": [
-      "message-media-fix.mjs",
-      "routes/core-messaging.mjs"
     ],
     "POST /api/profile/location": [
       "real-map.mjs",
@@ -179,14 +136,10 @@
       "experience-v2.mjs",
       "core-extensions.mjs"
     ],
-    "POST /api/uploads": [
-      "experience-v2.mjs",
-      "security-p0.mjs",
-      "core-extensions.mjs"
-    ],
     "PUT /api/feed/:id/reaction": [
       "r1-core-experience.mjs",
       "social-experience.mjs"
     ]
-  }
+  },
+  "lastOwnershipMigration": "GROUP 1: messaging, sessions, admin readiness, generic upload"
 }
