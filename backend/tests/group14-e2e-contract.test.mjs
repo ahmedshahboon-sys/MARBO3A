@@ -7,7 +7,7 @@ test("group14 matrix refuses source-only PASS claims",()=>{
  const m=read("docs/GROUP14-E2E-MATRIX.md");
  assert.match(m,/Never convert NOT_RUN\/BLOCKED into PASS from source inspection alone/);
  for(const area of ["Auth/session","Social","Messaging","Calls","Rooms","Live","Map","Admin","TV","Guest","PWA","Performance","Backup/restore"])assert.ok(m.includes(area));
- assert.match(m,/two real devices\/browsers on different networks/);
+ assert.match(m,/two real devices\/browsers on different networks/i);
  assert.match(m,/real encrypted external copy and restore drill/);
 });
 
