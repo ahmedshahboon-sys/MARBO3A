@@ -157,3 +157,14 @@ html[data-nav-dock="hidden"] .social-dock{display:none!important}
 .ui-v3 .v3-header-icon{position:relative!important;overflow:visible!important}
 .ui-v3 .v3-unread-badge{position:absolute!important;top:-2px!important;right:-5px!important;display:grid!important;place-items:center!important;border-radius:999px!important;background:var(--ui-accent)!important;color:#fff!important;font-weight:900!important;box-shadow:0 0 0 2px var(--ui-bg)!important;z-index:1!important}
 .ui-v3 .social-dock,.ui-v3 .social-dock-track{overflow:visible!important}
+
+
+/* Group 5 theme and typography parity. */
+html[data-theme="light"] :is(.drawer-overlay,.settings-overlay,.app-dialog-backdrop,.message-sheet-backdrop){background:color-mix(in srgb,#000 38%,transparent)!important}
+html[data-theme="light"] .ui-v3 :is(.admin-route-page>header,.admin-route-actions>a,.broadcast-form,.friends-polished-page .sf-people,.friend-person-card,.profile-completeness-card){background:var(--ui-surface)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
+html[data-theme="light"] .ui-v3 :is(.admin-toolbar input,.broadcast-form textarea,.broadcast-form input,.broadcast-form select,.post-friend-action.outgoing){background:var(--ui-surface-2)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
+html[data-theme="light"] .ui-v3 :is(.person-identity-meta,.friends-page-head p,.profile-completeness-card span,.profile-completeness-card small){color:var(--ui-muted)!important}
+@media(prefers-reduced-motion:reduce){
+  html:focus-within{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
