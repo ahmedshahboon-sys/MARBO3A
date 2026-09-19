@@ -47,7 +47,7 @@ for(const file of files){
     if(!/(requireAdmin|requireSuperAdmin|adminGuard|requireRole)\s*\(/.test(slice))add(file,lineOf(src,m.index),"admin-route-without-visible-guard");
   }
 
-  const query=new RegExp("\\\\b(?:pool|client|db)\\\\.query\\\\s*\\\\(\\\\s*\\\\x60([\\\\s\\\\S]*?)\\\\x60","g");
+  const query=/\b(?:pool|client|db)\.query\s*\(\s*`([\s\S]*?)`/g;
   for(const m of src.matchAll(query)){
     const sql=m[1];
     const expressions=[...sql.matchAll(/\$\{([^}]+)\}/g)].map(x=>x[1].trim());
