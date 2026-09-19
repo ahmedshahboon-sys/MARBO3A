@@ -14,7 +14,7 @@ test("advanced controls use the canonical bounded operational schema",()=>{
  const src=read("routes/group-o-admin.mjs"),controls=read("operational-controls.mjs");
  assert.match(controls,/upload_max_mb:\{type:"integer",min:1,max:8/);
  assert.match(controls,/live_max_viewers:\{type:"integer",min:1,max:8/);
- assert.match(controls,/voice_participant_max:\{type:"integer",min:4,max:100/);
+ assert.match(controls,/voice_participant_max:\{type:"integer",min:4,max:VOICE_HARD_MAX/);
  assert.match(src,/operationalSettingMeta/);
  assert.match(src,/SETTING_NOT_FOUND/);
  assert.match(src,/FEATURE_NOT_FOUND/);
