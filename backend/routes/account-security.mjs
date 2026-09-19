@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import {pool,redis,ensureRedis,requireAuth,tokenFrom,tokenHash,clean,ipOf,isAdmin} from "../runtime.mjs";
+import {pool,redis,ensureRedis,requireAuth,tokenFrom,tokenHash,clean,ipOf,isAdmin,destroySession,clearSessionCookie} from "../runtime.mjs";
 
 const EMAIL_CHANGE_TTL=600,EMAIL_CHANGE_MAX_ATTEMPTS=5;
 async function sendMail(email,subject,html){if(!process.env.BREVO_API_KEY)throw new Error("EMAIL_NOT_CONFIGURED");const r=await fetch("https://api.brevo.com/v3/smtp/email",{method:"POST",headers:{accept:"application/json","content-type":"application/json","api-key":process.env.BREVO_API_KEY},body:JSON.stringify({sender:{name:"مربوعة",email:"no-reply@marbo3a.ly"},to:[{email}],subject,htmlContent:html})});if(!r.ok)throw new Error("EMAIL_SEND_FAILED")}
@@ -72,6 +72,18 @@ export function registerAccountSecurity(app){
       sendMail(data.email,"تم تأكيد بريدك الجديد في مربوعة",`<div dir="rtl"><h2>مربوعة</h2><p>تم اعتماد هذا البريد لحسابك بنجاح.</p></div>`)
     ]);
     res.json({ok:true,email:data.email,otherSessionsRevoked:true});
+  });
+
+  app.post("/api/account/deactivate",async(req,res)=>{
+    const u=await requireAuth(req,res);if(!u)return;
+    if(isAdmin(u))return res.status(409).json({ok:false,error:"ADMIN_CANNOT_DEACTIVATE"});
+    if(!await requireStepUp(req,res,u))return;
+    const current=tokenFrom(req);
+    await pool.query(`UPDATE users SET account_status='deactivated',deactivated_at=NOW(),updated_at=NOW() WHERE id=$1`,[u.id]);
+    await revokeOtherSessions(u.id,current);
+    await recordSecurity(u.id,"account_deactivated",req);
+    await destroySession(current);clearSessionCookie(res);
+    res.json({ok:true,deactivated:true,reactivation:"login"});
   });
 
   app.post("/api/account/delete",async(req,res)=>{
