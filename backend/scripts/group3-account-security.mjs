@@ -64,6 +64,12 @@ try{
   assertStatus(reg,201);
   if(reg.data.token||reg.data.sessionMode!=="cookie"||!cookieFrom(reg.r))throw new Error("cookie web registration leaked or missed session contract");
 
+  const oauthFlow=crypto.randomBytes(24).toString("hex"),oauthEmail=`group3oauth_${Date.now()}_${crypto.randomBytes(3).toString("hex")}@example.invalid`;
+  await redis.set(`oauth:pending:${oauthFlow}`,JSON.stringify({mode:"new",provider:"google",sub:`g3-${crypto.randomBytes(8).toString("hex")}`,email:oauthEmail,emailVerified:true,name:"Group3 OAuth",picture:"",next:"/home"}),{EX:600});
+  const oauthComplete=await raw("/api/auth/oauth/complete",{method:"POST",headers:{"x-marbo3a-session-mode":"cookie"},body:{flow:oauthFlow,email:oauthEmail,username:`g3o_${crypto.randomBytes(5).toString("hex")}`,displayName:"Group3 OAuth",gender:"male",password:"Group3!Oauth123"}});
+  assertStatus(oauthComplete,201);
+  if(oauthComplete.data.token||oauthComplete.data.sessionMode!=="cookie"||!cookieFrom(oauthComplete.r))throw new Error("OAuth web completion leaked or missed cookie session contract");
+
   let result=await auth("/api/account/request-email-change",{cookie:webCookie,method:"POST",body:{email:`next_${user.email}`},status:403,error:"STEP_UP_REQUIRED"});
 
   result=await auth("/api/account/step-up/request",{cookie:webCookie,method:"POST",body:{currentPassword:"wrong-password"},status:403,error:"WRONG_PASSWORD"});
