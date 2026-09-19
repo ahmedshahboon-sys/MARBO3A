@@ -6,9 +6,9 @@ const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 
 test("comment preview uses the real post_comments edit timestamp",()=>{
   const src=read("routes/core-feed.mjs");
-  const start=src.indexOf('app.get("/api/feed/:id/comments/preview"');
-  const end=src.indexOf('app.post("/api/feed/:id/comments"',start);
-  assert.ok(start>=0&&end>start,"comment preview route must exist before profile identity route");
+  const start=src.indexOf("async function commentRows");
+  const end=src.indexOf("async function commentById",start);
+  assert.ok(start>=0&&end>start,"canonical commentRows helper must exist");
   const preview=src.slice(start,end);
   assert.match(preview,/c\.edited_at/);
   assert.doesNotMatch(preview,/c\.updated_at/);
@@ -87,7 +87,7 @@ test("authenticated profile feed honors post visibility and blocks",()=>{
   assert.match(src,/who_can_see_posts/);
   assert.match(src,/await blocked\(viewer\.id,p\.id\)/);
   assert.match(src,/canPosts/);
-  assert.match(src,/if\(canPosts\)posts=/);
+  assert.match(src,/if\(canPosts\)\{/);
   assert.match(src,/account_status=\'active\'/);
 });
 
