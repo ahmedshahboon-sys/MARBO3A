@@ -8,7 +8,7 @@
   const root=process.cwd();
   const appDir=path.join(root,"app");
   const layout=fs.readFileSync(path.join(appDir,"layout.js"),"utf8");
-  const imports=[...layout.matchAll(/import\s+["']\.\/(.+?\.css)["'];/g)].map(x=>x[1]);
+const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css)["\'];$/)?.[1]).filter(Boolean);
   const chrome=["google-chrome","google-chrome-stable","chromium","chromium-browser"].find(bin=>{
     const r=spawnSync("bash",["-lc","command -v "+bin],{encoding:"utf8"});
     return r.status===0&&r.stdout.trim();
