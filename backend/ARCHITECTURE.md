@@ -8,6 +8,7 @@
 - `routes/auth-session.mjs` — login, current session and logout/session ownership.
 - `routes/core-social.mjs` — friends, search, notifications and core profile social actions.
 - `routes/core-feed.mjs` — canonical smart/public feed, post reactions, threaded comments/replies and authenticated social-profile feed.
+- `routes/core-stories.mjs` — canonical Stories & Media lifecycle: rail discovery, create/view/viewers, reactions/replies, mutes, highlights, expiry and safe owned-media cleanup.
 - `routes/core-messaging.mjs` — direct conversation/message core API.
 - `routes/core-rooms.mjs` — room membership/core room API.
 - `routes/core-admin-rooms.mjs` — role-protected room administration.
@@ -75,4 +76,15 @@ Remaining migration rule: retire an allowlisted compatibility duplicate only aft
 - `routes/core-social.mjs` is the sole friend-removal owner and excludes blocked accounts from search, incoming/friend lists and suggestions.
 - Social profile detail and mutual-friend endpoints reject blocked relationships; mutual-friend visibility follows `who_can_see_friends`; deleted posts cannot be re-pinned.
 - `scripts/group4-social-lifecycle.mjs` exercises feed visibility, public IDs/deep links, block/privacy boundaries, reactions, threaded comments, saved visibility, pin cleanup and audited friend removal against a live CI database.
+
+## Group 5 Stories & Media — 2026-09-19
+
+- `routes/core-stories.mjs` is the single explicit owner for the Stories lifecycle. The historical `stories.mjs` wrapper and story registrations in `ijkl-experience.mjs` are retired.
+- Story visibility is fail-closed across account privacy, per-story privacy, accepted friendships and bidirectional user blocks. Mutes remove accounts from the rail without mutating their content.
+- Story creation accepts only MARBO3A-owned upload URLs, including date-segment storage paths, and validates image/video URL extensions against the declared media kind. Text stories always discard media fields.
+- Video upload preserves real container-signature validation (MP4/MOV `ftyp`, WebM EBML) and discards invalid disk files.
+- Reaction changes replace stale reaction notifications; deleting a reaction removes its notification. Story replies obey `who_can_reply_story` and deliver through direct messages.
+- Non-highlighted expired stories are soft-deleted and their owned media is removed when it is not referenced elsewhere. Highlighted stories survive expiry; removing an expired highlight allows normal expiry cleanup.
+- Manual story deletion transactionally clears highlights and story notifications, then removes orphaned owned media safely.
+- `scripts/group5-stories-media.mjs` and the Group 5 frontend contract cover upload → create → privacy/block/mute → view/viewers → reaction/reply → highlight/expiry → delete, plus responsive viewer and Live rail integration.
 
