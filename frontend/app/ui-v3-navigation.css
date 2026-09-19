@@ -10,12 +10,12 @@
   transform:translateX(-50%)!important;
   width:min(760px,calc(100% - 12px))!important;
   max-width:calc(100vw - 12px)!important;
-  bottom:calc(6px + env(safe-area-inset-bottom))!important;
-  z-index:500!important;
+  bottom:0!important;
+  z-index:var(--ui-z-dock)!important;
 }
 .ui-v3 .social-dock-track{
-  height:70px!important;
-  min-height:70px!important;
+  height:var(--app-dock-h)!important;
+  min-height:var(--app-dock-h)!important;
   display:grid!important;
   grid-template-columns:repeat(5,minmax(0,1fr))!important;
   align-items:center!important;
@@ -29,8 +29,8 @@
   appearance:none!important;
   width:100%!important;
   min-width:0!important;
-  height:58px!important;
-  min-height:58px!important;
+  height:50px!important;
+  min-height:50px!important;
   margin:0!important;
   padding:4px 2px!important;
   border:0!important;
@@ -105,9 +105,9 @@
   .ui-v3 .about-links{grid-template-columns:1fr}
 }
 
-@media(max-width:350px){
+@media(max-width:360px){
   .ui-v3 .social-dock{width:calc(100% - 8px)!important}
   .ui-v3 .social-dock-track{padding-inline:3px!important}
   .ui-v3 .social-dock-track>:is(a,button){font-size:9px!important}
-  .ui-v3 .social-dock .dock-create{width:54px!important;min-width:54px!important;height:54px!important;min-height:54px!important}
+  .ui-v3 .social-dock .dock-create{width:50px!important;min-width:50px!important;height:50px!important;min-height:50px!important}
 }
