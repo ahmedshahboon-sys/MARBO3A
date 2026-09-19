@@ -40,7 +40,7 @@ for(const token of ['package-ecosystem: "npm"','directory: "/backend"','director
 }
 
 const script=fs.readFileSync(path.join(root,"ops","deploy-production.sh"),"utf8");
-for(const token of ["REQUESTED_RELEASE_SHA","git rev-parse HEAD","git reset --hard \\"$PREVIOUS\\"","ROLLBACK_HEAD"]){
+for(const token of ["REQUESTED_RELEASE_SHA","git rev-parse HEAD",'git reset --hard "$PREVIOUS"',"ROLLBACK_HEAD"]){
   if(!script.includes(token))fail("deploy-production.sh: missing "+token);
 }
 
