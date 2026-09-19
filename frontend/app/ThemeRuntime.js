@@ -1,10 +1,10 @@
 "use client";
 
 import {useEffect} from "react";
+import {sessionMarker,cookieHeaders} from "./webSession";
 
 const THEME_KEY="marbo3a_theme";
 const validTheme=value=>["dark","light","system"].includes(value)?value:"dark";
-const authToken=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
 
 function resolvedTheme(theme,media){
   return theme==="system"?(media.matches?"light":"dark"):theme;
@@ -35,12 +35,12 @@ export default function ThemeRuntime(){
     document.addEventListener("change",onThemeControl,true);
 
     let cancelled=false;
-    const token=authToken();
+    const token=sessionMarker();
     if(token){
       fetch("/api/settings",{
         cache:"no-store",
         credentials:"same-origin",
-        headers:token!=="cookie"?{authorization:`Bearer ${token}`}:{},
+        headers:cookieHeaders(),
       }).then(response=>response.ok?response.json():null).then(data=>{
         if(cancelled||!data?.settings?.theme)return;
         preference=validTheme(data.settings.theme);
