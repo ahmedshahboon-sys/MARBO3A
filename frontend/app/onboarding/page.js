@@ -3,10 +3,11 @@ import {useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 import Icon from "../Icon";
 import {fetchJson} from "../request";
+import {sessionMarker,clearCookieSession,cookieHeaders} from "../webSession";
 
-const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-const clearToken=()=>{localStorage.removeItem("marbo3a_token");sessionStorage.removeItem("marbo3a_token")};
-const authHeaders=()=>{const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}};
+const token=()=>sessionMarker();
+const clearToken=()=>clearCookieSession();
+const authHeaders=()=>cookieHeaders();
 function finishTarget(){try{const raw=sessionStorage.getItem("marbo3a_after_onboarding")||sessionStorage.getItem("marbo3a_return_to")||"/home";sessionStorage.removeItem("marbo3a_after_onboarding");sessionStorage.removeItem("marbo3a_return_to");const value=String(raw||"").trim();if(!value.startsWith("/")||value.startsWith("//"))return"/home";const pathname=value.split(/[?#]/,1)[0]||"/";return pathname!=="/"&&pathname!=="/explore"&&!pathname.startsWith("/explore/")&&pathname!=="/onboarding"?value:"/home"}catch{return"/home"}}
 const messageFor=e=>e?.message==="REQUEST_TIMEOUT"?"الاتصال تأخر. جرّب مرة ثانية أو تأكد من الشبكة.":e?.message==="REQUEST_FAILED"?"تعذر الاتصال بالسيرفر. جرّب مرة ثانية.":"تعذر تجهيز بيانات البداية. جرّب مرة ثانية.";
 
