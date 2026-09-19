@@ -2,9 +2,9 @@
    This component-scoped layer intentionally uses the room-community-* contract
    so legacy room bubble/fixed-overlay rules cannot reshape the new room UI. */
 
-body.ui-v3:has(.room-community-page){height:100dvh;min-height:100dvh;overflow:hidden}
+body.ui-v3:has(.room-community-page){height:var(--app-viewport-h);min-height:var(--app-viewport-h);overflow:hidden}
 .ui-v3 .room-community-page{
-  height:calc(100dvh - var(--v3-header-h));
+  height:calc(var(--app-viewport-h) - var(--app-header-total-h));
   min-height:0;
   width:100%;
   overflow:hidden;
@@ -38,7 +38,7 @@ body.ui-v3:has(.room-community-page){height:100dvh;min-height:100dvh;overflow:hi
   box-shadow:0 12px 30px rgba(0,0,0,.22);
 }
 .ui-v3 .room-community-icon,.ui-v3 .room-community-actions>:is(a,button){
-  width:36px;height:36px;min-width:36px;min-height:36px;padding:0;
+  width:44px;height:44px;min-width:44px;min-height:44px;padding:0;
   border:1px solid rgba(255,255,255,.10);border-radius:11px;
   background:#151c25;color:#eef2f6;display:grid;place-items:center;text-decoration:none;
 }
@@ -101,7 +101,7 @@ body.ui-v3:has(.room-community-page){height:100dvh;min-height:100dvh;overflow:hi
 .ui-v3 .room-community-tools{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) 104px;gap:6px}
 .ui-v3 .room-community-search{height:42px;display:grid;grid-template-columns:28px minmax(0,1fr) 34px;align-items:center;padding:0 6px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:#10161e}
 .ui-v3 .room-community-search>svg{width:17px;height:17px;color:#7f8a98;margin:auto}
-.ui-v3 .room-community-search input{height:38px!important;min-height:38px!important;padding:0 4px!important;border:0!important;background:transparent!important;font-size:12px!important;outline:0!important;color:#eef2f6!important;min-width:0!important}
+.ui-v3 .room-community-search input{height:44px!important;min-height:44px!important;padding:0 4px!important;border:0!important;background:transparent!important;font-size:12px!important;outline:0!important;color:#eef2f6!important;min-width:0!important}
 .ui-v3 .room-community-search button{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:0!important;border:0!important;border-radius:9px!important;background:rgba(255,122,0,.10)!important;color:#ff8a1c!important;display:grid!important;place-items:center!important}
 .ui-v3 .room-community-search button svg{width:15px;height:15px}
 .ui-v3 .room-pins-toggle{height:42px!important;min-height:42px!important;padding:0 8px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:14px!important;background:#10161e!important;color:#aeb6c2!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;font-size:9px!important;font-weight:800!important;white-space:nowrap!important}
@@ -127,13 +127,13 @@ body.ui-v3:has(.room-community-page){height:100dvh;min-height:100dvh;overflow:hi
 
 .ui-v3 .room-community-typing{flex:0 0 auto;padding:2px 9px;color:#8f99a7;font-size:8px}.ui-v3 .room-community-replying{flex:0 0 auto;min-height:34px;padding:4px 7px;display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#10161e;color:#adb5c0;font-size:8px}.ui-v3 .room-community-replying span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ui-v3 .room-community-replying button{min-height:26px!important;height:26px!important;padding:0 7px!important;border-radius:8px!important;font-size:7.5px!important}
 .ui-v3 .room-community-compose{flex:0 0 auto;height:50px;min-height:50px;padding:5px;display:grid;grid-template-columns:40px 40px minmax(0,1fr) 42px;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(10,15,21,.98);box-shadow:0 -8px 22px rgba(0,0,0,.14)}
-.ui-v3 .room-community-compose>.voice-record-btn,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:11px!important;background:#151c25!important;color:#eef2f6!important;display:grid!important;place-items:center!important;overflow:hidden!important}.ui-v3 .room-community-compose>label{cursor:pointer}.ui-v3 .room-community-compose>label svg,.ui-v3 .room-community-compose>.voice-record-btn svg{width:19px;height:19px}.ui-v3 .room-community-compose>input{width:100%!important;height:38px!important;min-height:38px!important;padding:0 10px!important;border:0!important;border-radius:11px!important;background:#11171e!important;color:#eef2f6!important;outline:0!important;font-size:12px!important;min-width:0!important}.ui-v3 .room-community-compose>button:last-child{background:linear-gradient(145deg,#ff8617,#ed6800)!important;border-color:rgba(255,162,72,.48)!important;color:#fff!important}.ui-v3 .room-community-compose>button:disabled{opacity:.45!important}
+.ui-v3 .room-community-compose>.voice-record-btn,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:11px!important;background:#151c25!important;color:#eef2f6!important;display:grid!important;place-items:center!important;overflow:hidden!important}.ui-v3 .room-community-compose>label{cursor:pointer}.ui-v3 .room-community-compose>label svg,.ui-v3 .room-community-compose>.voice-record-btn svg{width:19px;height:19px}.ui-v3 .room-community-compose>input{width:100%!important;height:44px!important;min-height:44px!important;padding:0 10px!important;border:0!important;border-radius:11px!important;background:#11171e!important;color:#eef2f6!important;outline:0!important;font-size:12px!important;min-width:0!important}.ui-v3 .room-community-compose>button:last-child{background:linear-gradient(145deg,#ff8617,#ed6800)!important;border-color:rgba(255,162,72,.48)!important;color:#fff!important}.ui-v3 .room-community-compose>button:disabled{opacity:.45!important}
 
 @media(max-width:520px){
   .ui-v3 .room-community-shell{width:calc(100% - 8px);gap:5px;padding-top:2px}
   .ui-v3 .room-community-head{min-height:70px;padding:7px;grid-template-columns:34px minmax(0,1fr) auto;border-radius:15px}.ui-v3 .room-community-icon,.ui-v3 .room-community-actions>:is(a,button){width:32px;height:32px;min-width:32px;min-height:32px}.ui-v3 .room-community-title h1{font-size:14px}.ui-v3 .room-community-title p{font-size:8px}.ui-v3 .room-community-title>span{font-size:7px}
   .ui-v3 .room-live-card{min-height:48px;padding:5px 6px;border-radius:13px}.ui-v3 .room-live-copy small{font-size:7px}.ui-v3 .room-voice-host .room-voice-entry>button{min-width:104px!important;height:34px!important;min-height:34px!important;font-size:8.5px!important}
-  .ui-v3 .room-community-tools{grid-template-columns:minmax(0,1fr) 90px;gap:4px}.ui-v3 .room-community-search,.ui-v3 .room-pins-toggle{height:38px!important;min-height:38px!important}.ui-v3 .room-community-search input{height:34px!important;min-height:34px!important;font-size:16px!important}.ui-v3 .room-pins-toggle{font-size:8px!important}
+  .ui-v3 .room-community-tools{grid-template-columns:minmax(0,1fr) 90px;gap:4px}.ui-v3 .room-community-search,.ui-v3 .room-pins-toggle{height:44px!important;min-height:44px!important}.ui-v3 .room-community-search input{height:34px!important;min-height:34px!important;font-size:16px!important}.ui-v3 .room-pins-toggle{font-size:8px!important}
   .ui-v3 .room-featured-pin{min-height:50px;padding:6px 7px}.ui-v3 .room-featured-pin p{font-size:9px}
   .ui-v3 .room-community-message{grid-template-columns:34px minmax(0,1fr);gap:6px;padding:5px 4px}.ui-v3 .room-community-avatar{width:34px;height:34px}.ui-v3 .room-community-message-main>p{font-size:11.5px}.ui-v3 .room-community-message-main>header b{font-size:10px}
   .ui-v3 .room-community-compose{height:48px;min-height:48px;grid-template-columns:38px 38px minmax(0,1fr) 40px;padding:4px;gap:3px;border-radius:14px}.ui-v3 .room-community-compose>.voice-record-btn,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}.ui-v3 .room-community-compose>input{height:36px!important;min-height:36px!important;font-size:16px!important}
