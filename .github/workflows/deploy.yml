@@ -2,6 +2,14 @@ name: MARBO3A Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      release_sha:
+        description: "Exact 40-character commit SHA from protected main to deploy"
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 concurrency:
   group: marbo3a-production
@@ -11,27 +19,64 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    timeout-minutes: 45
     steps:
-      - name: Prepare SSH key
+      - name: Prepare pinned SSH trust
         shell: bash
         env:
           SSH_PRIVATE_KEY: ${{ secrets.MARBO3A_DEPLOY_SSH_KEY }}
           SSH_HOST: ${{ secrets.MARBO3A_DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.MARBO3A_DEPLOY_USER }}
+          SSH_KNOWN_HOSTS: ${{ secrets.MARBO3A_DEPLOY_KNOWN_HOSTS }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
         run: |
           set -euo pipefail
-          test -n "$SSH_PRIVATE_KEY"; test -n "$SSH_HOST"; mkdir -p ~/.ssh; chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/marbo3a_deploy; chmod 600 ~/.ssh/marbo3a_deploy
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/known_hosts
-      - name: Deploy MARBO3A
+          [[ "$RELEASE_SHA" =~ ^[a-fA-F0-9]{40}$ ]] || { echo "release_sha must be an exact 40-character commit SHA" >&2; exit 2; }
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_HOST"
+          test -n "$SSH_USER"
+          test -n "$SSH_KNOWN_HOSTS"
+          [ "$SSH_USER" != "root" ] || { echo "Production deploy must use a least-privilege non-root SSH account" >&2; exit 3; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/marbo3a_deploy
+          chmod 600 ~/.ssh/marbo3a_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          ssh-keygen -F "$SSH_HOST" -f ~/.ssh/known_hosts >/dev/null || { echo "Pinned known_hosts does not contain the configured deploy host" >&2; exit 4; }
+
+      - name: Deploy exact immutable SHA
         shell: bash
         env:
           SSH_HOST: ${{ secrets.MARBO3A_DEPLOY_HOST }}
           SSH_USER: ${{ secrets.MARBO3A_DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.MARBO3A_DEPLOY_PATH }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
         run: |
           set -euo pipefail
           DEPLOY_PATH="${DEPLOY_PATH:-/opt/marbo3a}"
-          ssh -i ~/.ssh/marbo3a_deploy -o BatchMode=yes -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" "set -euo pipefail; cd '$DEPLOY_PATH'; PREV=\$(git rev-parse HEAD); git fetch origin main; git checkout main; git reset --hard origin/main; chmod +x ops/deploy-production.sh; ./ops/deploy-production.sh '$DEPLOY_PATH' \"\$PREV\""
-      - name: Cleanup key
+          ssh -i ~/.ssh/marbo3a_deploy \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$SSH_USER@$SSH_HOST" bash -s -- "$DEPLOY_PATH" "$RELEASE_SHA" <<'REMOTE'
+          set -euo pipefail
+          DEPLOY_PATH="$1"
+          RELEASE_SHA="$2"
+          [[ "$RELEASE_SHA" =~ ^[a-fA-F0-9]{40}$ ]]
+          cd "$DEPLOY_PATH"
+          PREV="$(git rev-parse HEAD)"
+          [[ "$PREV" =~ ^[a-fA-F0-9]{40}$ ]]
+          git fetch --no-tags origin main
+          git cat-file -e "$RELEASE_SHA^{commit}"
+          git merge-base --is-ancestor "$RELEASE_SHA" origin/main || { echo "Requested release SHA is not reachable from origin/main" >&2; exit 5; }
+          git reset --hard "$RELEASE_SHA"
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          chmod +x ops/deploy-production.sh
+          ./ops/deploy-production.sh "$DEPLOY_PATH" "$PREV" "$RELEASE_SHA"
+          REMOTE
+
+      - name: Cleanup SSH material
         if: always()
-        run: rm -f ~/.ssh/marbo3a_deploy
+        run: rm -f ~/.ssh/marbo3a_deploy ~/.ssh/known_hosts
