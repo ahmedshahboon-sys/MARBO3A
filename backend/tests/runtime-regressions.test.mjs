@@ -5,9 +5,9 @@ import fs from "node:fs";
 const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 
 test("comment preview uses the real post_comments edit timestamp",()=>{
-  const src=read("social-experience.mjs");
+  const src=read("routes/core-feed.mjs");
   const start=src.indexOf('app.get("/api/feed/:id/comments/preview"');
-  const end=src.indexOf('app.get("/api/profile/identity"',start);
+  const end=src.indexOf('app.post("/api/feed/:id/comments"',start);
   assert.ok(start>=0&&end>start,"comment preview route must exist before profile identity route");
   const preview=src.slice(start,end);
   assert.match(preview,/c\.edited_at/);
@@ -83,12 +83,12 @@ test("direct post interactions enforce the smart-feed visibility contract",()=>{
 });
 
 test("authenticated profile feed honors post visibility and blocks",()=>{
-  const src=read("feed-extensions.mjs");
+  const src=read("routes/core-feed.mjs");
   assert.match(src,/who_can_see_posts/);
-  assert.match(src,/canSeePosts/);
   assert.match(src,/await blocked\(viewer\.id,p\.id\)/);
-  assert.match(src,/postVisible\?/);
-  assert.match(src,/postRows=postVisible\?/);
+  assert.match(src,/canPosts/);
+  assert.match(src,/if\(canPosts\)posts=/);
+  assert.match(src,/account_status=\'active\'/);
 });
 
 test("public profile summary only counts guest-visible posts",()=>{
