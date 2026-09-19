@@ -4,11 +4,17 @@
    safe areas and interaction surfaces that must win over legacy CSS layers. */
 
 :root{
-  --app-max:600px;
+  --app-page-max:600px;
+  --app-max:var(--app-page-max); /* compatibility alias; retire with legacy consumers */
   --app-gutter:10px;
   --app-header-h:58px;
   --app-dock-h:62px;
-  --app-safe-bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 10px);
+  --app-safe-top:env(safe-area-inset-top,0px);
+  --app-safe-bottom:env(safe-area-inset-bottom,0px);
+  --app-header-total-h:calc(var(--app-header-h) + var(--app-safe-top));
+  --app-dock-total-h:calc(var(--app-dock-h) + var(--app-safe-bottom));
+  --app-content-bottom-space:calc(var(--app-dock-total-h) + 10px);
+  --app-viewport-h:var(--marbo3a-vvh,100dvh);
   --app-r-lg:15px;
   --app-r-md:12px;
   --app-space-1:4px;
@@ -16,12 +22,9 @@
   --app-space-3:9px;
   --app-space-4:12px;
 }
-/* Temporary V3 compatibility geometry owner.
-   These values reproduce the effective pre-Group-1 cascade exactly.
-   Group 2 will decide the final unified geometry and retire --v3-* consumers. */
-body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
-@media(max-width:720px){body.ui-v3{--v3-header-h:66px}}
-@media(max-width:520px){body.ui-v3{--v3-header-h:68px}}
+/* Group 2 geometry contract.
+   Legacy V3 consumers resolve to the same single app geometry source. */
+body.ui-v3{--v3-header-h:var(--app-header-total-h);--v3-dock-h:var(--app-dock-h)}
 
 
 /* One width/spacing system across every visible and nested product route. */
@@ -31,8 +34,8 @@ body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
   .admin-shell,.friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,
   .safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell
 ){
-  width:min(100%,var(--app-max))!important;
-  max-width:var(--app-max)!important;
+  width:min(100%,var(--app-page-max))!important;
+  max-width:var(--app-page-max)!important;
   margin-inline:auto!important;
   box-sizing:border-box!important;
 }
@@ -42,8 +45,8 @@ body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
   .account-shell,.login-methods-shell,.platform-shell
 ){padding-inline:var(--app-gutter)!important}
 .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.chat-page,.direct-chat-page){
-  min-height:100dvh!important;
-  padding-bottom:var(--app-safe-bottom)!important;
+  min-height:var(--app-viewport-h)!important;
+  padding-bottom:var(--app-content-bottom-space)!important;
   box-sizing:border-box!important;
 }
 
@@ -60,20 +63,20 @@ body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
 
 /* Global chrome. */
 .ui-v3 .v3-global-header{
-  min-height:var(--app-header-h)!important;height:var(--app-header-h)!important;
-  padding:max(4px,env(safe-area-inset-top,0px)) var(--app-gutter) 4px!important;box-sizing:border-box!important
+  min-height:var(--app-header-total-h)!important;height:var(--app-header-total-h)!important;
+  padding:var(--app-safe-top) var(--app-gutter) 0!important;box-sizing:border-box!important
 }
-.ui-v3 .v3-brand-lockup{gap:7px!important;min-height:42px!important}
+.ui-v3 .v3-brand-lockup{gap:7px!important;min-height:44px!important}
 .ui-v3 .v3-brand-lockup>img{width:40px!important;height:40px!important}
 .ui-v3 .v3-brand-copy>b{font-size:19px!important;line-height:1!important}
 .ui-v3 .v3-brand-copy>small{font-size:8px!important;line-height:1!important}
 .ui-v3 .v3-brand-copy>em{font-size:7px!important;line-height:1.2!important;margin-top:2px!important}
 .ui-v3 .v3-header-actions{gap:5px!important}
-.ui-v3 .v3-global-header :where(.v3-header-icon,button,a.v3-header-icon){min-width:34px!important;min-height:34px!important;width:34px!important;height:34px!important}
+.ui-v3 .v3-global-header :where(.v3-header-icon,button,a.v3-header-icon){min-width:44px!important;min-height:44px!important;width:44px!important;height:44px!important}
 .ui-v3 .v3-global-header :where(svg){max-width:22px!important;max-height:22px!important}
 .ui-v3 .v3-unread-badge{min-width:17px!important;height:17px!important;font-size:9px!important;padding-inline:4px!important;line-height:17px!important}
 
-.ui-v3 .social-dock{height:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px))!important;min-height:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px))!important;padding-bottom:env(safe-area-inset-bottom,0px)!important}
+.ui-v3 .social-dock{bottom:0!important;height:var(--app-dock-total-h)!important;min-height:var(--app-dock-total-h)!important;padding-bottom:var(--app-safe-bottom)!important}
 .ui-v3 .social-dock-track{height:var(--app-dock-h)!important;min-height:var(--app-dock-h)!important;padding:3px 6px!important;gap:2px!important}
 .ui-v3 .social-dock :where(a,button){min-height:50px!important;height:50px!important;font-size:9px!important;gap:2px!important;padding:2px 4px!important}
 .ui-v3 .social-dock svg{width:21px!important;height:21px!important}
@@ -81,7 +84,7 @@ body.ui-v3{--v3-header-h:72px;--v3-dock-h:78px}
 .ui-v3 .dock-unread-badge{min-width:15px!important;height:15px!important;line-height:15px!important;font-size:8px!important}
 
 /* Feed / composer / posts. */
-.ui-v3 .feed-center{max-width:var(--app-max)!important}
+.ui-v3 .feed-center{max-width:var(--app-page-max)!important}
 .ui-v3 :where(.sf-composer,.feed-composer){padding:8px!important;border-radius:15px!important;margin-bottom:7px!important}
 .ui-v3 :where(.sf-composer textarea,.feed-composer textarea){min-height:54px!important;font-size:13px!important}
 .ui-v3 :where(.sf-post,.post-card){border-radius:15px!important;margin-bottom:8px!important}
@@ -174,19 +177,19 @@ body.ui-v3:has(.notifications-panel) .notifications-panel{padding:6px!important;
 .ui-v3 .notification-actions{padding:0 5px 5px!important;gap:4px!important}.ui-v3 .notification-actions button{height:27px!important;min-height:27px!important;padding:0 8px!important;font-size:8px!important}.ui-v3 .notification-result{display:block!important;padding:0 7px 5px!important;font-size:8px!important;color:rgba(255,255,255,.55)!important}
 
 /* Rooms + room chat. */
-body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!important;overflow:auto!important}
-.ui-v3 .room-community-page{height:auto!important;min-height:calc(100dvh - var(--app-header-h))!important;overflow:visible!important;padding-bottom:var(--app-safe-bottom)!important}
-.ui-v3 .room-community-shell{width:min(var(--app-max),calc(100% - 14px))!important;min-height:0!important;height:auto!important;padding:2px 0 6px!important;gap:5px!important;overflow:visible!important}
+body.ui-v3:has(.room-community-page){height:auto!important;min-height:var(--app-viewport-h)!important;overflow:auto!important}
+.ui-v3 .room-community-page{height:auto!important;min-height:calc(var(--app-viewport-h) - var(--app-header-total-h))!important;overflow:visible!important;padding-bottom:var(--app-content-bottom-space)!important}
+.ui-v3 .room-community-shell{width:min(var(--app-page-max),calc(100% - 14px))!important;min-height:0!important;height:auto!important;padding:2px 0 6px!important;gap:5px!important;overflow:visible!important}
 .ui-v3 .room-community-head{min-height:52px!important;padding:5px 6px!important;border-radius:12px!important;grid-template-columns:29px minmax(0,1fr) auto!important;gap:5px!important}.ui-v3 .room-community-title small{font-size:7px!important}.ui-v3 .room-community-title h1{font-size:14px!important}.ui-v3 .room-community-title p{font-size:7px!important;margin:1px 0!important}.ui-v3 .room-community-title>span{font-size:7px!important}.ui-v3 .room-community-actions>:is(a,button),.ui-v3 .room-community-icon{width:29px!important;height:29px!important;min-width:29px!important;min-height:29px!important}
 .ui-v3 .room-live-card{min-height:0!important;margin:0!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-live-card:has(.room-voice-stage) .room-live-copy{display:none!important}.ui-v3 .room-live-copy{min-height:34px!important;padding:3px 5px!important}.ui-v3 .room-live-copy b{font-size:9px!important}.ui-v3 .room-live-copy small{font-size:7px!important}
 .ui-v3 .room-voice-entry{min-height:38px!important;padding:4px 6px!important;border-radius:10px!important;gap:5px!important}.ui-v3 .room-voice-entry b{font-size:9px!important}.ui-v3 .room-voice-entry small{font-size:7px!important}.ui-v3 .room-voice-entry button{height:29px!important;min-height:29px!important;font-size:8px!important;padding:0 7px!important}
 .ui-v3 .room-voice-host .room-voice-stage{border-radius:10px!important}.ui-v3 .room-voice-host .room-voice-stage>header{height:31px!important;min-height:31px!important;padding:0 6px!important}.ui-v3 .room-voice-host .room-voice-stage>header b{font-size:9px!important}.ui-v3 .room-voice-host .room-voice-stage>header span{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-body{max-height:82px!important;padding:3px!important;overflow:auto!important}.ui-v3 .room-voice-host .voice-people{gap:3px!important;flex-wrap:nowrap!important;overflow-x:auto!important}.ui-v3 .room-voice-host .voice-people>button{min-width:47px!important;flex:0 0 47px!important;font-size:7px!important;padding:2px!important}.ui-v3 .room-voice-host .voice-people :is(img,i){width:25px!important;height:25px!important}.ui-v3 .room-voice-host .voice-people b,.ui-v3 .room-voice-host .voice-people small{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-actions{gap:3px!important;padding-top:3px!important}.ui-v3 .room-voice-host .room-voice-actions button{min-height:28px!important;height:28px!important;padding:0 7px!important;font-size:7px!important}.room-voice-remote-audio{position:fixed!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:-9999px!important}
 .ui-v3 .room-community-tools{gap:4px!important}.ui-v3 .room-community-search{min-height:34px!important;height:34px!important;border-radius:10px!important}.ui-v3 .room-community-search input{height:32px!important;min-height:32px!important;font-size:9px!important}.ui-v3 .room-pins-toggle{height:34px!important;min-height:34px!important;font-size:8px!important;padding:0 7px!important}
 .ui-v3 .room-community-stream{padding:0 2px!important;margin:0!important;min-height:170px!important}.ui-v3 .room-community-message{gap:6px!important;padding-block:4px!important}.ui-v3 .room-community-avatar{width:30px!important;height:30px!important;min-width:30px!important}.ui-v3 .room-community-message header b{font-size:9px!important}.ui-v3 .room-community-message header small,.ui-v3 .room-community-message time{font-size:7px!important}.ui-v3 .room-role-badge{font-size:6px!important;padding:1px 4px!important;min-height:0!important}.ui-v3 .room-community-message :where(p,.message-text){font-size:10px!important;line-height:1.4!important}.ui-v3 .room-message-more{width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important}.ui-v3 .room-community-typing,.ui-v3 .room-community-replying,.ui-v3 .room-community-status{font-size:8px!important}
-.ui-v3 .room-community-compose{position:sticky!important;bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 3px)!important;z-index:30!important;min-height:44px!important;gap:4px!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-community-compose>input{height:35px!important;min-height:35px!important;font-size:10px!important}.ui-v3 .room-community-compose>button,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>.voice-record-btn{width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important}.ui-v3 .room-community-compose svg{width:18px!important;height:18px!important}
+.ui-v3 .room-community-compose{position:sticky!important;bottom:calc(var(--app-dock-total-h) + 3px)!important;z-index:30!important;min-height:44px!important;gap:4px!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-community-compose>input{height:35px!important;min-height:35px!important;font-size:10px!important}.ui-v3 .room-community-compose>button,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>.voice-record-btn{width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important}.ui-v3 .room-community-compose svg{width:18px!important;height:18px!important}
 
 /* Direct chat. */
-.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-head,.direct-chat-head,.chat-social-head){min-height:50px!important;padding:5px 7px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-avatar,.peer-avatar,.sf-avatar){max-width:34px!important;max-height:34px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-message,.message-bubble,.chat-bubble){font-size:10px!important;line-height:1.4!important;border-radius:12px!important;padding:6px 8px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-composer,.direct-chat-compose,.chat-social-compose){min-height:44px!important;padding:4px!important;gap:4px!important;bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 3px)!important}
+.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-head,.direct-chat-head,.chat-social-head){min-height:50px!important;padding:5px 7px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-avatar,.peer-avatar,.sf-avatar){max-width:34px!important;max-height:34px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-message,.message-bubble,.chat-bubble){font-size:10px!important;line-height:1.4!important;border-radius:12px!important;padding:6px 8px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-composer,.direct-chat-compose,.chat-social-compose){min-height:44px!important;padding:4px!important;gap:4px!important;bottom:calc(var(--app-dock-total-h) + 3px)!important}
 
 /* Voice note controls: clear active state above keyboard/dock. */
 .ui-v3 .voice-record-btn{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
@@ -204,8 +207,8 @@ body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!imp
 /* Loading must never dominate brand surfaces. */
 .ui-v3 :where(.spinner,.loading-spinner,.sf-spinner){max-width:24px!important;max-height:24px!important}.ui-v3 :where(.auth-loading-logo,.oauth-loading){gap:8px!important}.ui-v3 :where(.auth-loading-logo,.oauth-loading) img{max-width:96px!important;max-height:54px!important}
 
-@media (max-width:430px){
-  :root{--app-max:100%;--app-gutter:8px;--app-header-h:56px;--app-dock-h:60px}
+@media (max-width:520px){
+  :root{--app-page-max:100%;--app-gutter:8px}
   .ui-v3 .v3-brand-lockup>img{width:37px!important;height:37px!important}.ui-v3 .v3-brand-copy>b{font-size:18px!important}.ui-v3 .v3-brand-copy>em{display:none!important}
   .ui-v3 .social-dock-track{padding-inline:3px!important}.ui-v3 .social-dock :where(a,button){font-size:8px!important;padding-inline:2px!important}.ui-v3 .social-dock svg{width:20px!important;height:20px!important}
   .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h1{font-size:19px!important}

@@ -2,18 +2,10 @@
    Imported last. This layer only normalizes shared geometry/theme behavior and
    fixes legacy cascade collisions. Functional behavior remains in components. */
 
-:root{
-  --contract-max:600px;
-  --contract-gutter:10px;
-  --contract-header:58px;
-  --contract-dock:62px;
-  --contract-safe-bottom:calc(var(--contract-dock) + env(safe-area-inset-bottom,0px) + 10px);
-}
-
 /* Global page geometry */
 .ui-v3 :where(.social-shell,.feed-shell,.sf-main,.sf-simple-page,.feature-page,.inbox-wide,.room-community-shell,.chat-shell,.chat-social-shell,.profile-shell,.settings-shell,.admin-shell,.friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,.safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell){
-  width:min(100%,var(--contract-max))!important;
-  max-width:var(--contract-max)!important;
+  width:min(100%,var(--app-page-max))!important;
+  max-width:var(--app-page-max)!important;
   margin-inline:auto!important;
   box-sizing:border-box!important;
 }
@@ -21,15 +13,15 @@
   min-height:100dvh!important;
   box-sizing:border-box!important;
 }
-.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.real-map-page){padding-bottom:var(--contract-safe-bottom)!important}
+.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.real-map-page){padding-bottom:var(--app-content-bottom-space)!important}
 
 /* Global header: brand right, audience counters centered, actions left. */
 .ui-v3 .v3-global-header{
   position:sticky!important;top:0!important;z-index:9000!important;
   display:grid!important;grid-template-columns:minmax(42px,1fr) auto minmax(42px,1fr)!important;
   align-items:center!important;gap:6px!important;
-  min-height:var(--contract-header)!important;height:var(--contract-header)!important;
-  padding:4px var(--contract-gutter)!important;
+  min-height:var(--app-header-total-h)!important;height:var(--app-header-total-h)!important;
+  padding:var(--app-safe-top) var(--app-gutter) 0!important;
   background:color-mix(in srgb,var(--ui-bg-elevated) 92%,transparent)!important;
   border-bottom:1px solid var(--ui-border-soft)!important;
   backdrop-filter:blur(16px)!important;
@@ -44,8 +36,8 @@
 .ui-v3 .v3-online-pulse{width:7px;height:7px;border-radius:50%;background:var(--ui-success);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-success) 16%,transparent)}
 
 /* Dock never covers scrollable content. */
-.ui-v3 .social-dock{z-index:8500!important;height:calc(var(--contract-dock) + env(safe-area-inset-bottom,0px))!important}
-.ui-v3 .social-dock-track{height:var(--contract-dock)!important;min-height:var(--contract-dock)!important}
+.ui-v3 .social-dock{z-index:8500!important;bottom:0!important;height:var(--app-dock-total-h)!important;min-height:var(--app-dock-total-h)!important;padding-bottom:var(--app-safe-bottom)!important}
+.ui-v3 .social-dock-track{height:var(--app-dock-h)!important;min-height:var(--app-dock-h)!important}
 
 /* Feed mode/chip rows must scroll instead of clipping. */
 .ui-v3 :where(.feed-mode-tabs,.feed-mode-row,.feed-filter-tabs,.sf-feed-modes,.profile-tabs-v3,.map-filter-chips,.inbox-tabs){
@@ -67,7 +59,7 @@
 
 /* Direct chat: fix the overlapping/absolute-height legacy cascade. */
 .ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell){height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;padding-bottom:0!important}
-.ui-v3 :where(.chat-shell,.chat-social-shell){height:calc(100dvh - var(--contract-header))!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding-bottom:0!important}
+.ui-v3 :where(.chat-shell,.chat-social-shell){height:calc(var(--app-viewport-h) - var(--app-header-total-h))!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding-bottom:0!important}
 .ui-v3 :where(.chat-head,.direct-chat-head,.chat-social-head){flex:0 0 auto!important;min-height:56px!important;height:auto!important;padding:6px 8px!important;background:var(--ui-bg-elevated)!important;border-color:var(--ui-border-soft)!important}
 .ui-v3 .chat-stream{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:9px 7px calc(74px + env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:92px!important;background:var(--ui-bg)!important}
 .ui-v3 .chat-stream>*{position:relative!important;inset:auto!important;transform:none!important;flex:0 0 auto!important}
@@ -78,7 +70,7 @@
 .ui-v3 .chat-bubble :where(time,small,.chat-time,.message-time){position:static!important;display:block!important;margin-top:4px!important;font-size:var(--ui-meta)!important;line-height:1.2!important;opacity:.72!important}
 .ui-v3 .chat-bubble :where(img,video,audio){max-width:100%!important;height:auto!important}.ui-v3 .chat-bubble audio{width:min(300px,100%)!important}
 .ui-v3 :where(.chat-reply-preview,.reply-preview,.message-reply){position:static!important;max-width:100%!important;height:auto!important;overflow:hidden!important;margin-bottom:5px!important}
-.ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose){position:fixed!important;z-index:8600!important;left:50%!important;transform:translateX(-50%)!important;bottom:calc(var(--contract-dock) + env(safe-area-inset-bottom,0px) + 5px)!important;width:min(calc(100% - 14px),var(--contract-max))!important;min-height:50px!important;height:auto!important;padding:5px!important;gap:5px!important;border:1px solid var(--ui-border)!important;border-radius:16px!important;background:var(--ui-bg-elevated)!important;box-shadow:0 -8px 28px rgba(0,0,0,.20)!important}
+.ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose){position:fixed!important;z-index:8600!important;left:50%!important;transform:translateX(-50%)!important;bottom:calc(var(--app-dock-total-h) + 5px)!important;width:min(calc(100% - 14px),var(--app-page-max))!important;min-height:50px!important;height:auto!important;padding:5px!important;gap:5px!important;border:1px solid var(--ui-border)!important;border-radius:16px!important;background:var(--ui-bg-elevated)!important;box-shadow:0 -8px 28px rgba(0,0,0,.20)!important}
 .ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose) :where(input,textarea){min-width:0!important;min-height:40px!important;max-height:112px!important;background:var(--ui-surface-2)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
 
 /* Story viewer must isolate itself from all app chrome. */
@@ -101,7 +93,7 @@ body.story-overlay-open{overflow:hidden!important}
 .ui-v3 .sf-profile-main h1{font-size:clamp(23px,6.5vw,32px)!important;margin:7px 0 2px!important}.ui-v3 .profile-meta-v3{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:5px 10px!important;color:var(--ui-muted)!important;font-size:var(--ui-secondary)!important}.ui-v3 .sf-profile-counts{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;margin-top:10px!important}.ui-v3 .sf-profile-counts>span{min-width:0!important;padding:8px 4px!important;text-align:center!important;border-inline-start:1px solid var(--ui-border-soft)!important}.ui-v3 .sf-profile-counts>span:first-child{border-inline-start:0!important}.ui-v3 .sf-profile-counts b{display:block!important;font-size:18px!important}.ui-v3 .sf-profile-actions{display:grid!important;grid-template-columns:minmax(0,2fr) minmax(0,1fr)!important;gap:7px!important;margin-top:10px!important}.ui-v3 .sf-profile-actions>*{min-width:0!important}.ui-v3 .sf-profile-actions>.sf-primary{grid-column:1/-1!important;min-height:42px!important}.ui-v3 .profile-tabs-v3{display:flex!important;gap:4px!important;padding:6px 0!important;border-bottom:1px solid var(--ui-border-soft)!important}.ui-v3 .profile-tabs-v3>:where(button,a){min-height:36px!important;padding:0 10px!important;font-size:11px!important}
 
 /* Map */
-.real-map-page{background:var(--ui-bg)!important;color:var(--ui-text)!important}.real-map-shell{width:min(var(--contract-max),calc(100% - 8px))!important;gap:7px!important}.real-map-head,.real-map-summary>div,.map-hot-regions,.map-privacy-panel{background:var(--ui-surface)!important;border-color:var(--ui-border)!important}.real-map-head{padding:8px 9px!important}.real-map-head h1{font-size:var(--ui-section-title)!important}.real-map-head p{font-size:var(--ui-meta)!important;color:var(--ui-muted)!important}.map-filter-chips{padding:1px 0!important;gap:5px!important}.map-filter-chips button{height:34px!important;min-height:34px!important;font-family:var(--ui-font)!important;font-size:11px!important;background:var(--ui-surface)!important;color:var(--ui-text-2)!important;border-color:var(--ui-border)!important}.real-map-summary>div{min-height:50px!important;padding:7px 8px!important}.real-map-summary small{font-size:9px!important;color:var(--ui-muted)!important}.real-map-summary b{font-size:14px!important}.map-hot-regions{min-height:44px!important;overflow:hidden!important}.map-hot-regions>b{font-size:10px!important}.map-hot-regions span{font-size:9px!important;background:var(--ui-surface-2)!important}.real-map-canvas{height:calc(100dvh - var(--contract-header) - var(--contract-dock) - 230px)!important;min-height:390px!important;max-height:680px!important;border-radius:16px!important}.real-map-controls{left:8px!important;top:8px!important}.real-map-controls button{width:36px!important;height:36px!important;border-radius:10px!important}.real-map-note{font-size:10px!important}
+.real-map-page{background:var(--ui-bg)!important;color:var(--ui-text)!important}.real-map-shell{width:min(var(--app-page-max),calc(100% - 8px))!important;gap:7px!important}.real-map-head,.real-map-summary>div,.map-hot-regions,.map-privacy-panel{background:var(--ui-surface)!important;border-color:var(--ui-border)!important}.real-map-head{padding:8px 9px!important}.real-map-head h1{font-size:var(--ui-section-title)!important}.real-map-head p{font-size:var(--ui-meta)!important;color:var(--ui-muted)!important}.map-filter-chips{padding:1px 0!important;gap:5px!important}.map-filter-chips button{height:34px!important;min-height:34px!important;font-family:var(--ui-font)!important;font-size:11px!important;background:var(--ui-surface)!important;color:var(--ui-text-2)!important;border-color:var(--ui-border)!important}.real-map-summary>div{min-height:50px!important;padding:7px 8px!important}.real-map-summary small{font-size:9px!important;color:var(--ui-muted)!important}.real-map-summary b{font-size:14px!important}.map-hot-regions{min-height:44px!important;overflow:hidden!important}.map-hot-regions>b{font-size:10px!important}.map-hot-regions span{font-size:9px!important;background:var(--ui-surface-2)!important}.real-map-canvas{height:calc(var(--app-viewport-h) - var(--app-header-total-h) - var(--app-dock-total-h) - 230px)!important;min-height:390px!important;max-height:680px!important;border-radius:16px!important}.real-map-controls{left:8px!important;top:8px!important}.real-map-controls button{width:36px!important;height:36px!important;border-radius:10px!important}.real-map-note{font-size:10px!important}
 
 /* Guest registry */
 .admin-guests-page .feature-card{padding:12px!important}.admin-guest-summary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}.admin-guest-summary article{min-height:62px!important;padding:8px!important;border:1px solid var(--ui-border)!important;border-radius:var(--ui-radius)!important;background:var(--ui-surface-2)!important;display:grid!important;align-content:center!important;gap:2px!important}.admin-guest-summary b{font-size:17px!important}.admin-guest-summary small{font-size:9px!important;color:var(--ui-muted)!important}.admin-guest-table{display:grid!important;gap:7px!important}.admin-guest-row{padding:9px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;border-radius:var(--ui-card-radius)!important;background:var(--ui-surface)!important;border:1px solid var(--ui-border)!important}.admin-guest-row>div{min-width:0!important;display:grid!important;gap:2px!important}.admin-guest-row small{font-size:10px!important;color:var(--ui-muted)!important;overflow-wrap:anywhere!important}.admin-guest-row strong{font-size:10px!important;overflow-wrap:anywhere!important}.admin-guest-row>button{min-height:34px!important;height:34px!important;padding-inline:11px!important}
@@ -117,13 +109,12 @@ html[data-theme="light"] .ui-v3 :where(input,textarea,select){background:var(--u
 html[data-theme="light"] .reaction-hold-palette{background:#fff!important;border-color:var(--ui-border)!important;box-shadow:var(--ui-shadow)!important}
 
 /* No raw content should disappear under the browser/app dock. */
-.ui-v3 :where(.sf-profile-feed,.sf-inbox,.admin-guest-table,.feature-card:last-child,.real-map-wrap){scroll-margin-bottom:var(--contract-safe-bottom)!important}
+.ui-v3 :where(.sf-profile-feed,.sf-inbox,.admin-guest-table,.feature-card:last-child,.real-map-wrap){scroll-margin-bottom:var(--app-content-bottom-space)!important}
 
-@media(max-width:430px){
-  :root{--contract-gutter:8px;--contract-header:56px;--contract-dock:60px}
+@media(max-width:520px){
   .ui-v3 .v3-audience-stats{gap:2px;padding:2px}.ui-v3 .v3-audience-stats>span{min-width:48px;height:26px;padding-inline:4px;gap:3px}.ui-v3 .v3-audience-stats small{display:none}.ui-v3 .v3-audience-stats b{font-size:10px}.ui-v3 .v3-audience-stats svg{width:12px!important;height:12px!important}
   .ui-v3 .chat-bubble{max-width:88%!important}.ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose){width:calc(100% - 10px)!important}
   .ui-v3 .sf-profile-counts{grid-template-columns:repeat(2,minmax(0,1fr))!important}.ui-v3 .sf-profile-counts>span:nth-child(3){border-inline-start:0!important}
-  .real-map-canvas{height:calc(100dvh - var(--contract-header) - var(--contract-dock) - 250px)!important;min-height:360px!important}
+  .real-map-canvas{height:calc(var(--app-viewport-h) - var(--app-header-total-h) - var(--app-dock-total-h) - 250px)!important;min-height:360px!important}
   .admin-guest-summary{grid-template-columns:1fr 1fr!important}.admin-guest-row{grid-template-columns:1fr!important}.admin-guest-row>button{width:100%!important}
 }

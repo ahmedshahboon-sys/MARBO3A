@@ -60,6 +60,23 @@ for(const [prefix,owner] of protectedNamespaces){
   if(!ownership.includes(`${prefix}*`)||!ownership.includes(owner))fail(`STYLE_OWNERSHIP.md must document namespace ${prefix}* owner ${owner}`);
 }
 
+const geometryOwner=fs.readFileSync(path.join(root,"ui-v3-unified-scale.css"),"utf8");
+for(const token of ["--app-header-h","--app-dock-h","--v3-header-h","--v3-dock-h"]){
+  const count=[...geometryOwner.matchAll(new RegExp(`${token}\\s*:`,`g`))].length;
+  if(count!==1)fail(`Group 2 geometry token ${token} must have exactly one declaration; found ${count}`);
+}
+for(const token of ["--app-page-max","--app-safe-top","--app-safe-bottom","--app-header-total-h","--app-dock-total-h","--app-content-bottom-space","--app-viewport-h"]){
+  if(!declarationFor(token).test(geometryOwner))fail(`Group 2 geometry owner is missing ${token}`);
+}
+if(!geometryOwner.includes("--v3-header-h:var(--app-header-total-h)")||!geometryOwner.includes("--v3-dock-h:var(--app-dock-h)"))fail("legacy V3 header/dock geometry must alias the app geometry source");
+const finalContract=fs.readFileSync(path.join(root,"ui-contract-lock.css"),"utf8");
+for(const legacy of ["--contract-max","--contract-gutter","--contract-header","--contract-dock","--contract-safe-bottom"]){
+  if(finalContract.includes(legacy))fail(`ui-contract-lock.css must consume --app-* geometry directly; found ${legacy}`);
+}
+for(const file of ["ui-v3-unified-scale.css","ui-contract-lock.css","responsive-round.css"]){
+  const src=fs.readFileSync(path.join(root,file),"utf8");
+  if(/100vh(?![a-z])/i.test(src))fail(`${file} contains legacy 100vh; use app/visual viewport geometry`);
+}
 const grandfatheredNames=new Set(["ui-v3-final-audit.css","r1-brand-override.css"]);
 for(const file of cssFiles){
   if(/(?:repair|fix|final|override)/i.test(file)&&!grandfatheredNames.has(file))fail(`new repair/fix/final/override layer is forbidden: ${file}`);

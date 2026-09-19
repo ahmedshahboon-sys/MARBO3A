@@ -53,6 +53,16 @@ The legacy V3 geometry values were centralized without changing their effective 
 
 Group 2 owns the decision to converge those compatibility values with `--app-header-h` / `--app-dock-h`; Group 1 does not guess new geometry.
 
+## Group 2 responsive geometry contract — 2026-09-19
+
+- Final chrome geometry comes only from `ui-v3-unified-scale.css`.
+- `--app-header-h: 58px` is the content-height contract for the global header; `--app-header-total-h` adds `--app-safe-top`.
+- `--app-dock-h: 62px` is the dock content-height contract; `--app-dock-total-h` adds `--app-safe-bottom`.
+- `--app-page-max: 600px` is the shared signed-in content width. `--app-max` remains only as a compatibility alias.
+- `--v3-header-h` and `--v3-dock-h` are compatibility aliases to the app geometry and may not carry independent breakpoint values.
+- Shared responsive geometry uses 520px for mobile compaction and 720px for tablet/phone layout changes. A short-height query is allowed when vertical space, not width, is the actual constraint.
+- Safe areas are part of header/dock total height instead of being added again as external fixed offsets.
+- Interactive global-header actions have a 44×44 hit area. Visible icons may remain smaller.
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
