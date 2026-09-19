@@ -4,7 +4,7 @@ import {createPortal} from "react-dom";
 import Icon from "./Icon";
 
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
-async function api(path,options={}){const headers={...(options.headers||{})},t=token();if(t&&t!=="cookie")headers.authorization=`Bearer ${t}`;if(options.body&&!headers["content-type"])headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store",credentials:"same-origin"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const headers={...(options.headers||{})},t=token();if(t&&t!=="cookie")headers["x-marbo3a-session-mode"]="cookie";if(options.body&&!headers["content-type"])headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store",credentials:"same-origin"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const uniqByHost=list=>{const seen=new Set();return(list||[]).filter(x=>{const key=String(x.host_id||x.user_id||"");if(!key||seen.has(key))return false;seen.add(key);return true})};
 
 function LiveComposerButton(){return <button type="button" className="composer-tool-button live-composer-entry" onClick={()=>{location.href="/live/new"}} aria-label="افتح لايف"><span className="live-composer-icon"><Icon name="video"/><i/></span><span>مباشر</span></button>}
