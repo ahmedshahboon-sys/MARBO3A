@@ -54,8 +54,8 @@ BEGIN
   default_members:=GREATEST(2,LEAST(500,COALESCE(default_members,100)));
   max_members_cap:=GREATEST(2,LEAST(500,COALESCE(max_members_cap,500)));
   IF default_members>max_members_cap THEN default_members:=max_members_cap; END IF;
-  IF NEW.max_members IS NULL OR NEW.max_members=500 THEN NEW.max_members:=default_members; END IF;
-  NEW.max_members:=GREATEST(2,LEAST(NEW.max_members,max_members_cap));
+  IF TG_OP='INSERT' AND (NEW.max_members IS NULL OR NEW.max_members=500) THEN NEW.max_members:=default_members; END IF;
+  NEW.max_members:=GREATEST(2,LEAST(COALESCE(NEW.max_members,default_members),max_members_cap));
   RETURN NEW;
 EXCEPTION WHEN OTHERS THEN
   NEW.max_members:=GREATEST(2,LEAST(COALESCE(NEW.max_members,100),500));
