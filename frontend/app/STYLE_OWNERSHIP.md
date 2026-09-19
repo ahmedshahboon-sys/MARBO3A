@@ -65,6 +65,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Interactive global-header actions have a 44×44 hit area. Visible icons may remain smaller.
 - CI runs a real Chrome geometry matrix at 320×568, 360×640, 390×844, 412×915, 768×1024, 1024×768, 1366×768 and 1920×1080 in both Dark and Light, including simulated phone safe areas and signed-in/guest shell content.
 - Critical shell width/page reserve selectors in `ui-contract-lock.css` deliberately use explicit `body.ui-v3 :is(...)` specificity because older compatibility layers contain `!important`; this is a bounded geometry-owner exception, not a new repair layer.
+## Group 3 overlay/stacking contract — 2026-09-19
+
+- `design-system.css` owns the complete `--ui-z-*` ladder.
+- `useModalLayer.js` owns focus trapping, Escape routing, focus restoration and modal-depth scroll lock for Drawer, modal Settings, AppDialog, Media Viewer and Call overlay.
+- Nested layers are stack-aware: only the top layer handles Tab/Escape, and closing a child leaves the parent locked.
+- Toasts/install prompts sit below dialogs and media; critical call state suppresses ordinary transient UI.
+- Global Header and Bottom Dock never outrank Drawer/Dialog/Media/Call layers.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
