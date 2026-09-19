@@ -52,3 +52,13 @@ test("video uploads verify container signatures and discard invalid files",()=>{
   assert.match(src,/discard\(req\.file\)/);
   assert.match(src,/process\.env\.UPLOAD_DIR/);
 });
+
+test("expired and deleted stories clean orphaned owned media",()=>{
+  const src=read("routes/core-stories.mjs");
+  assert.match(src,/cleanupStoryMedia/);
+  assert.match(src,/cleanupExpiredStories/);
+  assert.match(src,/mediaReferencedElsewhere/);
+  assert.match(src,/deleteObject/);
+  assert.match(src,/NOT EXISTS\(SELECT 1 FROM story_highlights/);
+});
+
