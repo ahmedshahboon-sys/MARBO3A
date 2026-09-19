@@ -11,8 +11,9 @@ test("Group O migration defines controls analytics audit and anomaly storage",()
 });
 
 test("advanced admin exposes requested analytics and strict private-message policy",()=>{
- const src=read("routes/group-o-admin.mjs");
- for(const token of ["registrations","gender","averageSessionSeconds","returningUsers","peakHours","topDays","topPages","/api/admin/advanced/users","/api/admin/advanced/moderation","/api/admin/advanced/settings","/api/admin/advanced/audit","/api/admin/advanced/anomalies"])assert.ok(src.includes(token),`${token} missing`);
+ const analytics=read("routes/stability-overrides.mjs"),src=read("routes/group-o-admin.mjs");
+ for(const token of ["registrations","gender","averageSessionSeconds","returningUsers","peakHours","topDays","topPages","/api/admin/advanced/analytics"])assert.ok(analytics.includes(token),`${token} missing`);
+ for(const token of ["/api/admin/advanced/users","/api/admin/advanced/moderation","/api/admin/advanced/settings","/api/admin/advanced/audit","/api/admin/advanced/anomalies"])assert.ok(src.includes(token),`${token} missing`);
  assert.match(src,/target_type='direct_message'/);
  assert.match(src,/AUDIT_REASON_REQUIRED/);
  assert.match(src,/private_message_report_access/);
