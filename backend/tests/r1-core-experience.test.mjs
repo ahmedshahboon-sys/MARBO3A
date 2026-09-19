@@ -10,15 +10,15 @@ test("R1 migration is additive and defines feed/comment/ad/voice schema",()=>{
   assert.doesNotMatch(sql,/DROP\s+(TABLE|COLUMN)|TRUNCATE\s+/i);
 });
 
-test("R1 smart feed uses engagement freshness friendship and seeded diversity",()=>{
-  const src=read("r1-core-experience.mjs");
+test("canonical core feed preserves smart ranking, privacy and seeded diversity",()=>{
+  const src=read("routes/core-feed.mjs");
   for(const token of ["rankedFeed","hashtext","post_reactions","post_comments","friendships","NOW()-p.created_at","seedOf","ranking:\"smart-v1\"","interleaveSponsored","(i+1)%4===0"])assert.ok(src.includes(token),`missing ${token}`);
   assert.ok(src.includes('/api/public/feed'));
   assert.ok(src.includes('/api/feed'));
 });
 
-test("R1 threaded comments and custom reactions are first class",()=>{
-  const src=read("r1-core-experience.mjs");
+test("canonical core feed owns threaded comments and custom reactions",()=>{
+  const src=read("routes/core-feed.mjs");
   for(const token of ["parentCommentId","REPLY_DEPTH_LIMIT","comment_reactions","comment_reply","comment_reaction","love","laugh","wow","sad","angry"])assert.ok(src.includes(token),`missing ${token}`);
 });
 
