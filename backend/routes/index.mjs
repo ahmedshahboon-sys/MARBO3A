@@ -1,5 +1,6 @@
 import {registerAuthRegistration} from "./auth-registration.mjs";
 import {registerAuthSession} from "./auth-session.mjs";
+import {registerAccountSecurity} from "./account-security.mjs";
 import {registerCoreRooms} from "./core-rooms.mjs";
 import {registerCoreMessaging} from "./core-messaging.mjs";
 import {registerCoreSocial} from "./core-social.mjs";
@@ -21,6 +22,7 @@ import {registerLiveHardening} from "./live-hardening.mjs";
 export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
   registerAuthSession(app);
+  registerAccountSecurity(app);
   registerFghSocial(app);
   registerCoreRooms(app);
   registerCoreMessaging(app);
