@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import Icon from "../Icon";
 import {PostCard} from "../SocialFeed";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path){const t=token(),headers={...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{})};const r=await fetch(path,{headers,cache:"no-store",credentials:"same-origin"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path){const headers={"x-marbo3a-session-mode":"cookie"};const r=await fetch(path,{headers,cache:"no-store",credentials:"same-origin"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 export default function SavedPage(){
  const[me,setMe]=useState(null),[posts,setPosts]=useState([]),[loading,setLoading]=useState(true),[status,setStatus]=useState("");
  async function load(){setLoading(true);try{const[m,s]=await Promise.all([api("/api/auth/me"),api("/api/saved")]);setMe(m.user||null);setPosts((s.posts||[]).map(p=>({...p,saved:true})));setStatus("")}catch(e){setStatus(e.message==="UNAUTHORIZED"?"انتهت جلسة الدخول":"تعذر تحميل المحفوظات")}finally{setLoading(false)}}
