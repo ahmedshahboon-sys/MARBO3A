@@ -73,6 +73,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Toasts/install prompts sit below dialogs and media; critical call state suppresses ordinary transient UI.
 - Global Header and Bottom Dock never outrank Drawer/Dialog/Media/Call layers.
 
+## Group 4 navigation contract — 2026-09-19
+
+- `navigation-policy.js` is the functional source of truth for Global Header, Bottom Dock and Drawer visibility.
+- `/live/[id]` is immersive and does not render global navigation chrome; `/live` and `/live/new` retain normal app-shell behavior.
+- Direct chat and room chat remain app-shell conversations; their page-specific heads are content headers, not replacements for route policy.
+- The Bottom Dock remains five fixed destinations: المزيد، الأصحاب، الرئيسية، الرسائل، الغرف.
+- CSS may style navigation and provide a dataset fallback, but may not decide whether the global chrome exists via route-content `:has()`.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
