@@ -149,3 +149,11 @@ html[data-modal-layer="critical"] :is(.install-nudge,.live-notification-toast){d
 .share-qr details{max-width:min(320px,calc(100vw - 16px));overflow-wrap:anywhere}
 .share-qr details img{max-width:100%;height:auto}
 .install-nudge,.live-notification-toast{bottom:calc(var(--app-dock-total-h) + var(--marbo3a-keyboard-h,0px) + 8px)!important}
+
+
+/* Group 4 route-driven global navigation contract. */
+html[data-nav-header="hidden"] .v3-global-header{display:none!important}
+html[data-nav-dock="hidden"] .social-dock{display:none!important}
+.ui-v3 .v3-header-icon{position:relative!important;overflow:visible!important}
+.ui-v3 .v3-unread-badge{position:absolute!important;top:-2px!important;right:-5px!important;display:grid!important;place-items:center!important;border-radius:999px!important;background:var(--ui-accent)!important;color:#fff!important;font-weight:900!important;box-shadow:0 0 0 2px var(--ui-bg)!important;z-index:1!important}
+.ui-v3 .social-dock,.ui-v3 .social-dock-track{overflow:visible!important}
