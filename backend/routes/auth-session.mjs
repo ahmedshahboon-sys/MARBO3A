@@ -52,15 +52,16 @@ export function registerAuthSession(app){
     if(!identifier||password.length<8||password.length>128)return res.status(400).json({ok:false,error:"INVALID_LOGIN"});
     const u=(await pool.query(`SELECT id,email,username,display_name,gender,bio,avatar_url,password_hash,account_status,ban_reason,role,two_factor_enabled,onboarding_completed,created_at FROM users WHERE LOWER(email)=LOWER($1) OR LOWER(username)=LOWER($1) LIMIT 1`,[identifier])).rows[0];
     if(!u||!await verifyPassword(password,u.password_hash)){await recordSecurity(u?.id||null,"failed_login",req,{identifier:identifier.slice(0,60)});return res.status(401).json({ok:false,error:"INVALID_LOGIN"})}
-    if(!isAdmin(u)&&u.account_status!=="active")return res.status(403).json({ok:false,error:u.account_status==="banned"?"ACCOUNT_BANNED":"ACCOUNT_FROZEN",reason:u.ban_reason||""});
+    if(!isAdmin(u)&&!["active","deactivated"].includes(u.account_status))return res.status(403).json({ok:false,error:u.account_status==="banned"?"ACCOUNT_BANNED":"ACCOUNT_FROZEN",reason:u.ban_reason||""});
     if(u.two_factor_enabled){
       const challengeId=crypto.randomBytes(24).toString("hex"),code=String(crypto.randomInt(100000,1000000)),remaining=await recoveryRemaining(u.id);
-      await redis.set(`2fa:login:${challengeId}`,JSON.stringify({userId:u.id,hash:hashCode(u.id,code),attempts:0}),{EX:600});
+      await redis.set(`2fa:login:${challengeId}`,JSON.stringify({userId:u.id,hash:hashCode(u.id,code),attempts:0,reactivate:u.account_status==="deactivated"}),{EX:600});
       let emailDelivery=true;
       try{await sendCode(u,code,"login")}catch(e){emailDelivery=false;if(!remaining){await redis.del(`2fa:login:${challengeId}`);return res.status(502).json({ok:false,error:e.message})}}
       await recordSecurity(u.id,"login_2fa_challenge",req,{emailDelivery,recoveryAvailable:remaining>0});
       return res.status(202).json({ok:true,twoFactorRequired:true,challengeId,expiresIn:600,recoveryAvailable:remaining>0,emailDelivery});
     }
+    if(u.account_status==="deactivated"){await pool.query("UPDATE users SET account_status='active',deactivated_at=NULL,updated_at=NOW() WHERE id=$1",[u.id]);u.account_status="active";await recordSecurity(u.id,"account_reactivated",req,{factor:"password"})}
     const token=await createSession(u.id);setSessionCookie(res,token);delete u.password_hash;await recordSecurity(u.id,"login",req);loginAlert(u,req);
     res.json(sessionPayload(req,token,{ok:true,expiresIn:SESSION_TTL,user:u,isAdmin:isAdmin(u)}));
   });
@@ -75,12 +76,13 @@ export function registerAuthSession(app){
     if(Number(p.attempts||0)>=TWO_FACTOR_MAX_ATTEMPTS){await redis.del(key);return res.status(429).json({ok:false,error:"2FA_TOO_MANY_ATTEMPTS"})}
     const u=(await pool.query(`SELECT id,email,username,display_name,gender,bio,avatar_url,account_status,ban_reason,role,two_factor_enabled,onboarding_completed,created_at FROM users WHERE id=$1`,[p.userId])).rows[0];
     if(!u){await redis.del(key);return res.status(404).json({ok:false,error:"USER_NOT_FOUND"})}
-    if(!isAdmin(u)&&u.account_status!=="active"){await redis.del(key);return res.status(403).json({ok:false,error:u.account_status==="banned"?"ACCOUNT_BANNED":"ACCOUNT_FROZEN",reason:u.ban_reason||""})}
+    if(!isAdmin(u)&&!["active","deactivated"].includes(u.account_status)){await redis.del(key);return res.status(403).json({ok:false,error:u.account_status==="banned"?"ACCOUNT_BANNED":"ACCOUNT_FROZEN",reason:u.ban_reason||""})}
     let recoveryUsed=false,valid=false;
     if(recoveryCode){recoveryUsed=valid=await consumeRecoveryCode(u.id,recoveryCode)}
     else valid=hashCode(p.userId,code)===p.hash;
     if(!valid){const retry=await failedAttempt(key,p);return res.status(retry?400:429).json({ok:false,error:retry?"2FA_INVALID":"2FA_TOO_MANY_ATTEMPTS",attemptsLeft:retry?TWO_FACTOR_MAX_ATTEMPTS-p.attempts:0})}
     await redis.del(key);
+    if(p.reactivate&&u.account_status==="deactivated"){await pool.query("UPDATE users SET account_status='active',deactivated_at=NULL,updated_at=NOW() WHERE id=$1",[u.id]);u.account_status="active";await recordSecurity(u.id,"account_reactivated",req,{factor:"password+2fa"})}
     const token=await createSession(u.id);setSessionCookie(res,token);
     await recordSecurity(u.id,recoveryUsed?"login_2fa_recovery_used":"login_2fa_verified",req);
     loginAlert(u,req);
