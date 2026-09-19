@@ -3,17 +3,20 @@
    fixes legacy cascade collisions. Functional behavior remains in components. */
 
 /* Global page geometry */
-.ui-v3 :where(.social-shell,.feed-shell,.sf-main,.sf-simple-page,.feature-page,.inbox-wide,.room-community-shell,.chat-shell,.chat-social-shell,.profile-shell,.settings-shell,.admin-shell,.friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,.safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell){
+body.ui-v3 :is(.social-shell,.feed-shell,.sf-main,.sf-simple-page,.feature-page,.inbox-wide,.room-community-shell,.chat-shell,.chat-social-shell,.profile-shell,.settings-shell,.admin-shell,.friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,.safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell){
   width:min(100%,var(--app-page-max))!important;
   max-width:var(--app-page-max)!important;
   margin-inline:auto!important;
   box-sizing:border-box!important;
 }
-.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.chat-page,.direct-chat-page,.real-map-page){
+body.ui-v3 :is(.social-page,.messages-v3-page,.room-community-page,.feature-page,.chat-page,.direct-chat-page,.real-map-page){
   min-height:100dvh!important;
   box-sizing:border-box!important;
 }
-.ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.real-map-page){padding-bottom:var(--app-content-bottom-space)!important}
+body.ui-v3 :is(.social-page,.messages-v3-page,.room-community-page,.feature-page,.real-map-page){padding-bottom:var(--app-content-bottom-space)!important}
+
+body.ui-v3 :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){min-height:44px!important;max-width:100%!important;box-sizing:border-box!important}
+body.ui-v3 :is(.sf-panel,.feature-card,.settings-card,.admin-card,.social-shell,.sf-simple-page){min-width:0!important;overflow-wrap:anywhere!important}
 
 /* Global header: brand right, audience counters centered, actions left. */
 .ui-v3 .v3-global-header{
@@ -58,7 +61,7 @@
 .ui-v3 .sf-alert{max-width:100%!important;padding:9px 11px!important;border-radius:var(--ui-radius)!important;font-size:var(--ui-secondary)!important;line-height:1.45!important}
 
 /* Direct chat: fix the overlapping/absolute-height legacy cascade. */
-.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell){height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;padding-bottom:0!important}
+body.ui-v3 :is(.chat-page,.direct-chat-page,.chat-social-shell){height:var(--app-viewport-h)!important;min-height:var(--app-viewport-h)!important;overflow:hidden!important;padding-bottom:0!important}
 .ui-v3 :where(.chat-shell,.chat-social-shell){height:calc(var(--app-viewport-h) - var(--app-header-total-h))!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding-bottom:0!important}
 .ui-v3 :where(.chat-head,.direct-chat-head,.chat-social-head){flex:0 0 auto!important;min-height:56px!important;height:auto!important;padding:6px 8px!important;background:var(--ui-bg-elevated)!important;border-color:var(--ui-border-soft)!important}
 .ui-v3 .chat-stream{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:9px 7px calc(74px + env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:92px!important;background:var(--ui-bg)!important}
@@ -71,7 +74,7 @@
 .ui-v3 .chat-bubble :where(img,video,audio){max-width:100%!important;height:auto!important}.ui-v3 .chat-bubble audio{width:min(300px,100%)!important}
 .ui-v3 :where(.chat-reply-preview,.reply-preview,.message-reply){position:static!important;max-width:100%!important;height:auto!important;overflow:hidden!important;margin-bottom:5px!important}
 .ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose){position:fixed!important;z-index:8600!important;left:50%!important;transform:translateX(-50%)!important;bottom:calc(var(--app-dock-total-h) + 5px)!important;width:min(calc(100% - 14px),var(--app-page-max))!important;min-height:50px!important;height:auto!important;padding:5px!important;gap:5px!important;border:1px solid var(--ui-border)!important;border-radius:16px!important;background:var(--ui-bg-elevated)!important;box-shadow:0 -8px 28px rgba(0,0,0,.20)!important}
-.ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose) :where(input,textarea){min-width:0!important;min-height:40px!important;max-height:112px!important;background:var(--ui-surface-2)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
+.ui-v3 :where(.chat-compose,.chat-composer,.direct-chat-compose,.chat-social-compose) :where(input,textarea){min-width:0!important;min-height:44px!important;max-height:112px!important;background:var(--ui-surface-2)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
 
 /* Story viewer must isolate itself from all app chrome. */
 body.story-overlay-open .v3-global-header,body.story-overlay-open .social-dock{display:none!important;visibility:hidden!important;pointer-events:none!important}
