@@ -24,7 +24,10 @@
      They live here so the --ui-* namespace has one owner; Groups 2/3 retire
      the geometry/stack aliases only after route-by-route equivalence checks. */
   --ui-top-h:64px;--ui-dock-h:64px;--ui-dock-gap:10px;
-  --ui-layer-header:100;--ui-layer-float:130;--ui-layer-dock:160;--ui-layer-overlay:600;--ui-layer-dialog:700;
+  /* Central stacking ladder. */
+  --ui-z-base:0;--ui-z-sticky:100;--ui-z-header:200;--ui-z-dock:250;--ui-z-drawer:400;
+  --ui-z-popover:500;--ui-z-toast:600;--ui-z-dialog:700;--ui-z-media:800;--ui-z-call:900;--ui-z-emergency:1000;
+  --ui-layer-header:var(--ui-z-header);--ui-layer-float:var(--ui-z-popover);--ui-layer-dock:var(--ui-z-dock);--ui-layer-overlay:var(--ui-z-drawer);--ui-layer-dialog:var(--ui-z-dialog);
   --ui-muted-strong:#a7b0bd;
 }
 html[data-theme="light"]{
