@@ -12,6 +12,7 @@ import {registerCoreLocation} from "./core-location.mjs";
 import {registerCoreAdminRooms} from "./core-admin-rooms.mjs";
 import {registerCoreAdminControl} from "./core-admin-control.mjs";
 import {registerCorePresence} from "./core-presence.mjs";
+import {registerCoreUserSettings} from "./core-user-settings.mjs";
 import {registerFghSocial} from "./fgh-social.mjs";
 import {registerGroupMNEngagement} from "./group-mn-engagement.mjs";
 import {registerGroupOAdmin} from "./group-o-admin.mjs";
@@ -27,6 +28,7 @@ export function registerExplicitRoutes(app){
   registerAuthRegistration(app);
   registerAuthSession(app);
   registerAccountSecurity(app);
+  registerCoreUserSettings(app);
   registerFghSocial(app);
   registerCoreFeed(app);
   registerCoreStories(app);
