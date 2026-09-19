@@ -24,7 +24,10 @@ if [ -z "$PUBLIC_IP" ]; then
 fi
 
 SECRET="${TURN_SECRET:-}"
-if [ -z "$SECRET" ]; then
+if [ "${ROTATE_TURN_SECRET:-false}" = "true" ]; then
+  SECRET="$(openssl rand -hex 32)"
+  echo "TURN secret rotation requested; API and TURN will be recreated together."
+elif [ -z "$SECRET" ]; then
   SECRET="$(openssl rand -hex 32)"
 fi
 
@@ -45,7 +48,7 @@ set_env TURN_SECRET "$SECRET"
 echo "TURN configuration ready"
 echo "Public IP: $PUBLIC_IP"
 echo "Listening: 3478/udp and 3478/tcp"
-echo "Relay: 49160-49200/udp and tcp"
+echo "Relay: 49152-49663/udp and tcp (512 relay ports)"
 if [ -n "${TURN_TLS_HOST:-}" ]; then
   echo "TLS fallback advertised by API: turns:${TURN_TLS_HOST}:${TURN_TLS_PORT:-443}?transport=tcp"
 else
@@ -100,8 +103,8 @@ echo "TURN is healthy."
 echo "If UFW is enabled, allow all of these:"
 echo "  3478/tcp"
 echo "  3478/udp"
-echo "  49160:49200/tcp"
-echo "  49160:49200/udp"
+echo "  49152:49663/tcp"
+echo "  49152:49663/udp"
 echo
 echo "For a relay-only browser test run in DevTools:"
 echo "  localStorage.setItem('marbo3a_force_relay','1'); location.reload();"
