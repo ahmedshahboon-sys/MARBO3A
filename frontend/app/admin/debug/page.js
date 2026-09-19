@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useState} from "react";
 const KEY="marbo3a_debug_trace";
 const tok=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(p){const t=tok(),headers=t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{},r=await fetch(p,{headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"FAILED");return d}
+async function api(p){const t=tok(),headers=t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{},r=await fetch(p,{headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"FAILED");return d}
 const filters=[["all","الكل"],["errors","الأخطاء"],["warnings","التحذيرات"],["api","API"],["ui","الواجهة"],["navigation","التنقل"],["calls","المكالمات"],["media","الوسائط"],["voice","الصوت"]];
 function match(type,filter){if(filter==="all")return true;if(filter==="errors")return /error|failed|overlap|overflow/.test(type);if(filter==="warnings")return /slow|warn|blocked|stalled|disconnected/.test(type);if(filter==="api")return /^api_/.test(type);if(filter==="ui")return /^ui_|^click$|^page_view$/.test(type);if(filter==="navigation")return /^navigation_/.test(type);if(filter==="calls")return /^rtc_/.test(type);if(filter==="media")return /^media_/.test(type);if(filter==="voice")return /^voice_/.test(type)||/audio|recorder/.test(type);return true}
 function signature(e){const p=e?.payload||{};return [e?.event_type||"",e?.path||"",p?.message||"",p?.status||"",p?.src||"",p?.url||""].join("|")}
