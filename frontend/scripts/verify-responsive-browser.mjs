@@ -59,7 +59,7 @@ try{
     for(const theme of themes){
       const phone=width<=520,safeTop=phone?47:0,safeBottom=phone?34:0;
       const expected={width,height,theme,safeTop,safeBottom};
-      const probe=`<script>(${browserProbe.toString()})(${JSON.stringify(expected)});<\\/script>`;
+      const probe=`<script>(${browserProbe.toString()})(${JSON.stringify(expected)});</script>`;
       const html=`<!doctype html><html lang="ar" dir="rtl" data-theme="${theme}" style="--app-safe-top:${safeTop}px;--app-safe-bottom:${safeBottom}px"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">${cssLinks}</head><body class="ui-v3">
 <header class="v3-global-header"><a class="v3-brand-lockup" href="#"><span>مربوعة</span></a><div class="v3-audience-stats"><span><b>999</b><small>زائر</small></span><span><b>88</b><small>متصل</small></span></div><nav class="v3-header-actions"><a class="v3-header-icon" href="#">🔔</a><a class="v3-header-icon" href="#">⌕</a></nav></header>
 <main class="social-page"><section class="social-shell"><article class="sf-panel"><h1>اختبار القياسات والاستجابة</h1><p>هذا نص عربي طويل لاختبار التفاف السطور وعدم خروج المحتوى خارج الشاشة في المقاسات الضيقة.</p><p class="sf-muted">username_with_a_very_long_unbroken_identifier_abcdefghijklmnopqrstuvwxyz_0123456789</p><label>حقل اختبار <input id="matrix-input" value="نص عربي طويل للاختبار"></label><button type="button">إجراء أساسي</button></article></section></main>
