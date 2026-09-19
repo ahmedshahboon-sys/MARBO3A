@@ -63,7 +63,6 @@ import "./live-round-a.css";
 import "./live-guest-polish.css";
 import "./ui-v3-unified-scale.css";
 import "./ui-contract-lock.css";
-import "./ui-contract-additions.css";
 import { Cairo,Readex_Pro } from "next/font/google";
 import AppRuntime from "./AppRuntime";
 import IdentityMarksRuntime from "./IdentityMarksRuntime";
