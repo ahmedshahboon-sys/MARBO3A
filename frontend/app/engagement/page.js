@@ -5,7 +5,7 @@ import Icon from "../Icon";
 import "./engagement.css";
 
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
-async function api(path,options={}){const t=token(),headers={...(options.headers||{})};if(t&&t!=="cookie")headers.authorization=`Bearer ${t}`;if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(options.headers||{})};if(t&&t!=="cookie")headers["x-marbo3a-session-mode"]="cookie";if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const emitEffect=type=>window.dispatchEvent(new CustomEvent("marbo3a:effect",{detail:{type}}));
 function Avatar({u}){return u?.avatar_url?<img className="mn-avatar" src={u.avatar_url} alt=""/>:<span className="mn-avatar mn-fallback">{u?.display_name?.[0]||"م"}</span>}
 function Card({title,icon,children,className=""}){return <section className={`mn-card ${className}`}><header><span>{icon}</span><h2>{title}</h2></header>{children}</section>}
