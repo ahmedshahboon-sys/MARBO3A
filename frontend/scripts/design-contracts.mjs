@@ -25,7 +25,8 @@ await must("app/layout.js",[
   'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"','import "./ui-audience.css"',
   'data-site-font="readex"','import ThemeRuntime from "./ThemeRuntime"','<ThemeRuntime/>'
 ]);
-await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow","trackingStartedAt","v3-unread-badge"]);\nawait must("app/ui-contract-lock.css",[".ui-v3 .v3-unread-badge","box-shadow:0 0 0 2px var(--ui-bg)!important"]);
+await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow","trackingStartedAt","v3-unread-badge"]);
+await must("app/ui-contract-lock.css",[".ui-v3 .v3-unread-badge","box-shadow:0 0 0 2px var(--ui-bg)!important"]);
 await must("app/explore/page.js",["/api/public/site-stats","guest-audience-stats","/brand/official/marbo3a-mark.png","زائر مسجل"]);
 await must("app/admin/debug/page.js",["groupEvents","debug-duplicate-count","<details>"]);
 await must("app/FeedModePolicy.js",["/home","الأحدث","مختار لك","feed-mode-tabs"]);
