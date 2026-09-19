@@ -17,9 +17,9 @@ test("session creation and logout fail closed around durable storage",()=>{
   const destroy=src.slice(src.indexOf("export async function destroySession"),src.indexOf("export const clean"));
   assert.match(create,/await pool\.query\(`INSERT INTO durable_sessions/);
   assert.match(create,/await redis\.del\(`session:\$\{token\}`\)\.catch/);
-  assert.doesNotMatch(create,/INSERT INTO durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
+  assert.doesNotMatch(create,/await pool\.query\(`INSERT INTO durable_sessions[^`]*`[^;]*\)\.catch\(/);
   assert.ok(destroy.indexOf("DELETE FROM durable_sessions")<destroy.indexOf("redis.del"),"durable revocation must precede cache cleanup");
-  assert.doesNotMatch(destroy,/DELETE FROM durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
+  assert.doesNotMatch(destroy,/await pool\.query\(`DELETE FROM durable_sessions[^`]*`[^;]*\)\.catch\(/);
 });
 
 test("session cookies stay HttpOnly Secure and SameSite Lax",()=>{
@@ -66,7 +66,7 @@ test("moderation revocation is durable-first",()=>{
   const revoke=src.slice(src.indexOf("async function revokeUserSessions"),src.indexOf("async function reportTargetUser"));
   assert.match(revoke,/DELETE FROM durable_sessions WHERE user_id=\$1/);
   assert.ok(revoke.indexOf("DELETE FROM durable_sessions")<revoke.indexOf("redis.scanIterator"));
-  assert.doesNotMatch(revoke,/DELETE FROM durable_sessions[\s\S]*?\.catch\(\(\)=>\{\}\)/);
+  assert.doesNotMatch(revoke,/await pool\.query\(`DELETE FROM durable_sessions[^`]*`[^;]*\)\.catch\(/);
 });
 
 test("2FA setup and login challenges cap verification attempts",()=>{
