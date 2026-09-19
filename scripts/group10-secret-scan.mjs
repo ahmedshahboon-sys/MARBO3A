@@ -24,7 +24,8 @@ const highConfidence=[
   ["google-api-key",/\bAIza[0-9A-Za-z_-]{35}\b/],
   ["stripe-live-secret",/\bsk_live_[0-9A-Za-z]{16,}\b/]
 ];
-const generic=/(?:^|\s)([A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCESS_KEY)[A-Z0-9_]*)\s*[:=]\s*["']?([^"'\s#]{12,})/i;
+const envLiteral=/^\s*(?:export\s+)?([A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCESS_KEY)[A-Z0-9_]*)\s*[:=]\s*["']?([A-Za-z0-9_./:+-]{12,})["']?\s*(?:#.*)?$/;
+const jsLiteral=/^\s*(?:const|let|var)\s+([A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCESS_KEY)[A-Z0-9_]*)\s*=\s*["']([^"']{12,})["'];?\s*$/;
 const safeValue=/CHANGE_ME|YOUR_|REPLACE_ME|PLACEHOLDER|EXAMPLE|DUMMY|TEST|CI_|NOT_FOR_PRODUCTION|LOCALHOST|\$\{\{|process\.env|secrets\.|\*\*\*/i;
 const findings=[];
 const rel=f=>path.relative(root,f).replaceAll(path.sep,"/");
@@ -35,8 +36,10 @@ for(const file of files){
   const lines=src.split("\n");
   lines.forEach((line,i)=>{
     for(const pair of highConfidence)if(pair[1].test(line))findings.push({file:rel(file),line:i+1,rule:pair[0]});
-    const m=line.match(generic);
-    if(m&&!safeValue.test(m[2]))findings.push({file:rel(file),line:i+1,rule:"literal-secret-assignment"});
+    for(const re of [envLiteral,jsLiteral]){
+      const m=line.match(re);
+      if(m&&!safeValue.test(m[2]))findings.push({file:rel(file),line:i+1,rule:"literal-secret-assignment"});
+    }
   });
 }
 
