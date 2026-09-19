@@ -59,7 +59,7 @@ try{
   await setting(adminToken,"room_default_max_members",3);
   await setting(adminToken,"room_max_members_cap",4);
   await call("/api/admin/advanced/settings",{token:adminToken,method:"PATCH",body:{key:"room_default_max_members",value:5,reason:"must fail above cap"},status:409,error:"ROOM_DEFAULT_EXCEEDS_CAP"});
-  d=await call("/api/rooms",{token:userToken,method:"POST",body:{name:"Group Nine Room"}});
+  d=await call("/api/rooms",{token:userToken,method:"POST",body:{name:"Group Nine Room"},status:201});
   const room=(await pool.query("SELECT max_members FROM rooms WHERE id=$1",[d.room.id])).rows[0];
   if(Number(room?.max_members)!==3)throw new Error("room default capacity control was not applied by database trigger");
 
