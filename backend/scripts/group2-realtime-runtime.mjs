@@ -7,6 +7,14 @@ const pool=new pg.Pool({connectionString:process.env.DATABASE_URL,max:2});
 const redis=createClient({url:process.env.REDIS_URL});
 await redis.connect();
 const tokenHash=t=>crypto.createHash("sha256").update(t).digest("hex");
+async function http(path,{token,method="GET",body,status=200,error}={}){
+  const headers={origin:base};if(token)headers.authorization=`Bearer ${token}`;if(body!==undefined)headers["content-type"]="application/json";
+  const r=await fetch(`${base}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
+  const data=await r.json().catch(()=>({}));
+  if(r.status!==status)throw new Error(`${method} ${path}: expected ${status}, got ${r.status} ${JSON.stringify(data)}`);
+  if(error&&data.error!==error)throw new Error(`${method} ${path}: expected ${error}, got ${JSON.stringify(data)}`);
+  return data;
+}
 
 async function makeUser(label){
   const suffix=`${label}_${Date.now().toString(36)}_${crypto.randomBytes(3).toString("hex")}`;
@@ -96,6 +104,11 @@ try{
   const mobile=new PollSocket({authToken:A.token});
   if(!await mobile.open())throw new Error("handshake auth token did not authenticate");
   await mobile.close();
+
+  await http(`/api/typing/direct/${bc.id}`,{token:A.token,method:"POST",body:{typing:true},status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
+  await http(`/api/typing/room/${foreignRoom.id}`,{token:A.token,method:"POST",body:{typing:true},status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
+  await http(`/api/typing/direct/${bc.id}`,{token:A.token,status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
+  await http(`/api/typing/direct/${ab.id}`,{token:A.token,method:"POST",body:{typing:true}});
 
   const socket=new PollSocket({cookie:A.token});
   if(!await socket.open())throw new Error("cookie socket did not authenticate");
