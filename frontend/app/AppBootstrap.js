@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-
-function token() {
-  return localStorage.getItem("marbo3a_token") || sessionStorage.getItem("marbo3a_token") || "";
-}
+import {sessionMarker,cookieHeaders} from "./webSession";
 
 function visitorId() {
   let id = localStorage.getItem("marbo3a_visitor_id");
@@ -21,14 +18,11 @@ export default function AppBootstrap() {
     let stopped = false;
     async function ping() {
       if (stopped || document.visibilityState === "hidden") return;
-      const auth = token();
+      sessionMarker();
       try {
         const response=await fetch("/api/telemetry/ping", {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-            ...(auth&&auth!=="cookie" ? { authorization: `Bearer ${auth}` } : {})
-          },
+          headers: cookieHeaders({"content-type":"application/json"}),
           credentials:"same-origin",
           body: JSON.stringify({ visitorId: visitorId() }),
           keepalive: true
