@@ -56,7 +56,7 @@ for(const file of files){
     for(const expr of expressions){
       const reviewed =
         /^[A-Z][A-Z0-9_]*$/.test(expr) ||
-        /^(?:mediaSql|savedVisibilitySql|visibilitySql|feedVisibilitySql|sortSql|orderSql|orderBy|reactionSql\(.+\)|durationSql\(\)|blockedClause\(.+\)|pollVisibility\(\)|spec\[[01]\])$/.test(expr);
+        /^(?:mediaSql|postSql|savedVisibilitySql|visibilitySql|feedVisibilitySql|sortSql|orderSql|orderBy|order|friendsOnly|reactionSql\(.+\)|durationSql\(\)|blockedClause\(.+\)|pollVisibility\(\)|spec\[[01]\])$/.test(expr);
       if(reviewed)continue;
       add(file,lineOf(src,m.index),"dynamic-sql-template");
       break;
