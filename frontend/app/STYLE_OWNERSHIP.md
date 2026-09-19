@@ -104,6 +104,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Call layout owns the visible viewport and central critical z-index layer; WebRTC signaling/media logic is unchanged.
 - Room voice action controls keep a minimum 44px interaction target.
 
+## Group 8 admin/settings/secondary contract — 2026-09-19
+
+- Advanced Admin consumes the current `--app-*` geometry contract and keeps tabs/toolbars horizontally scrollable only inside their own controls.
+- Admin action controls and TV Admin inputs/buttons keep a 44px minimum interaction height.
+- Settings route consumes `--app-content-bottom-space`, `--app-dock-total-h` and the central stacking tokens; legacy `--v3-dock-h` is no longer its geometry source.
+- Debug toolbar horizontal overflow is local to the toolbar; the page itself remains clipped to the viewport.
+- Dangerous Admin/TV actions continue to use `AppDialog`; permissions, APIs and moderation behavior are unchanged.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
