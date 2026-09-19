@@ -8,7 +8,7 @@ import AppDialog from "../../AppDialog";
 import MediaGallery from "../../MediaGallery";
 import {uploadMedia} from "../../imageTools";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const headers={authorization:`Bearer ${token()}`,...(options.headers||{})};if(options.body&&!(options.body instanceof FormData))headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const headers={"x-marbo3a-session-mode":"cookie",...(options.headers||{})};if(options.body&&!(options.body instanceof FormData))headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const human=e=>({REQUEST_FAILED:"تعذر تنفيذ الطلب",CHAT_FORBIDDEN:"لا يمكنك فتح هذه المحادثة",UNAUTHORIZED:"انتهت جلسة الدخول",MESSAGE_NOT_FOUND:"الرسالة غير موجودة",FORBIDDEN:"ليس لديك صلاحية",UPLOAD_FAILED:"تعذر رفع الملف",UNSUPPORTED_FILE:"صيغة الملف غير مدعومة",FILE_TOO_LARGE:"الملف أكبر من الحد المسموح",HEIC_DECODE_FAILED:"تعذر تجهيز صورة الآيفون",IMAGE_PROCESS_FAILED:"تعذر تجهيز الصورة"}[e?.message]||e?.message||"صار خطأ. حاول مرة ثانية.");
 const reactionArray=m=>Array.isArray(m?.reactions)?m.reactions:[];
 const fmtDuration=s=>{s=Math.max(0,Number(s)||0);return s<60?`${s}ث`:`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`};
