@@ -134,7 +134,7 @@ try{
   }
   const platformSource=fs.readFileSync("app/PlatformClient.js","utf8");
   if(!platformSource.includes('navigator.serviceWorker.register("/sw.js")'))fail("PlatformClient no longer registers /sw.js");
-  const sw=await evaluate(`navigator.serviceWorker?navigator.serviceWorker.register("/sw.js").then(r=>Boolean(r&&(r.installing||r.waiting||r.active))).catch(e=>"ERR:"+e.message):Promise.resolve("UNSUPPORTED")`,true);
+  const sw=await evaluate(`navigator.serviceWorker?Promise.race([navigator.serviceWorker.register("/sw.js").then(r=>Boolean(r&&(r.installing||r.waiting||r.active))).catch(e=>"ERR:"+e.message),new Promise(resolve=>setTimeout(()=>resolve("TIMEOUT"),4000))]):Promise.resolve("UNSUPPORTED")`,true);
   if(sw!==true)fail("service worker runtime registration failed: "+sw);
 
   cdp.close();
