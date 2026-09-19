@@ -63,6 +63,7 @@ jobs:
       STORAGE_LOCAL_DIR: /tmp/marbo3a-uploads
       STORAGE_PUBLIC_PREFIX: /api/uploads
       TURN_HOST: 127.0.0.1
+      TURN_EXTERNAL_IP: 127.0.0.2
       TURN_SECRET: ci_turn_secret_not_for_production
     defaults:
       run:
@@ -145,6 +146,7 @@ jobs:
           node scripts/group3-account-security.mjs || { dump_log; exit 1; }
           node scripts/group4-social-lifecycle.mjs || { dump_log; exit 1; }
           node scripts/group5-stories-media.mjs || { dump_log; exit 1; }
+          node scripts/group6-messaging-calls.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
