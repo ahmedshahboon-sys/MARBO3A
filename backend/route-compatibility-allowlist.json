@@ -1,7 +1,7 @@
 {
   "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
   "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
-  "observedDuplicateCount": 33,
+  "observedDuplicateCount": 28,
   "duplicates": {
     "DELETE /api/friends/:userId": [
       "closure-routes.mjs",
@@ -10,10 +10,6 @@
     "GET /api/admin/advanced/analytics": [
       "routes/stability-overrides.mjs",
       "routes/group-o-admin.mjs"
-    ],
-    "GET /api/admin/system": [
-      "core-extensions.mjs",
-      "routes/core-admin-control.mjs"
     ],
     "GET /api/feed": [
       "r1-core-experience.mjs",
@@ -67,25 +63,9 @@
       "experience-v2.mjs",
       "core-extensions.mjs"
     ],
-    "PATCH /api/admin/users/:id/status": [
-      "audit-completion.mjs",
-      "session-control.mjs"
-    ],
     "PATCH /api/rooms/:id/settings": [
       "ijkl-experience.mjs",
       "core-extensions.mjs"
-    ],
-    "POST /api/account/change-password": [
-      "security-completion.mjs",
-      "core-extensions.mjs"
-    ],
-    "POST /api/admin/reports/:id/action": [
-      "audit-completion.mjs",
-      "core-extensions.mjs"
-    ],
-    "POST /api/auth/reset-password": [
-      "security-completion.mjs",
-      "platform-extra.mjs"
     ],
     "POST /api/feed/:id/comments": [
       "r1-core-experience.mjs",
@@ -141,5 +121,5 @@
       "social-experience.mjs"
     ]
   },
-  "lastOwnershipMigration": "GROUP 1: messaging, sessions, admin readiness, generic upload"
+  "lastOwnershipMigration": "GROUP 1: messaging, sessions, admin readiness/system/moderation, password security, privacy, generic upload"
 }
