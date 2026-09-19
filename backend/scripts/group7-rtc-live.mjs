@@ -11,7 +11,7 @@ const tokenHash=t=>crypto.createHash("sha256").update(String(t)).digest("hex");
 const passwordHash=password=>{const salt=crypto.randomBytes(16),derived=crypto.scryptSync(password,salt,64);return "scrypt:"+salt.toString("hex")+":"+derived.toString("hex")};
 async function makeUser(label){
   const suffix=("g7_"+label.replace(/[^a-z0-9]/gi,"").slice(0,5)+"_"+Date.now().toString(36).slice(-4)+"_"+crypto.randomBytes(3).toString("hex")).toLowerCase();
-  return (await pool.query("INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role) VALUES($1,$2,$3,'male',$4,'active','user') RETURNING id,email,username,display_name",[suffix+"@example.invalid",suffix,label,passwordHash("Group7!Pass123")])).rows[0];
+  return (await pool.query("INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role,created_at) VALUES($1,$2,$3,'male',$4,'active','user',NOW()-INTERVAL '2 days') RETURNING id,email,username,display_name",[suffix+"@example.invalid",suffix,label,passwordHash("Group7!Pass123")])).rows[0];
 }
 async function session(userId){
   const token=crypto.randomBytes(32).toString("hex");
