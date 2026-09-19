@@ -10,13 +10,15 @@ test("explicit admin control owns resilient overview system and readiness",()=>{
  assert.ok(src.includes("registeredUsers")&&src.includes("totalMessages")&&src.includes("frozen")&&src.includes("banned"),"overview summary contract incomplete");
 });
 
-test("advanced controls expose only supported settings and runtime upload limit",()=>{
- const src=read("routes/group-o-admin.mjs");
- assert.match(src,/upload_max_mb:\{type:"integer",min:1,max:8\}/);
- assert.match(src,/WHERE key=ANY\(\$1::text\[\]\)/);
- assert.match(src,/uploadMaxMb:\[1,8\]/);
+test("advanced controls use the canonical bounded operational schema",()=>{
+ const src=read("routes/group-o-admin.mjs"),controls=read("operational-controls.mjs");
+ assert.match(controls,/upload_max_mb:\{type:"integer",min:1,max:8/);
+ assert.match(controls,/live_max_viewers:\{type:"integer",min:1,max:8/);
+ assert.match(controls,/voice_participant_max:\{type:"integer",min:4,max:100/);
+ assert.match(src,/operationalSettingMeta/);
  assert.match(src,/SETTING_NOT_FOUND/);
  assert.match(src,/FEATURE_NOT_FOUND/);
+ assert.match(src,/TURNSTILE_NOT_CONFIGURED/);
 });
 
 test("destructive room administration is reasoned and audited before delete",()=>{
