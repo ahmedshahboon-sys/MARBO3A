@@ -96,6 +96,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Empty/Skeleton/Error states share bounded card geometry and readable tokenized text.
 - Core tabs remain horizontally scrollable/snap-safe instead of clipping.
 
+## Group 7 chat/room/call contract — 2026-09-19
+
+- `ViewportRuntime.js` owns VisualViewport height and keyboard detection; CSS consumes `--app-viewport-h` and does not calculate a second keyboard height.
+- Direct chat and room chat each have one scroll owner: the message stream. Their shell and composer remain non-scrolling flex siblings.
+- Keyboard-open state hides the Bottom Dock and collapses the room live card without unmounting the voice stage.
+- Call layout owns the visible viewport and central critical z-index layer; WebRTC signaling/media logic is unchanged.
+- Room voice action controls keep a minimum 44px interaction target.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
