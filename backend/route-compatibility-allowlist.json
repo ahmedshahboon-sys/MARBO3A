@@ -1,4 +1,192 @@
 {
-  "description": "Temporary compatibility duplicates that are explicitly accepted while ownership is migrated. Owner sets are exact; adding another owner fails CI.",
-  "duplicates": {}
+  "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
+  "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
+  "observedDuplicateCount": 44,
+  "duplicates": {
+    "DELETE /api/account/sessions/:id": [
+      "session-control.mjs",
+      "core-extensions.mjs"
+    ],
+    "DELETE /api/friends/:userId": [
+      "closure-routes.mjs",
+      "routes/core-social.mjs"
+    ],
+    "GET /api/account/sessions": [
+      "session-control.mjs",
+      "core-extensions.mjs"
+    ],
+    "GET /api/admin/advanced/analytics": [
+      "routes/stability-overrides.mjs",
+      "routes/group-o-admin.mjs"
+    ],
+    "GET /api/admin/readiness": [
+      "closure-routes.mjs",
+      "v1-social-extra.mjs",
+      "routes/core-admin-control.mjs"
+    ],
+    "GET /api/admin/system": [
+      "core-extensions.mjs",
+      "routes/core-admin-control.mjs"
+    ],
+    "GET /api/chats": [
+      "message-media-fix.mjs",
+      "v1-social-extra.mjs",
+      "routes/fgh-social.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "GET /api/chats/:id/messages": [
+      "message-media-fix.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "GET /api/feed": [
+      "r1-core-experience.mjs",
+      "fgh-regression-hotfix.mjs",
+      "fgh-privacy-compat.mjs",
+      "feed-extensions.mjs"
+    ],
+    "GET /api/feed/:id/comments": [
+      "r1-core-experience.mjs",
+      "feed-extensions.mjs"
+    ],
+    "GET /api/feed/:id/comments/preview": [
+      "r1-core-experience.mjs",
+      "social-experience.mjs"
+    ],
+    "GET /api/feed/:id/reactions": [
+      "r1-core-experience.mjs",
+      "social-experience.mjs"
+    ],
+    "GET /api/map/cities": [
+      "real-map.mjs",
+      "security-p0.mjs",
+      "routes/core-location.mjs"
+    ],
+    "GET /api/map/people": [
+      "real-map.mjs",
+      "security-p0.mjs"
+    ],
+    "GET /api/map/places": [
+      "real-map.mjs",
+      "instrumentation.mjs"
+    ],
+    "GET /api/public/feed": [
+      "r1-core-experience.mjs",
+      "guest-explore.mjs"
+    ],
+    "GET /api/rooms/:id/messages": [
+      "message-media-fix.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "GET /api/rooms/:id/voice/state": [
+      "r1-core-experience.mjs",
+      "room-voice.mjs"
+    ],
+    "GET /api/social/profile/:username": [
+      "fgh-regression-hotfix.mjs",
+      "fgh-privacy-compat.mjs",
+      "feed-extensions.mjs"
+    ],
+    "GET /api/stories": [
+      "ijkl-experience.mjs",
+      "stories.mjs"
+    ],
+    "GET /api/typing/:kind/:scopeId": [
+      "experience-v2.mjs",
+      "core-extensions.mjs"
+    ],
+    "PATCH /api/admin/users/:id/status": [
+      "audit-completion.mjs",
+      "session-control.mjs"
+    ],
+    "PATCH /api/rooms/:id/settings": [
+      "ijkl-experience.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/account/change-password": [
+      "security-completion.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/account/logout-all": [
+      "session-control.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/admin/reports/:id/action": [
+      "audit-completion.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/auth/reset-password": [
+      "security-completion.mjs",
+      "platform-extra.mjs"
+    ],
+    "POST /api/chats/with/:userId": [
+      "release-hardening.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "POST /api/direct-messages/:id/forward": [
+      "message-media-fix.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "POST /api/feed/:id/comments": [
+      "r1-core-experience.mjs",
+      "feed-extensions.mjs"
+    ],
+    "POST /api/invites/:token/redeem": [
+      "ijkl-room-guard.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/live/:id/join": [
+      "routes/live-hardening.mjs",
+      "routes/live.mjs"
+    ],
+    "POST /api/live/:id/messages": [
+      "routes/live-hardening.mjs",
+      "routes/live.mjs"
+    ],
+    "POST /api/live/:id/reactions": [
+      "routes/live-hardening.mjs",
+      "routes/live.mjs"
+    ],
+    "POST /api/live/:id/signals": [
+      "routes/live-hardening.mjs",
+      "routes/live.mjs"
+    ],
+    "POST /api/messages/:id/forward": [
+      "message-media-fix.mjs",
+      "routes/core-messaging.mjs"
+    ],
+    "POST /api/profile/location": [
+      "real-map.mjs",
+      "instrumentation.mjs"
+    ],
+    "POST /api/reports": [
+      "platform-extra.mjs",
+      "routes/auth-session.mjs"
+    ],
+    "POST /api/rooms/:id/voice/heartbeat": [
+      "r1-core-experience.mjs",
+      "room-voice.mjs"
+    ],
+    "POST /api/rooms/:id/voice/join": [
+      "r1-voice-preserve-mute.mjs",
+      "r1-core-experience.mjs",
+      "room-voice.mjs"
+    ],
+    "POST /api/rooms/:id/voice/role": [
+      "r1-core-experience.mjs",
+      "room-voice.mjs"
+    ],
+    "POST /api/typing/:kind/:scopeId": [
+      "experience-v2.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/uploads": [
+      "experience-v2.mjs",
+      "security-p0.mjs",
+      "core-extensions.mjs"
+    ],
+    "PUT /api/feed/:id/reaction": [
+      "r1-core-experience.mjs",
+      "social-experience.mjs"
+    ]
+  }
 }
