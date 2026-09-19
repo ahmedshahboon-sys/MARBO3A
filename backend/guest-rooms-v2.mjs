@@ -1,6 +1,7 @@
 import http from "http";
 import crypto from "crypto";
 import {pool,sessionUser,requireAuth,requireAdmin,isAdmin,turnConfig,clean} from "./runtime.mjs";
+import {operationalSetting} from "./operational-controls.mjs";
 
 const prior=http.createServer.bind(http);
 const GUEST_COOKIE="marbo3a_guest";
@@ -139,9 +140,16 @@ http.createServer=function guestRoomsV2CreateServer(app,...args){
     app.post("/api/public/rooms-v2/:id/voice/join",async(req,res)=>{try{
       const id=Number(req.params.id),room=await publicRoom(id);if(!room)return res.status(404).json({ok:false,error:"ROOM_NOT_FOUND"});
       const g=await ensureGuest(req,res);await purgeGuestRoom(id);
+      const existing=(await pool.query(`SELECT 1 FROM guest_room_voice_presence WHERE room_id=$1 AND guest_id=$2`,[id,g.id])).rowCount>0;
+      const maxParticipants=Math.max(4,Math.min(100,Number(await operationalSetting("voice_participant_max"))||24));
+      if(!existing){
+        const usersActive=Number((await pool.query(`SELECT COUNT(*)::int n FROM room_voice_presence WHERE room_id=$1 AND last_seen>NOW()-INTERVAL '${ACTIVE_VOICE_SECONDS} seconds'`,[id])).rows[0]?.n||0);
+        const guestsActive=Number((await pool.query(`SELECT COUNT(*)::int n FROM guest_room_voice_presence WHERE room_id=$1 AND last_seen>NOW()-INTERVAL '${ACTIVE_VOICE_SECONDS} seconds'`,[id])).rows[0]?.n||0);
+        if(usersActive+guestsActive>=maxParticipants)return res.status(409).json({ok:false,error:"VOICE_ROOM_FULL",maxParticipants});
+      }
       await pool.query(`INSERT INTO guest_room_voice_presence(room_id,guest_id,last_seen) VALUES($1,$2,NOW()) ON CONFLICT(room_id,guest_id) DO UPDATE SET last_seen=NOW()`,[id,g.id]);
       await pool.query(`INSERT INTO guest_room_presence(room_id,guest_id,last_seen) VALUES($1,$2,NOW()) ON CONFLICT(room_id,guest_id) DO UPDATE SET last_seen=NOW()`,[id,g.id]);
-      res.json({ok:true,viewerId:-Number(g.id)});
+      res.json({ok:true,viewerId:-Number(g.id),maxParticipants});
     }catch(e){console.error("guest voice join",e);res.status(500).json({ok:false,error:"GUEST_VOICE_JOIN_FAILED"})}});
 
     app.get("/api/public/rooms-v2/:id/voice/state",async(req,res)=>{try{
@@ -150,7 +158,7 @@ http.createServer=function guestRoomsV2CreateServer(app,...args){
       await pool.query(`UPDATE guest_room_voice_presence SET last_seen=NOW() WHERE room_id=$1 AND guest_id=$2`,[id,g.id]);
       const users=(await pool.query(`SELECT p.user_id,p.role,p.requested,p.muted,p.seat_index,p.joined_at,p.last_seen,u.username,u.display_name,u.avatar_url,FALSE guest FROM room_voice_presence p JOIN users u ON u.id=p.user_id WHERE p.room_id=$1 AND p.last_seen>NOW()-INTERVAL '${ACTIVE_VOICE_SECONDS} seconds'`,[id])).rows;
       const guests=(await pool.query(`SELECT -g.id user_id,'listener'::text role,FALSE requested,FALSE muted,NULL::int seat_index,p.joined_at,p.last_seen,NULL::text username,('زائر '||g.id)::text display_name,NULL::text avatar_url,TRUE guest FROM guest_room_voice_presence p JOIN guest_visitors g ON g.id=p.guest_id WHERE p.room_id=$1 AND p.last_seen>NOW()-INTERVAL '${ACTIVE_VOICE_SECONDS} seconds'`,[id])).rows;
-      const rtc=turnConfig(`guest-${g.id}`);res.json({ok:true,viewerId:-Number(g.id),manager:false,guest:true,roomName:room.name,participants:[...users,...guests],iceServers:rtc.iceServers,turnConfigured:rtc.turnConfigured,tlsConfigured:rtc.tlsConfigured,forceRelay:rtc.forceRelay,seatCount:Number(room.speaker_seat_count||8),maxSpeakers:Number(room.speaker_seat_count||8)});
+      const rtc=turnConfig(`guest-${g.id}`),maxParticipants=Math.max(4,Math.min(100,Number(await operationalSetting("voice_participant_max"))||24));res.json({ok:true,viewerId:-Number(g.id),manager:false,guest:true,roomName:room.name,participants:[...users,...guests],iceServers:rtc.iceServers,turnConfigured:rtc.turnConfigured,tlsConfigured:rtc.tlsConfigured,forceRelay:rtc.forceRelay,seatCount:Number(room.speaker_seat_count||8),maxSpeakers:Number(room.speaker_seat_count||8),maxParticipants});
     }catch(e){console.error("guest voice state",e);res.status(500).json({ok:false,error:"GUEST_VOICE_STATE_FAILED"})}});
 
     app.post("/api/public/rooms-v2/:id/voice/heartbeat",async(req,res)=>{try{
