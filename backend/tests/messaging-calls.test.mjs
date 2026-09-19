@@ -6,7 +6,7 @@ const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 const readFrontend=file=>fs.readFileSync(new URL(`../../frontend/app/${file}`,import.meta.url),"utf8");
 
 test("rich direct messages emit realtime delivery and validate reply ownership",()=>{
-  const src=read("direct-extensions.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/emitChat/);
   assert.match(src,/direct:new/);
   assert.match(src,/conversation_id=\$2/);
@@ -23,7 +23,7 @@ test("message forwarding requires access to the source message scope",()=>{
 });
 
 test("calls enforce blocks and who_can_call privacy",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/async function callAllowed/);
   assert.match(src,/who_can_call/);
   assert.match(src,/user_blocks/);
@@ -32,7 +32,7 @@ test("calls enforce blocks and who_can_call privacy",()=>{
 });
 
 test("call signaling is limited to active calls and correct offer answer roles",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/CALL_NOT_ACTIVE/);
   assert.match(src,/BAD_SIGNAL_ROLE/);
   assert.match(src,/kind==="offer"&&Number\(c\.caller_id\)!==Number\(u\.id\)/);
@@ -40,7 +40,7 @@ test("call signaling is limited to active calls and correct offer answer roles",
 });
 
 test("call ICE config advertises external IP relay fallback",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/TURN_EXTERNAL_IP/);
   assert.match(src,/turn:\$\{external\}:3478\?transport=udp/);
   assert.match(src,/turn:\$\{external\}:3478\?transport=tcp/);
