@@ -3,6 +3,7 @@ import {registerAuthSession} from "./auth-session.mjs";
 import {registerAccountSecurity} from "./account-security.mjs";
 import {registerCoreRooms} from "./core-rooms.mjs";
 import {registerCoreMessaging} from "./core-messaging.mjs";
+import {registerCoreCalls} from "./core-calls.mjs";
 import {registerCoreSocial} from "./core-social.mjs";
 import {registerCoreFeed} from "./core-feed.mjs";
 import {registerCoreStories} from "./core-stories.mjs";
@@ -30,6 +31,7 @@ export function registerExplicitRoutes(app){
   registerCoreStories(app);
   registerCoreRooms(app);
   registerCoreMessaging(app);
+  registerCoreCalls(app);
   registerCoreSocial(app);
   registerCoreLocation(app);
   registerCoreAdminRooms(app);
