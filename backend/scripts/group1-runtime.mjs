@@ -7,14 +7,15 @@ const pool=new pg.Pool({connectionString:process.env.DATABASE_URL,max:2});
 const redis=createClient({url:process.env.REDIS_URL});
 await redis.connect();
 const tokenHash=t=>crypto.createHash("sha256").update(t).digest("hex");
+const passwordHash=password=>{const salt=crypto.randomBytes(16),derived=crypto.scryptSync(password,salt,64);return `scrypt:${salt.toString("hex")}:${derived.toString("hex")}`};
 
 async function makeUser(label,role="user"){
-  const suffix=`${label}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
-  const row=(await pool.query(`INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role) VALUES($1,$2,$3,'male','scrypt:00:00','active',$4) RETURNING id,username`,[`${suffix}@example.invalid`,suffix,label,role])).rows[0];
+  const suffix=`${label}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,email=`${suffix}@example.invalid`,password="Group1!Pass123";
+  const row=(await pool.query(`INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role) VALUES($1,$2,$3,'male',$4,'active',$5) RETURNING id,username`,[email,suffix,label,passwordHash(password),role])).rows[0];
   const token=crypto.randomBytes(32).toString("hex");
   await redis.set(`session:${token}`,String(row.id),{EX:900});
   await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+make_interval(secs=>900),NOW())`,[tokenHash(token),row.id]);
-  return{...row,token};
+  return{...row,email,password,token};
 }
 async function api(path,{token,method="GET",body,status,error}={}){
   const headers={};
