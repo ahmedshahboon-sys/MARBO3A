@@ -98,6 +98,17 @@ try{
   await api("/api/chats/"+ab.id+"/messages",{token:aliceToken,method:"POST",body:{body:"privacy closed"},status:403,error:"PRIVACY_RESTRICTED"});
   await setPrivacy(bob.id,{message:"friends",call:"friends"});
 
+  // Deleted messages stay deleted; PATCH cannot resurrect them.
+  d=await api("/api/chats/"+ab.id+"/messages",{token:aliceToken,method:"POST",body:{body:"delete me"},status:201});
+  const deletedId=Number(d.message?.id);
+  await api("/api/direct-messages/"+deletedId,{token:aliceToken,method:"DELETE"});
+  await api("/api/direct-messages/"+deletedId,{token:aliceToken,method:"PATCH",body:{body:"resurrect"},status:404,error:"MESSAGE_NOT_FOUND"});
+
+  // Forwarding also obeys the destination messaging privacy rule.
+  await setPrivacy(bob.id,{message:"nobody",call:"friends"});
+  await api("/api/direct-messages/"+rootId+"/forward",{token:aliceToken,method:"POST",body:{conversationId:ab.id},status:403,error:"PRIVACY_RESTRICTED"});
+  await setPrivacy(bob.id,{message:"friends",call:"friends"});
+
   // TURN config must expose ephemeral relay credentials and external-IP UDP/TCP fallbacks.
   d=await api("/api/calls/config",{token:aliceToken});
   const allUrls=(d.iceServers||[]).flatMap(x=>Array.isArray(x.urls)?x.urls:[x.urls]).filter(Boolean);
