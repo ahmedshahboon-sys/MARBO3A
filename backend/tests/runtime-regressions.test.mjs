@@ -63,7 +63,7 @@ test("map city activity honors privacy and validates precise coordinates",()=>{
 });
 
 test("chat list respects show_online independently from last seen",()=>{
-  const src=read("message-media-fix.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/COALESCE\(pp\.show_online,TRUE\) show_online/);
   assert.match(src,/COALESCE\(pp\.show_last_seen,TRUE\) show_last_seen/);
   assert.match(src,/online:showOnline&&actualOnline/);
