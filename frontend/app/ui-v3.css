@@ -13,8 +13,6 @@ body.ui-v3{
   --v3-muted:#99a3af;
   --v3-radius:22px;
   --v3-shadow:0 18px 50px rgba(0,0,0,.28);
-  --v3-header-h:112px;
-  --v3-dock-h:116px;
   color:var(--v3-text);
   background:
     radial-gradient(70rem 34rem at 110% -8%,rgba(255,122,0,.12),transparent 50%),
@@ -247,7 +245,6 @@ body.ui-v3:has(.sf-profile-card) .sf-top{display:none!important}
 
 /* Mobile */
 @media(max-width:720px){
-  body.ui-v3{--v3-header-h:94px;--v3-dock-h:106px}
   .ui-v3 .v3-global-header{width:calc(100% - 24px);padding-inline:0;gap:8px}
   .ui-v3 .v3-brand-lockup-image{width:164px;max-height:68px}
   .ui-v3 .v3-header-actions{gap:2px}.ui-v3 .v3-header-icon{width:44px;height:44px}.ui-v3 .v3-header-icon svg{width:25px;height:25px}

@@ -1,7 +1,8 @@
 /* MARBO3A DESIGN CONTRACT
-   Central product tokens. New UI must consume these values instead of inventing
-   local font sizes, radii, control heights or theme colors. Change only by an
-   explicit product design decision. */
+   Single owner for shared product typography, colors, spacing, control heights,
+   radii and shadows. Protected tokens --ui-font and --ui-accent must not be
+   redefined by route/compatibility styles. Change only by an explicit product
+   design decision. */
 :root{
   --ui-font:var(--font-app),Arial,sans-serif;
   --ui-page-title:22px;--ui-section-title:18px;--ui-card-title:15px;

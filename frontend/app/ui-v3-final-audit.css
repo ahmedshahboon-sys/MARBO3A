@@ -115,7 +115,6 @@ body.ui-v3:has(.settings-route-marker) .setting-row{min-height:64px!important}
 /* Final small-screen contract: no horizontal escape and no oversized route
    chrome. 16px input text is intentional to prevent iOS Safari auto-zoom. */
 @media(max-width:520px){
-  body.ui-v3{--v3-header-h:68px}
   .ui-v3 .v3-global-header{width:calc(100% - 12px)!important;min-height:68px!important}
   .ui-v3 .v3-brand-lockup>img{width:34px!important;height:34px!important;flex-basis:34px!important}
   .ui-v3 .v3-brand-copy>b{font-size:18px!important}

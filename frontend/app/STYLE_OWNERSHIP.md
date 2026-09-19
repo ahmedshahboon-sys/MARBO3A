@@ -1,20 +1,57 @@
 # MARBO3A V3 style ownership
 
-`layout.js` owns the ordered global stylesheet list. The order is contractual while older V2/V3 compatibility layers are retired safely. The locked final cascade MUST end with `ui-v3-unified-scale.css` -> `ui-contract-lock.css` -> `ui-contract-additions.css`. Route/support styles such as `ui-audience.css` must be imported before that final locked tail.
+`layout.js` owns the ordered global stylesheet list. The order is contractual while older V2/V3 compatibility layers are retired safely. The locked final cascade MUST end with `ui-v3-unified-scale.css` -> `ui-contract-lock.css` -> `ui-contract-additions.css`. Route/support styles must be imported before that tail.
 
-## Final owners
+## Coherence repair ownership contract — 2026-09-19
 
-- Global density, max width, safe areas and interaction sizing: `ui-v3-unified-scale.css`.
+Each shared concern has one final owner. Route files may consume shared tokens and define feature structure, but they must not redefine protected global tokens.
+
+| Domain | Final owner | Contract |
+| --- | --- | --- |
+| Tokens / Theme | `design-system.css` | Typography, colors, spacing, shared control heights, radii and shadows. |
+| Header geometry | `ui-v3-unified-scale.css` | Owns `--app-header-h`; temporarily also owns compatibility `--v3-header-h`. |
+| Bottom Dock geometry | `ui-v3-unified-scale.css` | Owns `--app-dock-h`; temporarily also owns compatibility `--v3-dock-h`. |
+| Buttons / Inputs | `design-system.css` | Shared height/type/radius tokens; route files may add feature-specific variants only. |
+| Feed | `social-feed.css` | Feed structure; shared scale/theme comes from central contracts. |
+| Rooms | `ui-v3-room-community.css` | Community-room visual structure; voice behavior remains runtime/component owned. |
+| Direct Chat | `ui-v3-chat.css` | Direct-chat visual structure. |
+| Settings / Dialogs | `ui-v3-settings.css` | Settings surfaces; reusable dialog primitives stay in shared UI components. |
+| Profile | `ui-v3-profile.css` | Profile route visual structure. |
+| Admin | `ui-v3-admin.css` | Admin route visual structure. |
+| Calls / Media Viewer | `calls.css` | Call overlay geometry; shared viewer primitives consume central tokens. |
+
+### Protected token owners
+
+- `--ui-font` -> `design-system.css`.
+- `--ui-accent` -> `design-system.css`.
+- `--app-header-h` -> `ui-v3-unified-scale.css`.
+- `--app-dock-h` -> `ui-v3-unified-scale.css`.
+- `--v3-header-h` -> `ui-v3-unified-scale.css` temporarily, preserving current effective legacy values until Group 2.
+- `--v3-dock-h` -> `ui-v3-unified-scale.css` temporarily, preserving current effective legacy values until Group 2.
+
+The legacy V3 geometry values were centralized without changing their effective cascade:
+- base: `72px / 78px`;
+- <=720px: `66px / 72px`;
+- <=520px: header `68px`, dock remains `72px`.
+
+Group 2 owns the decision to converge those compatibility values with `--app-header-h` / `--app-dock-h`; Group 1 does not guess new geometry.
+
+## Final cascade responsibilities
+
+- Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
 - Contract enforcement and protected shared UI overrides: `ui-contract-lock.css`.
-- Final additive compatibility fixes that are explicitly part of the locked design contract: `ui-contract-additions.css`.
-- Product typography, color, spacing and light/dark tokens: `design-system.css`.
+- Final additive compatibility rules already accepted into the contract: `ui-contract-additions.css`.
 - Saved/system theme lifecycle: `ThemeRuntime.js`; route components must not own startup theme application.
-- Official visible mark: `/brand/official/marbo3a-mark.png`. Legacy image selectors may redirect historical sources to this mark, but new visible brand references must use the official asset directly.
-- Bottom navigation final size: the locked final cascade (`--app-dock-h` and `.social-dock*`).
-- Messages final density: the locked final cascade under `.messages-v3-page`.
-- Notifications final density: the locked final cascade under `.notifications-*`.
-- Room/community final density and composer safe-area: the locked final cascade under `.room-community-*` and `.room-compose`.
-- Route-specific files may define structure, colors, animation and feature-specific behavior, but must not become a later sizing override after `ui-contract-additions.css`.
+- Official visible mark: `/brand/official/marbo3a-mark.png`. Compatibility selectors may redirect stale references but may not redesign the mark.
+- Route-specific files must not become a later sizing override after `ui-contract-additions.css`.
+
+## Filename guard
+
+Do not add new global CSS files whose names contain `repair`, `fix`, `final` or `override`. The only grandfathered filename exceptions are:
+- `ui-v3-final-audit.css` — existing compatibility layer; retirement is staged.
+- `r1-brand-override.css` — existing brand compatibility redirect; retirement is staged.
+
+Any future exception requires a documented temporary reason and explicit ownership-contract/checker update rather than silently adding another cascade layer.
 
 ## Group 3 visual consistency audit — 2026-09-15
 

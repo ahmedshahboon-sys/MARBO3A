@@ -5,8 +5,6 @@
 
 html,body{max-width:100%;overflow-x:clip}
 body.ui-v3{
-  --v3-header-h:72px;
-  --v3-dock-h:78px;
   --v3-page-max:880px;
   --v3-mobile-gap:10px;
   --v3-card-radius:18px;
@@ -249,7 +247,7 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:10px!important;bor
 }
 
 @media(max-width:720px){
-  body.ui-v3{--v3-header-h:66px;--v3-dock-h:72px;--v3-page-max:100%}
+  body.ui-v3{--v3-page-max:100%}
   .ui-v3 .v3-global-header{width:100%!important;padding:calc(5px + env(safe-area-inset-top)) 10px 4px!important}
   .ui-v3 .v3-brand-lockup>img{width:34px!important;height:34px!important;flex-basis:34px!important}.ui-v3 .v3-brand-copy>b{font-size:18px!important}.ui-v3 .v3-brand-copy>em{font-size:7px!important}
   .ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}

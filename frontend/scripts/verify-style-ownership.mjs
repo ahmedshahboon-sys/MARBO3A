@@ -16,7 +16,40 @@ if(additionsIndex<0)fail("ui-contract-additions.css is missing");
 if(!(unifiedIndex<lockIndex&&lockIndex<additionsIndex))fail("final UI contract order must be unified-scale -> contract-lock -> contract-additions");
 if(imports.at(-1)!=="ui-contract-additions.css")fail("ui-contract-additions.css must remain the final global CSS import");
 
-if(!ownership.includes("ui-v3-unified-scale.css")||!ownership.includes("Bottom navigation")||!ownership.includes("Messages")||!ownership.includes("Notifications")||!ownership.includes("Room/community"))fail("STYLE_OWNERSHIP.md must document final V3 ownership");
 const required=["ui-v3.css","ui-v3-messages.css","ui-v3-navigation.css","ui-v3-room-community.css","ui-v3-social-experience.css","ui-v3-unified-scale.css","ui-contract-lock.css","ui-contract-additions.css"];
 for(const file of required)if(!imports.includes(file))fail(`required compatibility/final layer is missing: ${file}`);
-if(!process.exitCode)console.log(`Style ownership OK · ${imports.length} ordered layers · final owner ${imports.at(-1)}`);
+
+const protectedOwners=new Map([
+  ["--ui-font","design-system.css"],
+  ["--ui-accent","design-system.css"],
+  ["--app-header-h","ui-v3-unified-scale.css"],
+  ["--app-dock-h","ui-v3-unified-scale.css"],
+  ["--v3-header-h","ui-v3-unified-scale.css"],
+  ["--v3-dock-h","ui-v3-unified-scale.css"]
+]);
+const cssFiles=fs.readdirSync(root).filter(name=>name.endsWith(".css")).sort();
+const declarationFor=token=>new RegExp(`(?:^|[;{]\\s*)${token}\\s*:`,`gm`);
+for(const file of cssFiles){
+  const src=fs.readFileSync(path.join(root,file),"utf8");
+  for(const [token,owner] of protectedOwners){
+    if(declarationFor(token).test(src)&&file!==owner)fail(`${token} is owned by ${owner}, but is redefined in ${file}`);
+  }
+}
+
+for(const [token,owner] of protectedOwners){
+  const src=fs.readFileSync(path.join(root,owner),"utf8");
+  if(!declarationFor(token).test(src))fail(`${owner} no longer defines protected token ${token}`);
+  if(!ownership.includes(token)||!ownership.includes(owner))fail(`STYLE_OWNERSHIP.md must document ${token} owner ${owner}`);
+}
+
+const grandfatheredNames=new Set(["ui-v3-final-audit.css","r1-brand-override.css"]);
+for(const file of cssFiles){
+  if(/(?:repair|fix|final|override)/i.test(file)&&!grandfatheredNames.has(file))fail(`new repair/fix/final/override layer is forbidden: ${file}`);
+}
+for(const file of grandfatheredNames)if(!cssFiles.includes(file))fail(`grandfathered compatibility filename disappeared without contract update: ${file}`);
+
+for(const label of ["Tokens / Theme","Header geometry","Bottom Dock geometry","Buttons / Inputs","Feed","Rooms","Direct Chat","Settings / Dialogs","Profile","Admin","Calls / Media Viewer"]){
+  if(!ownership.includes(label))fail(`STYLE_OWNERSHIP.md is missing domain owner: ${label}`);
+}
+
+if(!process.exitCode)console.log(`Style ownership OK · ${imports.length} ordered layers · ${protectedOwners.size} protected tokens · final owner ${imports.at(-1)}`);

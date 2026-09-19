@@ -44,7 +44,6 @@ body.ui-v3{overflow-x:hidden}
 .ui-v3 .rooms-v3-route .sf-top{display:none!important}
 
 @media(max-width:720px){
-  body.ui-v3{--v3-header-h:82px;--v3-dock-h:94px}
 
   /* Global header */
   .ui-v3 .v3-global-header{
