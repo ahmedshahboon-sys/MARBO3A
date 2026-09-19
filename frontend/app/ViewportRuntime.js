@@ -12,7 +12,7 @@ export default function ViewportRuntime(){
         const vv=window.visualViewport,orientation=window.innerWidth>window.innerHeight?"landscape":"portrait";
         if(orientation!==lastOrientation){lastOrientation=orientation;maxLayoutHeight=Math.max(window.innerHeight||0,1)}else if(!isEditable())maxLayoutHeight=Math.max(maxLayoutHeight,window.innerHeight||0);
         const h=Math.max(1,Math.round(vv?.height||window.innerHeight||0)),w=Math.max(1,Math.round(vv?.width||window.innerWidth||0)),top=Math.max(0,Math.round(vv?.offsetTop||0));
-        const rawKeyboard=Math.max(0,Math.round((window.innerHeight||maxLayoutHeight)-h-top)),keyboard=isEditable()&&rawKeyboard>100?rawKeyboard:0;
+        const layoutBaseline=Math.max(maxLayoutHeight,window.innerHeight||0),rawKeyboard=Math.max(0,Math.round(layoutBaseline-h-top)),keyboard=isEditable()&&rawKeyboard>100?rawKeyboard:0;
         root.style.setProperty("--marbo3a-vvh",`${h}px`);
         root.style.setProperty("--marbo3a-vvw",`${w}px`);
         root.style.setProperty("--marbo3a-vv-top",`${top}px`);
