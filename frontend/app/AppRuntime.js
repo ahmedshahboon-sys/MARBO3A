@@ -27,7 +27,6 @@ import SideDrawer from "./SideDrawer";
 import SocialDock from "./SocialDock";
 import SiteFontRuntime from "./SiteFontRuntime";
 import FeedModePolicy from "./FeedModePolicy";
-import UiRoundFixes from "./UiRoundFixes";
 import ViewportRuntime from "./ViewportRuntime";
 import LibyanDialectRuntime from "./LibyanDialectRuntime";
 import LiveEntryRuntime from "./LiveEntryRuntime";
@@ -36,7 +35,7 @@ export default function AppRuntime({children}){
   const path=usePathname(),app=isAppShellPath(path),immersiveLive=/^\/live\/(?:new|\d+)$/.test(path||"");
   return <>
     <ViewportRuntime/><LibyanDialectRuntime/><AppBootstrap/><SiteFontRuntime/><PlatformClient/><UsageTelemetry/><NavigationRuntime/><MaintenanceRuntime/>
-    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><RoomExperienceRuntime/><FeedModePolicy/><UiRoundFixes/><LiveEntryRuntime/></>}
+    {app&&<><SessionGuard/><RealtimeClient/><AppDataCoordinator/><TypingRuntime/><ExperienceEffects/><EngagementViewRuntime/><RoomVoiceR1Runtime/><RoomExperienceRuntime/><FeedModePolicy/><LiveEntryRuntime/></>}
     <SocialHomeRedirect/>
     {app&&<><DebugTrace/><CallCenter/><OnboardingGate/><PermissionsCenter/><ContextSafety/><ReactionHoldBridge/>{!immersiveLive&&<PremiumChrome/>}<SettingsPanel/></>}
     {children}

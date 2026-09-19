@@ -25,3 +25,12 @@
 .auth-v1-discover a{min-height:44px}
 html[data-theme="light"] .auth-v1-card{background:var(--ui-surface)}
 @media(max-width:520px){.auth-v1-card>header p{font-size:12px}.auth-v1-tabs button{font-size:13px}.social-login-btn{min-height:44px;font-size:12px}}
+
+/* Group 6 auth surface parity. */
+.auth-v1-page{background:radial-gradient(circle at 85% 5%,var(--ui-accent-soft),transparent 28%),var(--ui-bg)!important;color:var(--ui-text)!important}
+.auth-v1-card{background:color-mix(in srgb,var(--ui-surface) 96%,transparent)!important;border-color:var(--ui-border)!important;color:var(--ui-text)!important;box-shadow:var(--ui-shadow)!important}
+.auth-v1-card>header>img{background:var(--ui-surface-2)!important}
+.auth-v1-card>header small{color:var(--ui-accent-2)!important}.auth-v1-card>header p{color:var(--ui-muted)!important}
+.auth-v1-form input,.auth-v1-form select{background:var(--ui-surface-2)!important;border-color:var(--ui-border)!important;color:var(--ui-text)!important}
+.auth-v1-secondary,.social-login-btn,.social-complete-preview{background:var(--ui-surface-2)!important;border-color:var(--ui-border)!important;color:var(--ui-text)!important}
+.social-login-divider{color:var(--ui-muted)!important}.social-login-divider:before,.social-login-divider:after{background:var(--ui-border)!important}

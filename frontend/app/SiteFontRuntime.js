@@ -6,7 +6,7 @@ const apply=font=>{try{document.documentElement.dataset.siteFont=normalize(font)
 export default function SiteFontRuntime(){
   useEffect(()=>{
     let alive=true;
-    try{apply(localStorage.getItem(KEY)||"readex")}catch{apply("readex")}
+    try{apply(document.documentElement.dataset.siteFont||localStorage.getItem(KEY)||"readex")}catch{apply("readex")}
     const sync=async()=>{try{const r=await fetch("/api/public/ui-settings",{cache:"no-store",credentials:"same-origin"}),d=await r.json().catch(()=>({}));if(!alive||!r.ok)return;const font=normalize(d.font);apply(font);try{localStorage.setItem(KEY,font)}catch{}}catch{}};
     const onFont=e=>{const font=normalize(e.detail?.font);apply(font);try{localStorage.setItem(KEY,font)}catch{}};
     const onVisible=()=>document.visibilityState==="visible"&&sync();

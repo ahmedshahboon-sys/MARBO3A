@@ -40,8 +40,8 @@ body.ui-v3 main.room-chat-page>.room-chat-shell{
   overflow-y:auto!important;
   overflow-x:hidden!important;
 }
-.ui-v3 .chat-social-shell{padding-bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 4px)!important}
-body.ui-v3 main.room-chat-page>.room-chat-shell{padding-bottom:calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 5px)!important}
+.ui-v3 .chat-social-shell{padding-bottom:calc(var(--app-dock-total-h) + 4px)!important}
+body.ui-v3 main.room-chat-page>.room-chat-shell{padding-bottom:calc(var(--app-dock-total-h) + 5px)!important}
 .ui-v3 :is(.chat-social-head,.room-chat-head){flex:0 0 auto!important}
 .ui-v3 :is(.chat-compose,.room-compose){flex:0 0 auto!important}
 .ui-v3 .chat-social-head{position:relative!important;top:auto!important}
@@ -143,7 +143,7 @@ body.ui-v3:has(.room-chat-page):has(.room-voice-stage.open) .room-chat-tools{mar
 
 /* Friends: production still inherited oversized secondary-surface rules. */
 body.ui-v3:has(.sf-people) .social-page>.social-shell>.sf-top{display:none!important}
-body.ui-v3:has(.sf-people) .sf-simple-page{padding:4px 6px calc(var(--v3-dock-h) + env(safe-area-inset-bottom) + 14px)!important}
+body.ui-v3:has(.sf-people) .sf-simple-page{padding:4px 6px calc(var(--app-dock-total-h) + 14px)!important}
 .ui-v3 .sf-people{padding:10px!important;border-radius:15px!important}
 .ui-v3 .sf-people>h1{font-size:21px!important;margin:0 0 7px!important}
 .ui-v3 .sf-people .sf-search{min-height:42px!important;margin:5px 0 9px!important}

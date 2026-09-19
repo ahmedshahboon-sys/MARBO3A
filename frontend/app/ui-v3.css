@@ -13,8 +13,6 @@ body.ui-v3{
   --v3-muted:#99a3af;
   --v3-radius:22px;
   --v3-shadow:0 18px 50px rgba(0,0,0,.28);
-  --v3-header-h:112px;
-  --v3-dock-h:116px;
   color:var(--v3-text);
   background:
     radial-gradient(70rem 34rem at 110% -8%,rgba(255,122,0,.12),transparent 50%),
@@ -162,7 +160,7 @@ body.ui-v3:has(.sf-profile-card) .sf-top{display:none!important}
 .ui-v3 .sf-create-room{border:1px solid var(--v3-border)!important;border-radius:20px!important;background:rgba(255,255,255,.02)!important;padding:14px!important}
 .ui-v3 .sf-room-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;margin-top:18px!important}
 .ui-v3 .sf-room-card{min-height:154px!important;padding:16px!important;display:grid!important;grid-template-columns:auto 1fr!important;grid-template-rows:1fr auto!important;gap:12px!important;position:relative!important;overflow:hidden!important}
-.ui-v3 .sf-room-card::after{content:"";position:absolute;inset:auto -30px -50px auto;width:150px;height:150px;background:url('/brand/marbo3a-symbol-orange.svg') center/contain no-repeat;opacity:.045;pointer-events:none}
+.ui-v3 .sf-room-card::after{content:"";position:absolute;inset:auto -30px -50px auto;width:150px;height:150px;background:url('/brand/official/marbo3a-mark.png') center/contain no-repeat;opacity:.045;pointer-events:none}
 .ui-v3 .sf-room-icon{width:54px!important;height:54px!important;border-radius:18px!important;background:rgba(255,122,0,.1)!important;color:var(--v3-orange)!important;display:grid!important;place-items:center!important}
 .ui-v3 .sf-room-copy{min-width:0!important}
 .ui-v3 .sf-room-copy h3{font-size:20px!important;margin:0 0 6px!important}
@@ -247,7 +245,6 @@ body.ui-v3:has(.sf-profile-card) .sf-top{display:none!important}
 
 /* Mobile */
 @media(max-width:720px){
-  body.ui-v3{--v3-header-h:94px;--v3-dock-h:106px}
   .ui-v3 .v3-global-header{width:calc(100% - 24px);padding-inline:0;gap:8px}
   .ui-v3 .v3-brand-lockup-image{width:164px;max-height:68px}
   .ui-v3 .v3-header-actions{gap:2px}.ui-v3 .v3-header-icon{width:44px;height:44px}.ui-v3 .v3-header-icon svg{width:25px;height:25px}

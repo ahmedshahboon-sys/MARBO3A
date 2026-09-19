@@ -4,11 +4,17 @@
    safe areas and interaction surfaces that must win over legacy CSS layers. */
 
 :root{
-  --app-max:600px;
+  --app-page-max:600px;
+  --app-max:var(--app-page-max); /* compatibility alias; retire with legacy consumers */
   --app-gutter:10px;
   --app-header-h:58px;
   --app-dock-h:62px;
-  --app-safe-bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 10px);
+  --app-safe-top:env(safe-area-inset-top,0px);
+  --app-safe-bottom:env(safe-area-inset-bottom,0px);
+  --app-header-total-h:calc(var(--app-header-h) + var(--app-safe-top));
+  --app-dock-total-h:calc(var(--app-dock-h) + var(--app-safe-bottom));
+  --app-content-bottom-space:calc(var(--app-dock-total-h) + 10px);
+  --app-viewport-h:var(--marbo3a-vvh,100dvh);
   --app-r-lg:15px;
   --app-r-md:12px;
   --app-space-1:4px;
@@ -16,6 +22,10 @@
   --app-space-3:9px;
   --app-space-4:12px;
 }
+/* Group 2 geometry contract.
+   Legacy V3 consumers resolve to the same single app geometry source. */
+body.ui-v3{--v3-header-h:var(--app-header-total-h);--v3-dock-h:var(--app-dock-h)}
+
 
 /* One width/spacing system across every visible and nested product route. */
 .ui-v3 :where(
@@ -24,8 +34,8 @@
   .admin-shell,.friends-shell,.search-shell,.more-shell,.notifications-shell,.rooms-shell,.calls-shell,
   .safety-shell,.privacy-shell,.account-shell,.login-methods-shell,.platform-shell
 ){
-  width:min(100%,var(--app-max))!important;
-  max-width:var(--app-max)!important;
+  width:min(100%,var(--app-page-max))!important;
+  max-width:var(--app-page-max)!important;
   margin-inline:auto!important;
   box-sizing:border-box!important;
 }
@@ -35,8 +45,8 @@
   .account-shell,.login-methods-shell,.platform-shell
 ){padding-inline:var(--app-gutter)!important}
 .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page,.chat-page,.direct-chat-page){
-  min-height:100dvh!important;
-  padding-bottom:var(--app-safe-bottom)!important;
+  min-height:var(--app-viewport-h)!important;
+  padding-bottom:var(--app-content-bottom-space)!important;
   box-sizing:border-box!important;
 }
 
@@ -53,20 +63,20 @@
 
 /* Global chrome. */
 .ui-v3 .v3-global-header{
-  min-height:var(--app-header-h)!important;height:var(--app-header-h)!important;
-  padding:max(4px,env(safe-area-inset-top,0px)) var(--app-gutter) 4px!important;box-sizing:border-box!important
+  min-height:var(--app-header-total-h)!important;height:var(--app-header-total-h)!important;
+  padding:var(--app-safe-top) var(--app-gutter) 0!important;box-sizing:border-box!important
 }
-.ui-v3 .v3-brand-lockup{gap:7px!important;min-height:42px!important}
+.ui-v3 .v3-brand-lockup{gap:7px!important;min-height:44px!important}
 .ui-v3 .v3-brand-lockup>img{width:40px!important;height:40px!important}
 .ui-v3 .v3-brand-copy>b{font-size:19px!important;line-height:1!important}
 .ui-v3 .v3-brand-copy>small{font-size:8px!important;line-height:1!important}
 .ui-v3 .v3-brand-copy>em{font-size:7px!important;line-height:1.2!important;margin-top:2px!important}
 .ui-v3 .v3-header-actions{gap:5px!important}
-.ui-v3 .v3-global-header :where(.v3-header-icon,button,a.v3-header-icon){min-width:34px!important;min-height:34px!important;width:34px!important;height:34px!important}
+.ui-v3 .v3-global-header :where(.v3-header-icon,button,a.v3-header-icon){min-width:44px!important;min-height:44px!important;width:44px!important;height:44px!important}
 .ui-v3 .v3-global-header :where(svg){max-width:22px!important;max-height:22px!important}
 .ui-v3 .v3-unread-badge{min-width:17px!important;height:17px!important;font-size:9px!important;padding-inline:4px!important;line-height:17px!important}
 
-.ui-v3 .social-dock{height:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px))!important;min-height:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px))!important;padding-bottom:env(safe-area-inset-bottom,0px)!important}
+.ui-v3 .social-dock{bottom:0!important;height:var(--app-dock-total-h)!important;min-height:var(--app-dock-total-h)!important;padding-bottom:var(--app-safe-bottom)!important}
 .ui-v3 .social-dock-track{height:var(--app-dock-h)!important;min-height:var(--app-dock-h)!important;padding:3px 6px!important;gap:2px!important}
 .ui-v3 .social-dock :where(a,button){min-height:50px!important;height:50px!important;font-size:9px!important;gap:2px!important;padding:2px 4px!important}
 .ui-v3 .social-dock svg{width:21px!important;height:21px!important}
@@ -74,7 +84,7 @@
 .ui-v3 .dock-unread-badge{min-width:15px!important;height:15px!important;line-height:15px!important;font-size:8px!important}
 
 /* Feed / composer / posts. */
-.ui-v3 .feed-center{max-width:var(--app-max)!important}
+.ui-v3 .feed-center{max-width:var(--app-page-max)!important}
 .ui-v3 :where(.sf-composer,.feed-composer){padding:8px!important;border-radius:15px!important;margin-bottom:7px!important}
 .ui-v3 :where(.sf-composer textarea,.feed-composer textarea){min-height:54px!important;font-size:13px!important}
 .ui-v3 :where(.sf-post,.post-card){border-radius:15px!important;margin-bottom:8px!important}
@@ -82,10 +92,10 @@
 .ui-v3 .sf-post-head .sf-avatar{width:36px!important;height:36px!important}
 .ui-v3 :where(.sf-body,.sf-post-body){padding:0 8px 8px!important;font-size:13px!important;line-height:1.5!important}
 .ui-v3 .sf-post-stats{min-height:30px!important;padding:4px 8px!important;font-size:9px!important}
-.ui-v3 .sf-actions-reactions{min-height:38px!important;height:38px!important;padding:2px 5px!important;gap:3px!important}
-.ui-v3 .sf-actions-reactions>button{min-height:32px!important;height:32px!important;font-size:10px!important;padding-inline:7px!important}
+.ui-v3 .sf-actions-reactions{min-height:44px!important;height:44px!important;padding:2px 5px!important;gap:3px!important}
+.ui-v3 .sf-actions-reactions>button{min-height:44px!important;height:44px!important;font-size:10px!important;padding-inline:7px!important}
 .ui-v3 .sf-reaction-picker{min-width:0!important;flex:0 1 auto!important;overflow:visible!important;position:relative!important}
-.ui-v3 .sf-reaction-picker>button{min-height:32px!important;height:32px!important;padding:0 7px!important;gap:4px!important;font-size:10px!important}
+.ui-v3 .sf-reaction-picker>button{min-height:44px!important;height:44px!important;padding:0 7px!important;gap:4px!important;font-size:10px!important}
 .ui-v3 .sf-reaction-picker>button:not(:first-child){display:none!important}
 .ui-v3 .sf-reaction-picker>button:first-child{display:flex!important;align-items:center!important;justify-content:center!important}
 .ui-v3 .sf-reaction-picker>button:first-child>span{font-size:18px!important;line-height:1!important}
@@ -95,7 +105,7 @@
 .reaction-hold-palette>button:active{transform:scale(1.16)!important;background:rgba(255,255,255,.07)!important}
 .ui-v3 .sf-comment-preview{padding:4px 8px 7px!important}
 .ui-v3 .sf-comment-preview-item{padding-block:3px!important;font-size:10px!important}
-.ui-v3 .sf-view-comments{font-size:10px!important;min-height:28px!important}
+.ui-v3 .sf-view-comments{font-size:10px!important;min-height:44px!important}
 
 /* Post option/reaction dialogs stay phone-sized and visually even. */
 .ui-v3 .app-dialog-backdrop{padding:12px!important;align-items:center!important}
@@ -103,9 +113,9 @@
 .ui-v3 .app-dialog>h3{font-size:16px!important;margin:0!important}
 .ui-v3 .app-dialog>p{font-size:11px!important;margin:0!important}
 .ui-v3 .app-dialog footer{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:5px!important}
-.ui-v3 .app-dialog footer button{height:36px!important;min-height:36px!important;width:100%!important;font-size:11px!important}
+.ui-v3 .app-dialog footer button{height:44px!important;min-height:44px!important;width:100%!important;font-size:11px!important}
 .ui-v3 .post-menu-actions{display:grid!important;gap:6px!important}
-.ui-v3 .post-menu-actions>button,.ui-v3 .dialog-danger-link{width:100%!important;min-height:36px!important;height:36px!important;border-radius:10px!important;padding:0 10px!important;font-size:11px!important;text-align:center!important}
+.ui-v3 .post-menu-actions>button,.ui-v3 .dialog-danger-link{width:100%!important;min-height:44px!important;height:44px!important;border-radius:10px!important;padding:0 10px!important;font-size:11px!important;text-align:center!important}
 .ui-v3 .reaction-people{max-height:52dvh!important;overflow:auto!important}
 .ui-v3 .reaction-people>a{min-height:48px!important;padding:5px 3px!important}
 
@@ -129,7 +139,7 @@ body.story-overlay-open{overscroll-behavior:none!important;touch-action:none!imp
 .story-viewer .story-nav.prev{right:0!important}.story-viewer .story-nav.next{left:0!important}
 .story-viewer.viewers-open .story-nav{pointer-events:none!important}
 .story-viewer .story-owner-tools{position:absolute!important;z-index:45!important;left:8px!important;right:8px!important;bottom:max(8px,env(safe-area-inset-bottom,0px))!important;display:flex!important;justify-content:space-between!important;gap:8px!important;pointer-events:auto!important}
-.story-viewer .story-owner-tools>button{height:38px!important;min-height:38px!important;padding-inline:11px!important;font-size:10px!important;pointer-events:auto!important}
+.story-viewer .story-owner-tools>button{height:44px!important;min-height:44px!important;padding-inline:11px!important;font-size:10px!important;pointer-events:auto!important}
 .story-viewer .story-viewers-panel{position:absolute!important;z-index:80!important;left:8px!important;right:8px!important;bottom:max(8px,env(safe-area-inset-bottom,0px))!important;max-height:58dvh!important;overflow:hidden!important;border-radius:16px!important;background:#11161d!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 -14px 34px rgba(0,0,0,.48)!important;pointer-events:auto!important;touch-action:pan-y!important}
 .story-viewer .story-viewers-panel>header{position:sticky!important;top:0!important;z-index:2!important;display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:44px!important;padding:7px 9px!important;background:#11161d!important}
 .story-viewer .story-viewers-list{max-height:calc(58dvh - 44px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:3px 8px 8px!important}
@@ -161,29 +171,29 @@ body.story-overlay-open{overscroll-behavior:none!important;touch-action:none!imp
 body.ui-v3:has(.notifications-panel) .social-page .sf-top{display:none!important}
 body.ui-v3:has(.notifications-panel) .sf-simple-page{padding-top:1px!important}
 body.ui-v3:has(.notifications-panel) .notifications-panel{padding:6px!important;border-radius:14px!important;margin:0!important}
-.ui-v3 .notif-head{min-height:42px!important;padding:1px 2px 6px!important;gap:5px!important}.ui-v3 .notif-head h1{font-size:19px!important}.ui-v3 .notif-head p{font-size:8px!important;margin:1px 0!important}.ui-v3 .notif-head>button{height:28px!important;min-height:28px!important;padding:0 7px!important;font-size:8px!important}
+.ui-v3 .notif-head{min-height:42px!important;padding:1px 2px 6px!important;gap:5px!important}.ui-v3 .notif-head h1{font-size:19px!important}.ui-v3 .notif-head p{font-size:8px!important;margin:1px 0!important}.ui-v3 .notif-head>button{height:44px!important;min-height:44px!important;padding:0 7px!important;font-size:8px!important}
 .ui-v3 .notification-list{gap:4px!important}.ui-v3 .notification-row{min-height:54px!important;border-radius:11px!important;overflow:hidden!important}.ui-v3 .notification-row.expired{opacity:.7!important}
 .ui-v3 .notification-main{min-height:52px!important;padding:5px 6px!important;grid-template-columns:30px minmax(0,1fr) auto!important;gap:6px!important}.ui-v3 .notification-main .notif-icon{width:29px!important;height:29px!important;min-width:29px!important;border-radius:9px!important}.ui-v3 .notification-main .notif-icon svg{width:15px!important;height:15px!important}.ui-v3 .notification-main b{font-size:10px!important}.ui-v3 .notification-main p{font-size:8px!important;line-height:1.3!important;margin:1px 0!important}.ui-v3 .notification-main small{font-size:7px!important}
-.ui-v3 .notification-actions{padding:0 5px 5px!important;gap:4px!important}.ui-v3 .notification-actions button{height:27px!important;min-height:27px!important;padding:0 8px!important;font-size:8px!important}.ui-v3 .notification-result{display:block!important;padding:0 7px 5px!important;font-size:8px!important;color:rgba(255,255,255,.55)!important}
+.ui-v3 .notification-actions{padding:0 5px 5px!important;gap:4px!important}.ui-v3 .notification-actions button{height:44px!important;min-height:44px!important;padding:0 8px!important;font-size:8px!important}.ui-v3 .notification-result{display:block!important;padding:0 7px 5px!important;font-size:8px!important;color:rgba(255,255,255,.55)!important}
 
 /* Rooms + room chat. */
-body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!important;overflow:auto!important}
-.ui-v3 .room-community-page{height:auto!important;min-height:calc(100dvh - var(--app-header-h))!important;overflow:visible!important;padding-bottom:var(--app-safe-bottom)!important}
-.ui-v3 .room-community-shell{width:min(var(--app-max),calc(100% - 14px))!important;min-height:0!important;height:auto!important;padding:2px 0 6px!important;gap:5px!important;overflow:visible!important}
-.ui-v3 .room-community-head{min-height:52px!important;padding:5px 6px!important;border-radius:12px!important;grid-template-columns:29px minmax(0,1fr) auto!important;gap:5px!important}.ui-v3 .room-community-title small{font-size:7px!important}.ui-v3 .room-community-title h1{font-size:14px!important}.ui-v3 .room-community-title p{font-size:7px!important;margin:1px 0!important}.ui-v3 .room-community-title>span{font-size:7px!important}.ui-v3 .room-community-actions>:is(a,button),.ui-v3 .room-community-icon{width:29px!important;height:29px!important;min-width:29px!important;min-height:29px!important}
+body.ui-v3:has(.room-community-page){height:auto!important;min-height:var(--app-viewport-h)!important;overflow:auto!important}
+.ui-v3 .room-community-page{height:auto!important;min-height:calc(var(--app-viewport-h) - var(--app-header-total-h))!important;overflow:visible!important;padding-bottom:var(--app-content-bottom-space)!important}
+.ui-v3 .room-community-shell{width:min(var(--app-page-max),calc(100% - 14px))!important;min-height:0!important;height:auto!important;padding:2px 0 6px!important;gap:5px!important;overflow:visible!important}
+.ui-v3 .room-community-head{min-height:52px!important;padding:5px 6px!important;border-radius:12px!important;grid-template-columns:29px minmax(0,1fr) auto!important;gap:5px!important}.ui-v3 .room-community-title small{font-size:7px!important}.ui-v3 .room-community-title h1{font-size:14px!important}.ui-v3 .room-community-title p{font-size:7px!important;margin:1px 0!important}.ui-v3 .room-community-title>span{font-size:7px!important}.ui-v3 .room-community-actions>:is(a,button),.ui-v3 .room-community-icon{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
 .ui-v3 .room-live-card{min-height:0!important;margin:0!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-live-card:has(.room-voice-stage) .room-live-copy{display:none!important}.ui-v3 .room-live-copy{min-height:34px!important;padding:3px 5px!important}.ui-v3 .room-live-copy b{font-size:9px!important}.ui-v3 .room-live-copy small{font-size:7px!important}
-.ui-v3 .room-voice-entry{min-height:38px!important;padding:4px 6px!important;border-radius:10px!important;gap:5px!important}.ui-v3 .room-voice-entry b{font-size:9px!important}.ui-v3 .room-voice-entry small{font-size:7px!important}.ui-v3 .room-voice-entry button{height:29px!important;min-height:29px!important;font-size:8px!important;padding:0 7px!important}
-.ui-v3 .room-voice-host .room-voice-stage{border-radius:10px!important}.ui-v3 .room-voice-host .room-voice-stage>header{height:31px!important;min-height:31px!important;padding:0 6px!important}.ui-v3 .room-voice-host .room-voice-stage>header b{font-size:9px!important}.ui-v3 .room-voice-host .room-voice-stage>header span{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-body{max-height:82px!important;padding:3px!important;overflow:auto!important}.ui-v3 .room-voice-host .voice-people{gap:3px!important;flex-wrap:nowrap!important;overflow-x:auto!important}.ui-v3 .room-voice-host .voice-people>button{min-width:47px!important;flex:0 0 47px!important;font-size:7px!important;padding:2px!important}.ui-v3 .room-voice-host .voice-people :is(img,i){width:25px!important;height:25px!important}.ui-v3 .room-voice-host .voice-people b,.ui-v3 .room-voice-host .voice-people small{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-actions{gap:3px!important;padding-top:3px!important}.ui-v3 .room-voice-host .room-voice-actions button{min-height:28px!important;height:28px!important;padding:0 7px!important;font-size:7px!important}.room-voice-remote-audio{position:fixed!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:-9999px!important}
-.ui-v3 .room-community-tools{gap:4px!important}.ui-v3 .room-community-search{min-height:34px!important;height:34px!important;border-radius:10px!important}.ui-v3 .room-community-search input{height:32px!important;min-height:32px!important;font-size:9px!important}.ui-v3 .room-pins-toggle{height:34px!important;min-height:34px!important;font-size:8px!important;padding:0 7px!important}
-.ui-v3 .room-community-stream{padding:0 2px!important;margin:0!important;min-height:170px!important}.ui-v3 .room-community-message{gap:6px!important;padding-block:4px!important}.ui-v3 .room-community-avatar{width:30px!important;height:30px!important;min-width:30px!important}.ui-v3 .room-community-message header b{font-size:9px!important}.ui-v3 .room-community-message header small,.ui-v3 .room-community-message time{font-size:7px!important}.ui-v3 .room-role-badge{font-size:6px!important;padding:1px 4px!important;min-height:0!important}.ui-v3 .room-community-message :where(p,.message-text){font-size:10px!important;line-height:1.4!important}.ui-v3 .room-message-more{width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important}.ui-v3 .room-community-typing,.ui-v3 .room-community-replying,.ui-v3 .room-community-status{font-size:8px!important}
-.ui-v3 .room-community-compose{position:sticky!important;bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 3px)!important;z-index:30!important;min-height:44px!important;gap:4px!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-community-compose>input{height:35px!important;min-height:35px!important;font-size:10px!important}.ui-v3 .room-community-compose>button,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>.voice-record-btn{width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important}.ui-v3 .room-community-compose svg{width:18px!important;height:18px!important}
+.ui-v3 .room-voice-entry{min-height:38px!important;padding:4px 6px!important;border-radius:10px!important;gap:5px!important}.ui-v3 .room-voice-entry b{font-size:9px!important}.ui-v3 .room-voice-entry small{font-size:7px!important}.ui-v3 .room-voice-entry button{height:44px!important;min-height:44px!important;font-size:8px!important;padding:0 7px!important}
+.ui-v3 .room-voice-host .room-voice-stage{border-radius:10px!important}.ui-v3 .room-voice-host .room-voice-stage>header{height:31px!important;min-height:31px!important;padding:0 6px!important}.ui-v3 .room-voice-host .room-voice-stage>header b{font-size:9px!important}.ui-v3 .room-voice-host .room-voice-stage>header span{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-body{max-height:82px!important;padding:3px!important;overflow:auto!important}.ui-v3 .room-voice-host .voice-people{gap:3px!important;flex-wrap:nowrap!important;overflow-x:auto!important}.ui-v3 .room-voice-host .voice-people>button{min-width:47px!important;min-height:44px!important;flex:0 0 47px!important;font-size:7px!important;padding:2px!important}.ui-v3 .room-voice-host .voice-people :is(img,i){width:25px!important;height:25px!important}.ui-v3 .room-voice-host .voice-people b,.ui-v3 .room-voice-host .voice-people small{font-size:7px!important}.ui-v3 .room-voice-host .room-voice-actions{gap:3px!important;padding-top:3px!important}.ui-v3 .room-voice-host .room-voice-actions button{min-height:44px!important;height:44px!important;padding:0 7px!important;font-size:7px!important}.room-voice-remote-audio{position:fixed!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:-9999px!important}
+.ui-v3 .room-community-tools{gap:4px!important}.ui-v3 .room-community-search{min-height:44px!important;height:44px!important;border-radius:10px!important}.ui-v3 .room-community-search input{height:44px!important;min-height:44px!important;font-size:9px!important}.ui-v3 .room-pins-toggle{height:44px!important;min-height:44px!important;font-size:8px!important;padding:0 7px!important}
+.ui-v3 .room-community-stream{padding:0 2px!important;margin:0!important;min-height:170px!important}.ui-v3 .room-community-message{gap:6px!important;padding-block:4px!important}.ui-v3 .room-community-avatar{width:30px!important;height:30px!important;min-width:30px!important}.ui-v3 .room-community-message header b{font-size:9px!important}.ui-v3 .room-community-message header small,.ui-v3 .room-community-message time{font-size:7px!important}.ui-v3 .room-role-badge{font-size:6px!important;padding:1px 4px!important;min-height:0!important}.ui-v3 .room-community-message :where(p,.message-text){font-size:10px!important;line-height:1.4!important}.ui-v3 .room-message-more{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}.ui-v3 .room-community-typing,.ui-v3 .room-community-replying,.ui-v3 .room-community-status{font-size:8px!important}
+.ui-v3 .room-community-compose{position:sticky!important;bottom:calc(var(--app-dock-total-h) + 3px)!important;z-index:30!important;min-height:44px!important;gap:4px!important;padding:4px!important;border-radius:12px!important}.ui-v3 .room-community-compose>input{height:44px!important;min-height:44px!important;font-size:10px!important}.ui-v3 .room-community-compose>button,.ui-v3 .room-community-compose>label,.ui-v3 .room-community-compose>.voice-record-btn{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important}.ui-v3 .room-community-compose svg{width:18px!important;height:18px!important}
 
 /* Direct chat. */
-.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-head,.direct-chat-head,.chat-social-head){min-height:50px!important;padding:5px 7px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-avatar,.peer-avatar,.sf-avatar){max-width:34px!important;max-height:34px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-message,.message-bubble,.chat-bubble){font-size:10px!important;line-height:1.4!important;border-radius:12px!important;padding:6px 8px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-composer,.direct-chat-compose,.chat-social-compose){min-height:44px!important;padding:4px!important;gap:4px!important;bottom:calc(var(--app-dock-h) + env(safe-area-inset-bottom,0px) + 3px)!important}
+.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-head,.direct-chat-head,.chat-social-head){min-height:50px!important;padding:5px 7px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-avatar,.peer-avatar,.sf-avatar){max-width:34px!important;max-height:34px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-message,.message-bubble,.chat-bubble){font-size:10px!important;line-height:1.4!important;border-radius:12px!important;padding:6px 8px!important}.ui-v3 :where(.chat-page,.direct-chat-page,.chat-social-shell) :where(.chat-composer,.direct-chat-compose,.chat-social-compose){min-height:44px!important;padding:4px!important;gap:4px!important;bottom:calc(var(--app-dock-total-h) + 3px)!important}
 
 /* Voice note controls: clear active state above keyboard/dock. */
 .ui-v3 .voice-record-btn{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
-.ui-v3 .voice-record-panel{width:100%!important;max-width:100%!important;min-height:42px!important;padding:4px!important;gap:5px!important;border-radius:11px!important;touch-action:none!important}.ui-v3 .voice-record-panel button{min-height:32px!important;height:32px!important;padding-inline:7px!important;font-size:8px!important}.ui-v3 .voice-record-time{font-size:10px!important;min-width:0!important}.ui-v3 .voice-record-time small{font-size:7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.ui-v3 .voice-dot{width:7px!important;height:7px!important}.ui-v3 .voice-lock{flex:0 0 auto!important}
+.ui-v3 .voice-record-panel{width:100%!important;max-width:100%!important;min-height:42px!important;padding:4px!important;gap:5px!important;border-radius:11px!important;touch-action:none!important}.ui-v3 .voice-record-panel button{min-height:44px!important;height:44px!important;padding-inline:7px!important;font-size:8px!important}.ui-v3 .voice-record-time{font-size:10px!important;min-width:0!important}.ui-v3 .voice-record-time small{font-size:7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.ui-v3 .voice-dot{width:7px!important;height:7px!important}.ui-v3 .voice-lock{flex:0 0 auto!important}
 
 /* Presence. */
 .ui-v3 .avatar-presence-wrap{position:relative!important;display:inline-flex!important}.ui-v3 .online-dot,.ui-v3 .presence-dot,.ui-v3 .avatar-presence-wrap>i{width:9px!important;height:9px!important;min-width:9px!important;min-height:9px!important;border:2px solid #0d1117!important;box-sizing:border-box!important}
@@ -192,13 +202,14 @@ body.ui-v3:has(.room-community-page){height:auto!important;min-height:100dvh!imp
 /* Profile/friends/search/settings/admin/legal all follow the same compact rows. */
 .ui-v3 :where(.profile-page,.friends-page,.search-page,.more-page,.settings-page,.admin-page,.privacy-page,.security-page,.account-page) :where(.page-head,.section-head,.profile-head){margin-block:3px 6px!important;padding-block:3px!important}.ui-v3 :where(.profile-page,.friends-page,.search-page,.more-page,.settings-page,.admin-page,.privacy-page,.security-page,.account-page) :where(.page-head,.section-head,.profile-head) h1{font-size:19px!important}
 .ui-v3 :where(.settings-row,.setting-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result){min-height:47px!important;padding:6px 8px!important;border-radius:11px!important}.ui-v3 :where(.settings-row,.setting-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) svg{width:18px!important;height:18px!important}.ui-v3 :where(.settings-row,.setting-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) :where(b,strong){font-size:10px!important}.ui-v3 :where(.settings-row,.setting-row,.more-row,.privacy-row,.security-row,.account-row,.friend-row,.search-result) :where(p,small,span){font-size:8px!important}
-.ui-v3 .feature-card{padding:8px!important}.ui-v3 .feature-block{padding:8px!important;border-radius:12px!important}.ui-v3 .profile-field-label{font-size:10px!important;gap:4px!important}.ui-v3 .profile-field-label :where(input,textarea){font-size:11px!important;min-height:36px!important}.ui-v3 .settings-route-head{min-height:50px!important;padding:4px!important}.ui-v3 .settings-route-head h1{font-size:18px!important}.ui-v3 .settings-route-head p,.ui-v3 .settings-route-head small{font-size:8px!important}
+.ui-v3 .feature-card{padding:8px!important}.ui-v3 .feature-block{padding:8px!important;border-radius:12px!important}.ui-v3 .profile-field-label{font-size:10px!important;gap:4px!important}.ui-v3 .profile-field-label :where(input,textarea){font-size:11px!important;min-height:44px!important}.ui-v3 .settings-route-head{min-height:50px!important;padding:4px!important}.ui-v3 .settings-route-head h1{font-size:18px!important}.ui-v3 .settings-route-head p,.ui-v3 .settings-route-head small{font-size:8px!important}
 
 /* Loading must never dominate brand surfaces. */
 .ui-v3 :where(.spinner,.loading-spinner,.sf-spinner){max-width:24px!important;max-height:24px!important}.ui-v3 :where(.auth-loading-logo,.oauth-loading){gap:8px!important}.ui-v3 :where(.auth-loading-logo,.oauth-loading) img{max-width:96px!important;max-height:54px!important}
 
-@media (max-width:430px){
-  :root{--app-max:100%;--app-gutter:8px;--app-header-h:56px;--app-dock-h:60px}
+@media (max-width:520px){
+  :root{--app-page-max:100%;--app-gutter:8px}
+  .ui-v3 input:not([type="checkbox"]):not([type="radio"]),.ui-v3 textarea,.ui-v3 select{font-size:16px!important;line-height:1.45!important}
   .ui-v3 .v3-brand-lockup>img{width:37px!important;height:37px!important}.ui-v3 .v3-brand-copy>b{font-size:18px!important}.ui-v3 .v3-brand-copy>em{display:none!important}
   .ui-v3 .social-dock-track{padding-inline:3px!important}.ui-v3 .social-dock :where(a,button){font-size:8px!important;padding-inline:2px!important}.ui-v3 .social-dock svg{width:20px!important;height:20px!important}
   .ui-v3 :where(.social-page,.messages-v3-page,.room-community-page,.feature-page) h1{font-size:19px!important}

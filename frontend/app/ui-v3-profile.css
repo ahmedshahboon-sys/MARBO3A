@@ -3,8 +3,8 @@
 .ui-v3 .profile-v3-route .sf-profile-card{overflow:hidden!important;background:linear-gradient(145deg,var(--ui-surface),var(--ui-bg-elevated))!important;border:1px solid var(--ui-border)!important;border-radius:25px!important;box-shadow:var(--ui-shadow)!important}
 .ui-v3 .profile-v3-route .sf-cover{height:300px!important;position:relative!important;background:
  linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.22)),
- radial-gradient(circle at 18% 18%,rgba(255,122,0,.22),transparent 36%),#20150d!important;background-size:cover!important;background-position:center!important}
-.ui-v3 .profile-cover-edit{position:absolute;left:18px;top:18px;min-height:44px;padding:0 14px;border-radius:15px;background:rgba(8,12,18,.72);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;color:#fff;font-weight:750}
+ radial-gradient(circle at 18% 18%,var(--ui-accent-soft),transparent 36%),var(--ui-surface-2)!important;background-size:cover!important;background-position:center!important}
+.ui-v3 .profile-cover-edit{position:absolute;left:18px;top:18px;min-height:44px;padding:0 14px;border-radius:15px;background:color-mix(in srgb,var(--ui-bg-elevated) 78%,transparent);border:1px solid var(--ui-border);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;color:var(--ui-text);font-weight:750}
 .ui-v3 .profile-v3-route .sf-profile-body{padding:0 24px 24px!important;text-align:center!important}
 .ui-v3 .profile-v3-route .sf-profile-avatar{margin:-88px auto 10px!important}
 .ui-v3 .profile-v3-route .sf-profile-avatar .sf-avatar{width:172px!important;height:172px!important;border-radius:50%!important;border:6px solid var(--ui-surface)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--ui-text) 88%,transparent),0 16px 30px rgba(0,0,0,.22)!important}

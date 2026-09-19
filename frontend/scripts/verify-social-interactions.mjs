@@ -16,7 +16,7 @@ const checks=[
   ["app/SocialFeed.js",["comments/preview","/reactions","const previous=post,next=","reaction-people"]],
   ["app/profile/edit/page.js",["USERNAME_COOLDOWN","7 أيام","usernameNextChangeAt"]],
   ["app/ui-v3-unified-scale.css",["--app-dock-h:62px",".sf-reaction-picker>button:not(:first-child)",".story-viewer{position:fixed",".room-community-compose{position:sticky",".voice-record-btn{touch-action:none"]],
-  ["app/InterfaceFixes.js",["settings-overlay","global-search-box:focus-within","chat-bubble","profile-v3-route"]]
+  ["app/ui-contract-lock.css",["settings-overlay","global-search-box:focus-within","chat-bubble","profile-v3-route"]]
 ];
 
 let failed=false;
@@ -30,7 +30,7 @@ const notifications=await read("app/notifications/page.js");
 for(const banned of ["الطلب لم يعد متاحًا"]){if(notifications.includes(banned)){console.error(`Expired friend-request UX regression: ${banned}`);failed=true}}
 const layout=await read("app/layout.js");
 const cssImports=[...layout.matchAll(/import\s+["']\.\/(.+?\.css)["'];/g)].map(x=>x[1]);
-const expectedTail=["ui-v3-unified-scale.css","ui-contract-lock.css","ui-contract-additions.css"];
+const expectedTail=["ui-v3-unified-scale.css","ui-contract-lock.css"];
 const actualTail=cssImports.slice(-expectedTail.length);
 if(actualTail.join("|")!==expectedTail.join("|")){
   console.error(`Final UI cascade must end with ${expectedTail.join(" -> ")}`);

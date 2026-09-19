@@ -115,12 +115,11 @@ body.ui-v3:has(.settings-route-marker) .setting-row{min-height:64px!important}
 /* Final small-screen contract: no horizontal escape and no oversized route
    chrome. 16px input text is intentional to prevent iOS Safari auto-zoom. */
 @media(max-width:520px){
-  body.ui-v3{--v3-header-h:68px}
-  .ui-v3 .v3-global-header{width:calc(100% - 12px)!important;min-height:68px!important}
+  .ui-v3 .v3-global-header{width:min(100%,var(--app-page-max))!important;min-height:var(--app-header-total-h)!important;height:var(--app-header-total-h)!important}
   .ui-v3 .v3-brand-lockup>img{width:34px!important;height:34px!important;flex-basis:34px!important}
   .ui-v3 .v3-brand-copy>b{font-size:18px!important}
   .ui-v3 .v3-brand-copy>em{font-size:6.5px!important}
-  .ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{width:calc(100% - 8px)!important;padding-inline:4px!important}
+  .ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{width:min(100%,var(--app-page-max))!important;max-width:var(--app-page-max)!important;padding-inline:4px!important}
   .ui-v3 .chat-social-head,.ui-v3 .room-chat-head{border-radius:14px!important}
   body.ui-v3:has(.room-chat-page) .room-voice-entry,
   body.ui-v3:has(.room-chat-page) .room-voice-stage{top:calc(var(--v3-header-h) + 62px)!important;width:calc(100% - 12px)!important;max-width:calc(100vw - 12px)!important}

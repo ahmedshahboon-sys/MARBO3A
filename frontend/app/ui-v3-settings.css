@@ -6,20 +6,21 @@
 .ui-v3 .settings-route-head small{color:var(--ui-accent);font-weight:800}
 .ui-v3 .settings-route-head h1{font-size:36px;line-height:1.2;margin:5px 0 4px;letter-spacing:-.03em}
 .ui-v3 .settings-route-head p{margin:0;color:var(--ui-muted);font-size:16px}
-body.ui-v3:has(.settings-route-marker) .settings-overlay{position:static!important;inset:auto!important;display:block!important;background:transparent!important;backdrop-filter:none!important;padding:0 0 calc(var(--v3-dock-h,112px) + 28px)!important;z-index:auto!important}
+body.ui-v3:has(.settings-route-marker) .settings-overlay{position:static!important;inset:auto!important;display:block!important;background:transparent!important;backdrop-filter:none!important;padding:0 0 calc(var(--app-content-bottom-space) + 18px)!important;z-index:auto!important}
 body.ui-v3:has(.settings-route-marker) .settings-card{width:min(920px,calc(100% - 32px))!important;max-height:none!important;margin:0 auto!important;overflow:visible!important;border-radius:24px!important;background:transparent!important;border:0!important;box-shadow:none!important}
 body.ui-v3:has(.settings-route-marker) .settings-card>header{display:none!important}
-body.ui-v3:has(.settings-route-marker) .settings-tabs{position:sticky;top:0;z-index:5;margin-bottom:14px!important;padding:5px!important;border:1px solid var(--ui-border)!important;border-radius:20px!important;background:color-mix(in srgb,var(--ui-bg-elevated) 92%,transparent)!important;backdrop-filter:blur(16px)!important}
+body.ui-v3:has(.settings-route-marker) .settings-tabs{position:sticky;top:0;z-index:var(--ui-z-sticky);margin-bottom:14px!important;padding:5px!important;border:1px solid var(--ui-border)!important;border-radius:20px!important;background:color-mix(in srgb,var(--ui-bg-elevated) 92%,transparent)!important;backdrop-filter:blur(16px)!important}
 body.ui-v3:has(.settings-route-marker) .setting-row{margin-inline:0!important;background:linear-gradient(145deg,var(--ui-surface),var(--ui-bg-elevated))!important;border-color:var(--ui-border)!important;color:var(--ui-text)!important}
 body.ui-v3:has(.settings-route-marker) .settings-form{margin-inline:0!important;border:1px solid var(--ui-border)!important;border-radius:20px!important;background:var(--ui-surface)!important;color:var(--ui-text)!important;padding:16px!important}
 body.ui-v3:has(.settings-route-marker) .settings-links{padding-inline:0!important}
-body.ui-v3:has(.settings-route-marker) .settings-status{position:sticky!important;bottom:calc(var(--v3-dock-h,112px) + 10px)!important;margin:14px 0 0!important;z-index:7!important}
+body.ui-v3:has(.settings-route-marker) .settings-status{position:sticky!important;bottom:calc(var(--app-dock-total-h) + 10px)!important;margin:14px 0 0!important;z-index:var(--ui-z-toast)!important}
 @media(max-width:720px){
  .ui-v3 .settings-route-marker{width:calc(100% - 20px);padding-top:0}
  .ui-v3 .settings-route-head h1{font-size:30px}
  .ui-v3 .settings-route-head p{font-size:14px}
  body.ui-v3:has(.settings-route-marker) .settings-card{width:calc(100% - 20px)!important}
- body.ui-v3:has(.settings-route-marker) .settings-tabs{grid-template-columns:repeat(4,minmax(82px,1fr))!important;overflow-x:auto!important;scrollbar-width:none}
+ body.ui-v3:has(.settings-route-marker) .settings-tabs{grid-template-columns:repeat(4,minmax(82px,1fr))!important;overflow-x:auto!important;overscroll-behavior-inline:contain!important;scroll-snap-type:x proximity!important;scrollbar-width:none}
  body.ui-v3:has(.settings-route-marker) .settings-tabs::-webkit-scrollbar{display:none}
+ body.ui-v3:has(.settings-route-marker) .settings-tabs button{min-height:44px!important;scroll-snap-align:start!important}
  body.ui-v3:has(.settings-route-marker) .setting-row{min-height:88px!important;padding:14px!important}
 }

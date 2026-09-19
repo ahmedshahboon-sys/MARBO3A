@@ -2,16 +2,7 @@
    Loaded last. It does not invent a second theme; it enforces the canonical
    design tokens and mobile layout contract across legacy/product surfaces. */
 :root{
-  --ui-top-h:64px;
-  --ui-dock-h:64px;
-  --ui-dock-gap:10px;
-  --ui-layer-header:100;
-  --ui-layer-float:130;
-  --ui-layer-dock:160;
-  --ui-layer-overlay:600;
-  --ui-layer-dialog:700;
   --dock-h:var(--ui-dock-h);
-  --ui-muted-strong:#a7b0bd;
 }
 html,body{max-width:100%;overflow-x:clip}
 body{background:#0b0f15;color:#f5f6f8}

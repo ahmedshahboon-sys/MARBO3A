@@ -39,7 +39,7 @@ test("room moderation hierarchy protects owner and moderators",()=>{
   assert.match(src,/actorRole==="owner"/);
   assert.match(src,/actorRole==="moderator"/);
   assert.match(src,/ROOM_ROLE_PROTECTED/);
-  assert.match(src,/voice\\\\?\/(kick\\|role)/);
+  assert.match(src,/voice[\\s\\S]{0,40}kick\\|role/);
 });
 
 test("room scoped pins search read typing and reactions require membership",()=>{

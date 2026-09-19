@@ -1,0 +1,10 @@
+import fs from "node:fs";
+const read=p=>fs.readFileSync(p,"utf8");
+const fail=m=>{console.error("CORE_SURFACES_FAILED: "+m);process.exitCode=1};
+const globals=read("app/globals.css"),lock=read("app/ui-contract-lock.css"),auth=read("app/auth.css");
+if(/main\{[^}]*display:grid;[^}]*place-items:center/.test(globals))fail("generic main still centers every route");
+if(!globals.includes("main:has(>.auth-card),main:has(>.splash-card)"))fail("legacy auth/splash centering is not scoped");
+for(const token of ["var(--ui-bg)","var(--ui-surface)","var(--ui-border)","var(--ui-text)"])if(!auth.includes(token))fail("auth token parity missing "+token);
+for(const token of [".sf-user b",".person-identity-name",".messages-v3-page .sf-chat-row .sf-avatar",".sf-empty",".notification-actions button","scroll-snap-type:x proximity"])if(!lock.includes(token))fail("core surface contract missing "+token);
+if(!lock.includes("overflow-wrap:anywhere")||!lock.includes("word-break:break-word"))fail("long identifiers are not protected");
+if(!process.exitCode)console.log("Core surface contracts OK · scoped main · auth parity · long text · fixed avatars · empty states · action targets");

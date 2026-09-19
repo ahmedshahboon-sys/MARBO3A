@@ -8,8 +8,9 @@ await must("app/brand-source.js",["/brand/official/marbo3a-mark.png","أقرب �
 await must("app/PremiumChrome.js",["/brand/official/marbo3a-mark.png"]);
 await must("app/opengraph-image.js",["/brand/official/marbo3a-mark.png"]);
 await must("app/ui-v3-brand.css",["/brand/official/marbo3a-mark.png"]);
-await must("app/r1-brand-override.css",["/brand/official/marbo3a-mark.png"]);
-await must("app/layout.js",["/favicon-32.png","/favicon-16.png","/pwa-192.png",'import "./r1-brand-override.css"']);
+await must("app/ui-v3-reference.css",["/brand/official/marbo3a-mark.png"]);
+await must("app/ui-v3.css",["/brand/official/marbo3a-mark.png"]);
+await must("app/layout.js",["/favicon-32.png","/favicon-16.png","/pwa-192.png"]);
 await must("app/onboarding/page.js",["/brand/official/marbo3a-mark.png"]);
 await must("app/PlatformClient.js",["/brand/official/marbo3a-mark.png"]);
 await must("public/offline.html",["/brand/official/marbo3a-mark.png"]);

@@ -92,8 +92,13 @@ jobs:
         run: |
           set -euo pipefail
           duplicates="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sed -E 's/^([0-9]+)_.*/\1/' | sort | uniq -d)"
-          if [ -n "$duplicates" ]; then
-            echo "Duplicate migration prefixes: $duplicates" >&2
+          # Historical production migrations 021 and 034 already share prefixes.
+          # Their filenames are immutable because renaming an applied migration would make it look new.
+          test "$(find migrations -maxdepth 1 -type f -name '021_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "021_group13_performance.sql,021_stories.sql" || { echo "Historical 021 migration set changed" >&2; exit 1; }
+          test "$(find migrations -maxdepth 1 -type f -name '034_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "034_room_rail_admin_controls.sql,034_site_font.sql" || { echo "Historical 034 migration set changed" >&2; exit 1; }
+          unexpected="$(printf '%s\n' "$duplicates" | grep -Ev '^(021|034)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected duplicate migration prefixes: $unexpected" >&2
             exit 1
           fi
           npm run migrate
@@ -161,6 +166,12 @@ jobs:
             exit 1
           fi
       - run: npm run build
+      - name: Explicit frontend contract suite
+        run: npm run test:contracts
+      - name: Responsive geometry matrix
+        run: npm run test:responsive
+      - name: Runtime browser and PWA smoke
+        run: npm run test:runtime-browser
       - name: Verify generated PWA assets
         shell: bash
         run: |

@@ -5,9 +5,7 @@
 
 html,body{max-width:100%;overflow-x:clip}
 body.ui-v3{
-  --v3-header-h:72px;
-  --v3-dock-h:78px;
-  --v3-page-max:880px;
+  --v3-page-max:var(--app-page-max);
   --v3-mobile-gap:10px;
   --v3-card-radius:18px;
   background:#090d12!important;
@@ -16,11 +14,11 @@ body.ui-v3{
 }
 body.ui-v3 *,body.ui-v3 *::before,body.ui-v3 *::after{min-width:0;box-sizing:border-box}
 .ui-v3 :is(.social-page,.room-chat-page,.chat-social,.auth-v1-page){max-width:100vw!important;overflow-x:clip!important}
-.ui-v3 :is(.social-shell,.chat-social-shell,.room-chat-shell,.settings-route-marker){max-width:var(--v3-page-max)!important;margin-inline:auto!important}
+.ui-v3 :is(.social-shell,.chat-social-shell,.room-chat-shell,.settings-route-marker){max-width:var(--app-page-max)!important;margin-inline:auto!important}
 
 /* Header / brand */
 .ui-v3 .v3-global-header{
-  width:min(var(--v3-page-max),calc(100% - 20px))!important;
+  width:min(var(--app-page-max),calc(100% - 20px))!important;
   min-height:var(--v3-header-h)!important;
   padding:calc(7px + env(safe-area-inset-top)) 2px 6px!important;
   gap:8px!important;
@@ -32,16 +30,16 @@ body.ui-v3 *,body.ui-v3 *::before,body.ui-v3 *::after{min-width:0;box-sizing:bor
 .ui-v3 .v3-brand-copy>small{font-size:8px!important;line-height:1.1!important;letter-spacing:.2em!important;margin-top:3px!important}
 .ui-v3 .v3-brand-copy>em{font-size:7.5px!important;line-height:1.2!important;margin-top:4px!important;color:#8f98a4!important;white-space:nowrap!important}
 .ui-v3 .v3-header-actions{gap:2px!important;flex:0 0 auto!important}
-.ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;border-radius:12px!important;padding:0!important;display:grid!important;place-items:center!important;background:transparent!important;border:0!important;color:#f7f8fa!important;box-shadow:none!important}
+.ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:12px!important;padding:0!important;display:grid!important;place-items:center!important;background:transparent!important;border:0!important;color:#f7f8fa!important;box-shadow:none!important}
 .ui-v3 .v3-header-icon svg,.ui-v3 .v3-header-install svg{width:22px!important;height:22px!important}
 .ui-v3 .v3-header-install span{display:none!important}
 .ui-v3 .v3-header-install{color:var(--v3-orange)!important;background:rgba(255,122,0,.08)!important;border:1px solid rgba(255,122,0,.18)!important}
 
 /* Shared compact controls */
 .ui-v3 :is(button,input,textarea,select){max-width:100%}
-.ui-v3 :is(.sf-primary,button.primary,.ui-button.ui-primary,.rooms-create-button,.setting-action,.feature-action){min-height:40px!important;border-radius:12px!important;font-size:13px!important}
+.ui-v3 :is(.sf-primary,button.primary,.ui-button.ui-primary,.rooms-create-button,.setting-action,.feature-action){min-height:44px!important;border-radius:12px!important;font-size:13px!important}
 .ui-v3 :is(.sf-search,.global-search-box){min-height:46px!important;border-radius:14px!important}
-.ui-v3 :is(.sf-search input,.global-search-box input){min-height:42px!important;font-size:14px!important}
+.ui-v3 :is(.sf-search input,.global-search-box input){min-height:44px!important;font-size:14px!important}
 .ui-v3 :is(.sf-panel,.sf-post,.sf-profile-card,.settings-card,.sf-room-card,.feature-card){border-radius:var(--v3-card-radius)!important}
 
 /* No duplicate legacy page mastheads in approved V3 routes. */
@@ -53,8 +51,8 @@ body.ui-v3 .rooms-v3-page .sf-top,
 body.ui-v3 .rooms-v3-route .sf-top{display:none!important}
 
 /* Home / feed */
-.ui-v3 .feed-shell{width:min(var(--v3-page-max),calc(100% - 20px))!important;padding-top:2px!important}
-.ui-v3 .feed-center{max-width:760px!important;gap:10px!important}
+.ui-v3 .feed-shell{width:min(var(--app-page-max),calc(100% - 20px))!important;padding-top:2px!important}
+.ui-v3 .feed-center{max-width:var(--app-page-max)!important;gap:10px!important}
 .ui-v3 .sf-composer.compact{padding:11px!important;border-radius:17px!important}
 .ui-v3 .sf-composer-row{gap:9px!important;align-items:center!important}
 .ui-v3 .sf-composer-row>.sf-avatar{width:38px!important;height:38px!important;flex:0 0 38px!important}
@@ -77,14 +75,14 @@ body.ui-v3 .rooms-v3-route .sf-top{display:none!important}
 .ui-v3 .social-dock{
   left:max(6px,env(safe-area-inset-left))!important;
   right:max(6px,env(safe-area-inset-right))!important;
-  bottom:calc(6px + env(safe-area-inset-bottom))!important;
+  bottom:0!important;
   width:auto!important;
-  max-width:var(--v3-page-max)!important;
+  max-width:var(--app-page-max)!important;
   margin-inline:auto!important;
   transform:none!important;
   overflow:visible!important;
 }
-.ui-v3 .social-dock-track{height:68px!important;padding:4px 5px!important;border-radius:21px!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;overflow:visible!important}
+.ui-v3 .social-dock-track{height:var(--app-dock-h)!important;min-height:var(--app-dock-h)!important;padding:4px 5px!important;border-radius:21px!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;overflow:visible!important}
 .ui-v3 .social-dock a{height:56px!important;min-width:0!important;gap:2px!important;border-radius:13px!important;font-size:10px!important;overflow:visible!important}
 .ui-v3 .social-dock a svg{width:21px!important;height:21px!important}
 .ui-v3 .social-dock .dock-create{width:52px!important;height:52px!important;margin-top:-11px!important;font-size:9px!important}
@@ -229,7 +227,7 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:10px!important;bor
 .ui-v3 .auth-v1-page{padding:calc(16px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))!important;overflow-x:hidden!important}
 .ui-v3 .auth-v1-card{width:min(520px,100%)!important;padding:4px 8px 18px!important}
 .ui-v3 .auth-v1-card>header{margin-bottom:14px!important;gap:3px!important}
-.ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img{content:url('/brand/marbo3a-app-icon.svg')!important;width:92px!important;height:92px!important;max-height:none!important;border-radius:22px!important;object-fit:contain!important;background:transparent!important;filter:drop-shadow(0 12px 24px rgba(255,122,0,.14))!important}
+.ui-v3 .auth-v1-card>header>img,.ui-v3 .auth-v1-card>img{content:url('/brand/official/marbo3a-mark.png')!important;width:92px!important;height:92px!important;max-height:none!important;border-radius:22px!important;object-fit:contain!important;background:transparent!important;filter:drop-shadow(0 12px 24px rgba(255,122,0,.14))!important}
 .ui-v3 .auth-v1-card>header>div{margin-top:0!important}.ui-v3 .auth-v1-card>header p,.ui-v3 .auth-v1-card>p{font-size:13px!important;margin-top:4px!important}
 .ui-v3 .auth-v1-tabs{margin-bottom:12px!important;padding:3px!important;border-radius:14px!important}.ui-v3 .auth-v1-tabs button{height:44px!important;border-radius:11px!important;font-size:14px!important}
 .ui-v3 .auth-v1-form{gap:10px!important}.ui-v3 .auth-v1-form label{gap:5px!important;font-size:12px!important}.ui-v3 .auth-v1-form input,.ui-v3 .auth-v1-form select{height:50px!important;border-radius:13px!important;padding-inline:13px!important;font-size:14px!important}.ui-v3 .auth-v1-form>button:not(.auth-v1-secondary){height:48px!important;border-radius:13px!important;font-size:16px!important}.ui-v3 .auth-v1-secondary{min-height:42px!important;border-radius:12px!important;font-size:12px!important}.ui-v3 .auth-v1-card footer{margin-top:14px!important;font-size:10px!important;gap:10px!important}
@@ -249,10 +247,9 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:10px!important;bor
 }
 
 @media(max-width:720px){
-  body.ui-v3{--v3-header-h:66px;--v3-dock-h:72px;--v3-page-max:100%}
   .ui-v3 .v3-global-header{width:100%!important;padding:calc(5px + env(safe-area-inset-top)) 10px 4px!important}
   .ui-v3 .v3-brand-lockup>img{width:34px!important;height:34px!important;flex-basis:34px!important}.ui-v3 .v3-brand-copy>b{font-size:18px!important}.ui-v3 .v3-brand-copy>em{font-size:7px!important}
-  .ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}
+  .ui-v3 .v3-header-icon,.ui-v3 .v3-header-install{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
   .ui-v3 .feed-shell,.ui-v3 .messages-v3-page .social-shell,.ui-v3 .rooms-v3-page .social-shell{width:calc(100% - 16px)!important}
   .ui-v3 .rooms-featured-grid{grid-template-columns:repeat(3,minmax(185px,1fr))!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important}
   .ui-v3 .rooms-feature-card{scroll-snap-align:start!important}
@@ -266,7 +263,7 @@ body.ui-v3:has(.settings-route-marker) .settings-form{padding:10px!important;bor
 @media(max-width:430px){
   .ui-v3 .v3-brand-copy>em{display:block!important;max-width:150px!important;overflow:hidden!important;text-overflow:ellipsis!important}
   .ui-v3 .social-dock{left:max(4px,env(safe-area-inset-left))!important;right:max(4px,env(safe-area-inset-right))!important}
-  .ui-v3 .social-dock-track{height:66px!important;padding-inline:3px!important}.ui-v3 .social-dock a{height:54px!important;font-size:9.5px!important}.ui-v3 .social-dock .dock-create{width:50px!important;height:50px!important}
+  .ui-v3 .social-dock-track{height:var(--app-dock-h)!important;min-height:var(--app-dock-h)!important;padding-inline:3px!important}.ui-v3 .social-dock a{height:50px!important;min-height:50px!important;font-size:9.5px!important}.ui-v3 .social-dock .dock-create{width:50px!important;height:50px!important}
   .ui-v3 .chat-social-shell,.ui-v3 .room-chat-shell{padding-inline:6px!important}
   .ui-v3 .chat-social-head{grid-template-columns:minmax(0,1fr) auto 34px!important;padding-inline:6px!important}.ui-v3 .chat-peer-more{display:none!important}
   .ui-v3 .chat-head-actions .chat-icon-btn,.ui-v3 .chat-back{width:32px!important;height:32px!important;min-width:32px!important}
