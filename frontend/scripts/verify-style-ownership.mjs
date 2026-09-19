@@ -75,11 +75,25 @@ for(const file of ["ui-v3-unified-scale.css","ui-contract-lock.css","responsive-
   const src=fs.readFileSync(path.join(root,file),"utf8");
   if(/100vh(?![a-z])/i.test(src))fail(`${file} contains legacy 100vh; use app/visual viewport geometry`);
 }
-const grandfatheredNames=new Set(["ui-v3-final-audit.css","r1-brand-override.css"]);
+const grandfatheredNames=new Set(["ui-v3-final-audit.css"]);
 for(const file of cssFiles){
   if(/(?:repair|fix|final|override)/i.test(file)&&!grandfatheredNames.has(file))fail(`new repair/fix/final/override layer is forbidden: ${file}`);
 }
 for(const file of grandfatheredNames)if(!cssFiles.includes(file))fail(`grandfathered compatibility filename disappeared without contract update: ${file}`);
+
+const retiredFiles=["InterfaceFixes.js","UiRoundFixes.js","ui-contract-additions.css","r1-brand-override.css"];
+for(const file of retiredFiles)if(fs.existsSync(path.join(root,file)))fail(`retired visual layer returned: ${file}`);
+if(imports.length>64)fail(`global CSS layer count regressed: ${imports.length} > 64`);
+const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{const full=path.join(dir,entry.name);return entry.isDirectory()?walk(full):[full]});
+for(const file of walk(root).filter(file=>/\.(?:js|jsx)$/.test(file))){
+  const src=fs.readFileSync(file,"utf8");
+  if(/<style\s+jsx\s+global/i.test(src))fail(`runtime global CSS injection is forbidden: ${path.relative(root,file)}`);
+}
+const legacyBrandPaths=["/brand/marbo3a-app-icon.svg","/brand/marbo3a-symbol-orange.svg","/brand/official/marbo3a-mark.svg","/logo.svg","/pwa-icon.svg"];
+for(const file of walk(root).filter(file=>/\.(?:css|js|jsx)$/.test(file))){
+  const src=fs.readFileSync(file,"utf8");
+  for(const legacy of legacyBrandPaths)if(src.includes(legacy))fail(`legacy brand path ${legacy} remains in ${path.relative(root,file)}`);
+}
 
 for(const label of ["Tokens / Theme","Header geometry","Bottom Dock geometry","Buttons / Inputs","Feed","Rooms","Direct Chat","Settings / Dialogs","Profile","Admin","Calls / Media Viewer"]){
   if(!ownership.includes(label))fail(`STYLE_OWNERSHIP.md is missing domain owner: ${label}`);
