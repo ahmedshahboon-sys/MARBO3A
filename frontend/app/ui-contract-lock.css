@@ -168,3 +168,29 @@ html[data-theme="light"] .ui-v3 :is(.person-identity-meta,.friends-page-head p,.
   html:focus-within{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+
+/* Group 6 core social surface contract. */
+.ui-v3 :is(.sf-user,.person-identity,.sf-chat-row>div,.notification-main>div,.friend-person-main,.sf-profile-main,.sf-room-copy){min-width:0!important}
+.ui-v3 :is(.sf-user b,.person-identity-name,.sf-chat-row-head b,.sf-profile-main h1,.sf-room-copy h3,.notification-main b,.friend-person-main b,bdi){
+  overflow-wrap:anywhere!important;word-break:break-word!important;min-width:0!important
+}
+.ui-v3 :is(.sf-user small,.person-identity-meta,.sf-chat-row p,.sf-profile-bio,.notification-main p,.friend-person-main small){
+  max-width:100%!important;overflow-wrap:anywhere!important
+}
+.ui-v3 :is(.sf-post,.post-card,.sf-panel,.sf-inbox,.notifications-panel,.sf-people,.search-results,.saved-list){min-width:0!important;max-width:100%!important}
+.ui-v3 :is(.sf-post,.post-card) :is(img,video){max-width:100%!important;height:auto}
+.ui-v3 :is(.sf-empty,.sf-skeleton,.empty-state,.empty-panel,.no-results){min-height:96px!important;display:grid!important;place-items:center!important;text-align:center!important;padding:18px!important;border:1px dashed var(--ui-border)!important;border-radius:var(--ui-card-radius)!important;background:var(--ui-surface)!important;color:var(--ui-muted)!important}
+.ui-v3 :is(.sf-alert,.notice,.floating-error,.notification-result,.settings-status){max-width:100%!important;overflow-wrap:anywhere!important}
+.ui-v3 :is(.sf-chat-row,.friend-person-card,.notification-row,.search-result,.saved-row){min-width:0!important;max-width:100%!important}
+.ui-v3 .messages-v3-page .sf-chat-row .sf-avatar{width:46px!important;height:46px!important;min-width:46px!important;max-width:46px!important}
+.ui-v3 :is(.notification-actions button,.friend-card-actions button,.message-request-actions button,.post-friend-action,.sf-new-chat){min-height:44px!important}
+.ui-v3 :is(.profile-tabs-v3,.inbox-tabs,.feed-mode-tabs,.feed-filter-tabs){scroll-snap-type:x proximity}
+.ui-v3 :is(.profile-tabs-v3,.inbox-tabs,.feed-mode-tabs,.feed-filter-tabs)>:is(button,a){scroll-snap-align:start}
+.ui-v3 :is(.sf-actions-reactions,.sf-profile-actions,.friend-card-actions,.notification-actions,.message-request-actions){max-width:100%!important}
+.ui-v3 :is(.sf-actions-reactions,.sf-profile-actions,.friend-card-actions,.notification-actions,.message-request-actions)>*{min-width:0}
+@media(max-width:520px){
+  .auth-v1-page input,.auth-v1-page textarea,.auth-v1-page select{font-size:16px!important}
+  .ui-v3 .messages-v3-page .sf-chat-row{grid-template-columns:46px minmax(0,1fr) auto!important}
+  .ui-v3 :is(.sf-profile-actions,.friend-card-actions,.notification-actions,.message-request-actions){gap:6px!important}
+}
