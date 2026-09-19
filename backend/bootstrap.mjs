@@ -14,13 +14,11 @@ const modules=[
   "./post-media.mjs",
   // feed/social
   "./feed-extensions.mjs",
-  "./direct-extensions.mjs",
   "./social-extensions.mjs",
   "./social-ui-backend.mjs",
   "./release-hardening.mjs",
   "./media-social.mjs",
   // rtc/rooms
-  "./calls.mjs",
   "./room-voice.mjs",
   "./room-voice-discovery.mjs",
   // compatibility/product routes
