@@ -89,3 +89,49 @@ Group 0 is complete only when:
 4. frontend dependency install/build/contracts complete successfully, or any pre-existing failure is recorded before UI changes begin.
 
 No UI behavior, API, database, route, permission or production configuration is changed by this baseline commit.
+
+
+## Executed CI baseline — 2026-09-19
+
+After the repository was made public, the previously blocked GitHub Actions jobs started normally.
+
+### Passed baseline gates
+
+- Repository lockfile determinism: PASS.
+- Frontend `npm ci --no-audit --no-fund`: PASS.
+- Backend `npm ci --no-audit --no-fund`: PASS.
+- Backend JavaScript syntax check: PASS.
+- MARBO3A Operations Contracts: PASS.
+
+### Pre-existing blockers discovered before any UI repair
+
+The branch differs from the recorded `main` base only by this baseline documentation file. Therefore the failures below are pre-existing relative to the UI-coherence repair branch and are not caused by Group 0.
+
+#### Frontend CI blocker
+
+The frontend CI stops before `npm run build` at the repository guard that forbids browser-native dialogs:
+
+- `frontend/app/admin/tv/page.js`
+- Existing code uses `window.prompt(...)` in `removeChannel(id)` to collect the TV channel deletion reason.
+- CI message: `Use AppDialog/toasts instead of browser-native dialogs`.
+
+Because this guard fails before the build step, the CI run does not execute `npm run build` or the prebuild contract suite.
+
+#### Backend baseline blockers
+
+`npm test` executes 141 backend tests: 131 pass, 4 fail, 6 are skipped.
+
+The four existing failing tests are:
+
+1. `group14 matrix refuses source-only PASS claims`
+2. `room moderation hierarchy protects owner and moderators`
+3. `session creation and logout fail closed around durable storage`
+4. `moderation revocation is durable-first`
+
+These failures are outside the Group 0 UI documentation change and are recorded here so they are not misattributed to the coherence repair.
+
+### Transition status
+
+Group 0 baseline capture itself is complete and reproducible, but the transition gate to Group 1 is **not green** because the repository-wide rule requires successful build/tests before beginning the next group.
+
+No UI repair, API change, database change, permission change, runtime behavior change or production deployment has been made.
