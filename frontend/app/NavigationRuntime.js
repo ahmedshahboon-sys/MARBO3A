@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
 import {usePathname,useRouter} from "next/navigation";
+import {getNavigationPolicy} from "./navigation-policy";
 
 const emit=(name,detail={})=>{try{window.dispatchEvent(new CustomEvent(name,{detail}))}catch{}};
 const sameOriginHref=a=>{
@@ -15,6 +16,15 @@ export default function NavigationRuntime(){
   const[pending,setPending]=useState(false);
   const started=useRef(null);
   const fallback=useRef(null);
+
+  useEffect(()=>{
+    const root=document.documentElement,policy=getNavigationPolicy(pathname);
+    root.dataset.navShell=policy.shell?"true":"false";
+    root.dataset.navHeader=policy.showHeader?"shown":"hidden";
+    root.dataset.navDock=policy.showDock?"shown":"hidden";
+    root.dataset.navImmersive=policy.immersive?"true":"false";
+    return()=>{delete root.dataset.navShell;delete root.dataset.navHeader;delete root.dataset.navDock;delete root.dataset.navImmersive};
+  },[pathname]);
 
   useEffect(()=>{
     const onClick=e=>{
