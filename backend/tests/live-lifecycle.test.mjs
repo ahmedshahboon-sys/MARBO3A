@@ -13,7 +13,7 @@ test("live discovery and detail hide social and session blocks",()=>{
 });
 
 test("live join is serialized and enforces capacity",()=>{
-  const src=read("routes/live-hardening.mjs");
+  const src=read("routes/live.mjs");
   assert.match(src,/FOR UPDATE/);
   assert.match(src,/MAX_VIEWERS=8/);
   assert.match(src,/LIVE_FULL/);
@@ -28,13 +28,11 @@ test("live signaling enforces host offer and viewer answer roles",()=>{
   assert.match(src,/BAD_SIGNAL_ROLE/);
 });
 
-test("live relay config advertises external IP fallback",()=>{
-  const base=read("routes/live.mjs"),hard=read("routes/live-hardening.mjs");
-  for(const src of [base,hard]){
-    assert.match(src,/TURN_EXTERNAL_IP/);
-    assert.match(src,/turn:\$\{external\}:3478\?transport=udp/);
-    assert.match(src,/turn:\$\{external\}:3478\?transport=tcp/);
-  }
+test("live relay config advertises external IP fallback from the canonical runtime owner",()=>{
+  const src=read("routes/live.mjs");
+  assert.match(src,/TURN_EXTERNAL_IP/);
+  assert.match(src,/turn:\$\{external\}:3478\?transport=udp/);
+  assert.match(src,/turn:\$\{external\}:3478\?transport=tcp/);
 });
 
 test("viewer moderation events use realtime event names and close media",()=>{
