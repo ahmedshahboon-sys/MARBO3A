@@ -55,18 +55,6 @@ http.createServer=function closureRoutesCreateServer(app,...args){
 
     app.get("/api/me/room-memberships",async(req,res)=>{try{const user=await requireAuth(req,res);if(!user)return;const[joined,pending,banned]=await Promise.all([pool.query(`SELECT room_id FROM room_members WHERE user_id=$1`,[user.id]),pool.query(`SELECT room_id FROM room_join_requests WHERE user_id=$1 AND status='pending'`,[user.id]),pool.query(`SELECT room_id FROM room_bans WHERE user_id=$1`,[user.id])]);const states={};for(const row of joined.rows)states[String(row.room_id)]="joined";for(const row of pending.rows)if(!states[String(row.room_id)])states[String(row.room_id)]="pending";for(const row of banned.rows)states[String(row.room_id)]="banned";res.json({ok:true,states})}catch(error){console.error("room membership states",error);res.status(500).json({ok:false,error:"ROOM_MEMBERSHIP_LOAD_FAILED"})}});
 
-      try{await pool.query(`SELECT 1`);checks.database=true}catch{}
-      try{await ensureRedis();checks.redis=(await redis.ping())==="PONG"}catch{}
-      try{const saved=await saveObject({buffer:Buffer.from("marbo3a-readiness"),extension:"txt",contentType:"text/plain"});await deleteObject(saved.key);checks.uploads=true}catch{}
-      try{await pool.query(`SELECT 1 FROM durable_sessions LIMIT 1`);checks.sessions=true}catch{}
-      try{await pool.query(`SELECT 1 FROM posts LIMIT 1`);checks.feed=true}catch{}
-      checks.realtime=Boolean(realtimeServer());
-      checks.turn=Boolean(turnConfig(user.id).turnConfigured);
-      checks.email=validEnv("BREVO_API_KEY");
-      checks.push=validEnv("VAPID_PUBLIC_KEY")&&validEnv("VAPID_PRIVATE_KEY");
-      const[users,posts,rooms,errors,savedCount]=await Promise.all([pool.query(`SELECT COUNT(*)::int c FROM users`),pool.query(`SELECT COUNT(*)::int c FROM posts WHERE deleted_at IS NULL`),pool.query(`SELECT COUNT(*)::int c FROM rooms`),pool.query(`SELECT COUNT(*)::int c FROM audit_logs WHERE level='ERROR' AND created_at>NOW()-INTERVAL '24 hours'`),pool.query(`SELECT COUNT(*)::int c FROM post_saves`)]);
-      res.json({ok:true,checks,counts:{users:users.rows[0].c,posts:posts.rows[0].c,rooms:rooms.rows[0].c,saved:savedCount.rows[0].c,errors24h:errors.rows[0].c},storage:storageInfo(),version:process.env.npm_package_version||"0.7.0",time:new Date().toISOString()});
-    }catch(error){console.error("readiness",error);res.status(500).json({ok:false,error:"READINESS_FAILED"})}});
   }
   return prior(app,...args);
 };
