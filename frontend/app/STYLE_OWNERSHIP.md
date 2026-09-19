@@ -88,6 +88,14 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Shared Admin/Profile/InterfaceFixes surfaces consume `--ui-*` theme tokens. Media/call viewing backdrops may remain intentionally dark.
 - Light and Dark share the same surface/border/text contracts, and nonessential motion respects `prefers-reduced-motion`.
 
+## Group 6 core social surfaces — 2026-09-19
+
+- Generic `main` no longer centers every page; centering is scoped to legacy Auth/Splash cards only.
+- Auth surfaces consume product theme tokens and keep 16px mobile form text.
+- Feed/Profile/Friends/Notifications/Messages/Search/Saved shared rows protect long Arabic/Latin identifiers and constrain media/actions to the viewport.
+- Empty/Skeleton/Error states share bounded card geometry and readable tokenized text.
+- Core tabs remain horizontally scrollable/snap-safe instead of clipping.
+
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
