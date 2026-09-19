@@ -51,6 +51,8 @@ services:
       context: ./backend
     restart: unless-stopped
     env_file: [.env]
+    environment:
+      MARBO3A_RELEASE_SHA: ${MARBO3A_RELEASE_SHA:-unknown}
     depends_on:
       db:
         condition: service_healthy
