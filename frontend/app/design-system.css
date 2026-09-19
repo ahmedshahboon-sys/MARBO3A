@@ -4,7 +4,7 @@
    redefined by route/compatibility styles. Change only by an explicit product
    design decision. */
 :root{
-  --ui-font:var(--font-app),Arial,sans-serif;
+  --font-app:var(--font-readex);\n  --ui-font:var(--font-app),"Readex Pro",Arial,sans-serif;
   --ui-page-title:22px;--ui-section-title:18px;--ui-card-title:15px;
   --ui-body:14px;--ui-secondary:13px;--ui-meta:12px;--ui-caption:12px;
   --ui-weight-regular:400;--ui-weight-medium:500;--ui-weight-semibold:600;--ui-weight-bold:700;
@@ -38,7 +38,7 @@ html[data-theme="light"]{
   --ui-success:#168a51;--ui-warning:#a66c05;--ui-danger:#c43d4a;--ui-info:#246fbd;
   --ui-shadow:0 10px 30px rgba(34,42,52,.10);--ui-focus:0 0 0 3px rgba(233,111,0,.18);
 }
-html{font-size:14px;background:var(--ui-bg);color-scheme:dark}
+html[data-site-font="readex"]{--font-app:var(--font-readex)}\nhtml[data-site-font="cairo"]{--font-app:var(--font-cairo)}\nhtml{font-size:14px;background:var(--ui-bg);color-scheme:dark}
 html[data-theme="light"]{color-scheme:light}
 body,button,input,textarea,select{font-family:var(--ui-font)!important}
 body{color:var(--ui-text)}
