@@ -4,6 +4,7 @@ import {registerAccountSecurity} from "./account-security.mjs";
 import {registerCoreRooms} from "./core-rooms.mjs";
 import {registerCoreMessaging} from "./core-messaging.mjs";
 import {registerCoreSocial} from "./core-social.mjs";
+import {registerCoreFeed} from "./core-feed.mjs";
 import {registerCoreLocation} from "./core-location.mjs";
 import {registerCoreAdminRooms} from "./core-admin-rooms.mjs";
 import {registerCoreAdminControl} from "./core-admin-control.mjs";
@@ -24,6 +25,7 @@ export function registerExplicitRoutes(app){
   registerAuthSession(app);
   registerAccountSecurity(app);
   registerFghSocial(app);
+  registerCoreFeed(app);
   registerCoreRooms(app);
   registerCoreMessaging(app);
   registerCoreSocial(app);
