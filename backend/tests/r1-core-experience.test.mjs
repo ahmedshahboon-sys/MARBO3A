@@ -22,9 +22,10 @@ test("canonical core feed owns threaded comments and custom reactions",()=>{
   for(const token of ["parentCommentId","REPLY_DEPTH_LIMIT","comment_reactions","comment_reply","comment_reaction","love","laugh","wow","sad","angry"])assert.ok(src.includes(token),`missing ${token}`);
 });
 
-test("R1 sponsored posts have admin control and metrics events",()=>{
-  const src=read("r1-core-experience.mjs");
-  for(const token of ["/api/admin/sponsored-posts","sponsored_post_events","impression","click","sponsored_label","destination_url","weight"])assert.ok(src.includes(token),`missing ${token}`);
+test("R1 sponsored admin and canonical feed preserve sponsored contracts",()=>{
+  const admin=read("r1-core-experience.mjs"),feed=read("routes/core-feed.mjs");
+  for(const token of ["/api/admin/sponsored-posts","sponsored_post_events","impression","click","weight"])assert.ok(admin.includes(token),`missing admin token ${token}`);
+  for(const token of ["sponsored_label","destination_url","interleaveSponsored"])assert.ok(feed.includes(token),`missing feed token ${token}`);
 });
 
 test("R1 room voice resets stale join state and adds manager moderation",()=>{
