@@ -5,7 +5,7 @@ import AppDialog from "../../AppDialog";
 import styles from "./AdvancedAdmin.module.css";
 
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t?{authorization:`Bearer ${t}`}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t?{"x-marbo3a-session-mode":"cookie"}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 const nf=v=>Number(v||0).toLocaleString("en-US");
 const dt=v=>v?new Date(v).toLocaleString("ar-LY"):"-";
 const labels={registration_enabled:"التسجيل الجديد",rooms_enabled:"الغرف",upload_max_mb:"حد الرفع MB",story_lifetime_hours:"عمر الستوري بالساعات",pinned_post_limit:"حد المنشورات المثبتة",site_font:"خط الموقع",engagement:"التفاعل M/N",map:"الخريطة",calls:"المكالمات",voice_rooms:"الغرف الصوتية",guest_explore:"تصفح الزوار"};
