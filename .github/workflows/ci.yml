@@ -166,6 +166,8 @@ jobs:
             exit 1
           fi
       - run: npm run build
+      - name: Responsive geometry matrix
+        run: npm run test:responsive
       - name: Verify generated PWA assets
         shell: bash
         run: |

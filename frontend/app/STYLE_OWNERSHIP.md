@@ -63,6 +63,7 @@ Group 2 owns the decision to converge those compatibility values with `--app-hea
 - Shared responsive geometry uses 520px for mobile compaction and 720px for tablet/phone layout changes. A short-height query is allowed when vertical space, not width, is the actual constraint.
 - Safe areas are part of header/dock total height instead of being added again as external fixed offsets.
 - Interactive global-header actions have a 44×44 hit area. Visible icons may remain smaller.
+- CI runs a real Chrome geometry matrix at 320×568, 360×640, 390×844, 412×915, 768×1024, 1024×768, 1366×768 and 1920×1080 in both Dark and Light, including simulated phone safe areas and signed-in/guest shell content.
 ## Final cascade responsibilities
 
 - Global signed-in density, width, safe areas and interaction geometry: `ui-v3-unified-scale.css`.
