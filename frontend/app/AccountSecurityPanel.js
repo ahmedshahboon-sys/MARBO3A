@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import AppDialog from "./AppDialog";
+import {clearCookieSession} from "./webSession";
 
 async function api(path,options={}){
   const headers={"x-marbo3a-session-mode":"cookie",...(options.headers||{})};
@@ -25,6 +26,7 @@ const human=e=>({
   EMAIL_NOT_CONFIGURED:"خدمة البريد غير مجهزة",
   EMAIL_SEND_FAILED:"تعذر إرسال البريد الآن",
   ADMIN_CANNOT_DELETE:"حساب الأدمن لا يمكن حذفه من هنا",
+  ADMIN_CANNOT_DEACTIVATE:"حساب الأدمن لا يمكن تعطيله من هنا",
   INVALID_PASSWORD:"كلمة المرور الجديدة غير صالحة"
 }[e?.message]||e?.message||"تعذر تنفيذ العملية");
 
@@ -34,7 +36,7 @@ export default function AccountSecurityPanel({onChanged}){
   const[twoPass,setTwoPass]=useState(""),[twoCode,setTwoCode]=useState(""),[twoPending,setTwoPending]=useState(null),[recoveryCodes,setRecoveryCodes]=useState([]);
   const[newEmail,setNewEmail]=useState(""),[emailCode,setEmailCode]=useState(""),[emailGrant,setEmailGrant]=useState("");
   const[sensitivePassword,setSensitivePassword]=useState(""),[stepChallenge,setStepChallenge]=useState(""),[stepCode,setStepCode]=useState(""),[stepAction,setStepAction]=useState("");
-  const[deleteOpen,setDeleteOpen]=useState(false),[status,setStatus]=useState("");
+  const[deleteOpen,setDeleteOpen]=useState(false),[deactivateOpen,setDeactivateOpen]=useState(false),[status,setStatus]=useState("");
 
   async function refresh(){
     const d=await api("/api/account/security");
@@ -85,6 +87,11 @@ export default function AccountSecurityPanel({onChanged}){
       setStatus("تم جدولة حذف الحساب بعد 7 أيام. تقدر تلغي قبل الموعد.");
       onChanged?.();
     }
+    if(action==="deactivate"){
+      await api("/api/account/deactivate",{method:"POST",body:JSON.stringify({stepUpToken})});
+      setDeactivateOpen(false);setSensitivePassword("");clearCookieSession();
+      location.href="/?deactivated=1";
+    }
   }
   async function beginStepUp(action){
     try{
@@ -92,7 +99,7 @@ export default function AccountSecurityPanel({onChanged}){
       const d=await api("/api/account/step-up/request",{method:"POST",body:JSON.stringify({currentPassword:sensitivePassword})});
       if(d.twoFactorRequired){
         setStepAction(action);setStepChallenge(d.challengeId);setStepCode("");
-        setDeleteOpen(false);setStatus("بعثنا رمز أمان إلى بريدك لتأكيد العملية.");
+        setDeleteOpen(false);setDeactivateOpen(false);setStatus("بعثنا رمز أمان إلى بريدك لتأكيد العملية.");
       }else await performSensitive(action,d.stepUpToken);
     }catch(e){setStatus(human(e))}
   }
@@ -152,8 +159,10 @@ export default function AccountSecurityPanel({onChanged}){
       <button type="button" onClick={confirmEmail} disabled={emailCode.length!==6||!emailGrant}>تأكيد البريد</button>
     </div>
 
+    <div className="settings-form danger-zone"><h4>تعطيل الحساب</h4><p>يخفي حسابك وينهي الجلسة الحالية. تقدر ترجعه لاحقًا بتسجيل دخول صحيح، ومع 2FA لازم تكمل العامل الثاني.</p><button className="danger-setting" type="button" onClick={()=>setDeactivateOpen(true)} disabled={!sensitivePassword}>تعطيل الحساب مؤقتًا</button></div>
     {security.pendingDeleteAt?<div className="settings-form danger-zone"><h4>حذف الحساب مجدول</h4><p>موعد الحذف: {new Date(security.pendingDeleteAt).toLocaleString("ar-LY")}</p><button type="button" onClick={cancelDelete}>إلغاء حذف الحساب</button></div>:<button className="danger-setting" type="button" onClick={()=>setDeleteOpen(true)} disabled={!sensitivePassword}>حذف الحساب بعد 7 أيام</button>}
     {status&&<div className="settings-status" role="status" onClick={()=>setStatus("")}>{status}</div>}
+    <AppDialog open={deactivateOpen} title="تعطيل الحساب؟" description="سيختفي حسابك من المنصة وتُنهى جلستك. لا تُحذف بياناتك، وتقدر ترجع الحساب بتسجيل الدخول من جديد." danger confirmLabel="تعطيل الحساب" onConfirm={()=>beginStepUp("deactivate")} onClose={()=>setDeactivateOpen(false)}/>
     <AppDialog open={deleteOpen} title="حذف الحساب؟" description="سيتم جدولة الحذف النهائي بعد 7 أيام. تقدر تتراجع قبل انتهاء المهلة. العملية تحتاج التحقق الأمني الحالي." danger confirmLabel="جدولة الحذف" onConfirm={()=>beginStepUp("delete")} onClose={()=>setDeleteOpen(false)}/>
   </div>
 }
