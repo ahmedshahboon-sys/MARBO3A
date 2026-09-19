@@ -74,7 +74,8 @@ test("2FA setup and login challenges cap verification attempts",()=>{
   assert.match(src,/TWO_FACTOR_MAX_ATTEMPTS=5/);
   assert.match(src,/JSON\.stringify\(\{hash:hashCode\(u\.id,code\),enable,attempts:0\}\)/);
   assert.match(src,/2FA_TOO_MANY_ATTEMPTS/);
-  assert.match(src,/u\.account_status!=="active"/);
+  assert.match(src,/!\\["active","deactivated"\\]\\.includes\\(u\\.account_status\\)/);
+  assert.match(src,/reactivate:u\\.account_status==="deactivated"/);
 });
 
 test("request foundation rate-limits mutations and normalizes OAuth sessions",()=>{
