@@ -151,6 +151,7 @@ jobs:
           node scripts/group6-messaging-calls.mjs || { dump_log; exit 1; }
           node scripts/group7-rtc-live.mjs || { dump_log; exit 1; }
           node scripts/group8-settings-privacy.mjs || { dump_log; exit 1; }
+          node scripts/group9-admin-ops.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
