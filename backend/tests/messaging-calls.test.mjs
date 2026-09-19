@@ -14,7 +14,7 @@ test("rich direct messages emit realtime delivery and validate reply ownership",
 });
 
 test("message forwarding requires access to the source message scope",()=>{
-  const src=read("message-media-fix.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/JOIN direct_conversations c ON c\.id=dm\.conversation_id/);
   assert.match(src,/c\.user1_id=\$2 OR c\.user2_id=\$2/);
   assert.match(src,/EXISTS\(SELECT 1 FROM room_members rm WHERE rm\.room_id=m\.room_id AND rm\.user_id=\$2\)/);
