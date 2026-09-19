@@ -80,7 +80,7 @@ test("2FA setup and login challenges cap verification attempts",()=>{
 
 test("request foundation rate-limits mutations and normalizes OAuth sessions",()=>{
   const src=read("request-foundation.mjs");
-  assert.match(src,/import \{pool,sessionUser,tokenFrom\} from "\.\/runtime\.mjs"/);
+  assert.match(src,/import \{[^}]*pool[^}]*sessionUser[^}]*tokenFrom[^}]*\} from "\.\/runtime\.mjs"/);
   assert.match(src,/app\.use\("\/api\/auth",rateLimit/);
   assert.match(src,/app\.use\("\/api",rateLimit/);
   assert.match(src,/\["GET","HEAD","OPTIONS"\]\.includes\(req\.method\)/);
