@@ -1,15 +1,11 @@
 {
   "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
   "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
-  "observedDuplicateCount": 28,
+  "observedDuplicateCount": 26,
   "duplicates": {
     "DELETE /api/friends/:userId": [
       "closure-routes.mjs",
       "routes/core-social.mjs"
-    ],
-    "GET /api/admin/advanced/analytics": [
-      "routes/stability-overrides.mjs",
-      "routes/group-o-admin.mjs"
     ],
     "GET /api/feed": [
       "r1-core-experience.mjs",
@@ -95,10 +91,6 @@
       "real-map.mjs",
       "instrumentation.mjs"
     ],
-    "POST /api/reports": [
-      "platform-extra.mjs",
-      "routes/auth-session.mjs"
-    ],
     "POST /api/rooms/:id/voice/heartbeat": [
       "r1-core-experience.mjs",
       "room-voice.mjs"
@@ -121,5 +113,5 @@
       "social-experience.mjs"
     ]
   },
-  "lastOwnershipMigration": "GROUP 1: messaging, sessions, admin readiness/system/moderation, password security, privacy, generic upload"
+  "lastOwnershipMigration": "GROUP 1: messaging, sessions, privacy, uploads, password security, reports, admin system/readiness/moderation/analytics"
 }
