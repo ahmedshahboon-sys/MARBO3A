@@ -44,6 +44,12 @@ async function befriend(a,b){
   await pool.query("DELETE FROM friendships WHERE (requester_id=$1 AND addressee_id=$2) OR (requester_id=$2 AND addressee_id=$1)",[a,b]);
   await pool.query("INSERT INTO friendships(requester_id,addressee_id,status) VALUES($1,$2,'accepted')",[a,b]);
 }
+function localMediaPath(url){
+ const raw=String(url||"").split("?")[0],root=process.env.STORAGE_LOCAL_DIR||process.env.UPLOAD_DIR||"/tmp/marbo3a-uploads";
+ let key=raw.startsWith("/api/uploads/files/")?raw.slice("/api/uploads/files/".length):raw.startsWith("/api/uploads/")?raw.slice("/api/uploads/".length):raw.startsWith("/uploads/")?raw.slice("/uploads/".length):"";
+ return key?root.replace(/\/$/,"")+"/"+key:null;
+}
+async function exists(path){if(!path)return false;try{await fs.stat(path);return true}catch{return false}}
 async function storyIds(token){
   const d=await api("/api/stories",{token});
   return{data:d,ids:new Set((d.stories||[]).map(x=>Number(x.id)))};
@@ -85,6 +91,18 @@ try{
   const video=d.file;if(!video?.url||video.type!=="video/mp4")throw new Error("valid video upload contract failed");
   d=await api("/api/stories",{token:ownerToken,method:"POST",body:{kind:"video",text:"video story",mediaUrl:video.url,mediaType:video.type,privacy:"everyone"},status:201});
   const videoStory=Number(d.story?.id);if(!videoStory)throw new Error("video story missing id");
+  // Expired, non-highlighted story media must be cleaned instead of remaining public forever.
+  form=new FormData();form.append("file",new Blob([png],{type:"image/png"}),"expiry.png");
+  d=await api("/api/uploads",{token:ownerToken,method:"POST",form,status:201});
+  const expiryFile=d.file,expiryPath=localMediaPath(expiryFile.url);
+  if(!await exists(expiryPath))throw new Error("expiry test media was not stored");
+  const expiryStory=Number((await api("/api/stories",{token:ownerToken,method:"POST",body:{kind:"image",mediaUrl:expiryFile.url,mediaType:expiryFile.type,privacy:"everyone"},status:201})).story?.id);
+  await pool.query("UPDATE stories SET expires_at=NOW()-INTERVAL '1 minute' WHERE id=$1",[expiryStory]);
+  await storyIds(viewerToken);
+  const expiryRow=(await pool.query("SELECT deleted_at FROM stories WHERE id=$1",[expiryStory])).rows[0];
+  if(!expiryRow?.deleted_at)throw new Error("expired non-highlighted story was not cleaned");
+  if(await exists(expiryPath))throw new Error("expired story media remained public after cleanup");
+
 
   // Mute removes owner from the rail without changing the story.
   let list=await storyIds(viewerToken);
@@ -159,6 +177,12 @@ try{
   const highlights=Number((await pool.query("SELECT COUNT(*)::int c FROM story_highlights WHERE story_id=$1",[blockStory])).rows[0]?.c||0);
   const notices=Number((await pool.query("SELECT COUNT(*)::int c FROM notifications WHERE ref_id=$1 AND type IN('story_reaction','story_reply')",[blockStory])).rows[0]?.c||0);
   if(highlights!==0||notices!==0)throw new Error("story delete left stale highlight or notifications");
+  // Manual media-story deletion also removes its orphaned owned object.
+  const imagePath=localMediaPath(image.url);
+  if(!await exists(imagePath))throw new Error("image story media missing before manual delete");
+  await api("/api/stories/"+imageStory,{token:ownerToken,method:"DELETE"});
+  if(await exists(imagePath))throw new Error("manual story delete left orphaned media");
+
 
   console.log("group5 stories and media runtime ok");
 }finally{
