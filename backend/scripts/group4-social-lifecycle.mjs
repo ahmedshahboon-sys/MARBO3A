@@ -11,7 +11,7 @@ const tokenHash=t=>crypto.createHash("sha256").update(String(t)).digest("hex");
 const passwordHash=password=>{const salt=crypto.randomBytes(16),derived=crypto.scryptSync(password,salt,64);return "scrypt:"+salt.toString("hex")+":"+derived.toString("hex")};
 
 async function makeUser(label,status="active"){
-  const suffix=("g4_"+label+"_"+Date.now().toString(36)+"_"+crypto.randomBytes(3).toString("hex")).toLowerCase();
+  const suffix=("g4_"+label.replace(/[^a-z0-9]/gi,"").slice(0,5)+"_"+Date.now().toString(36).slice(-4)+"_"+crypto.randomBytes(3).toString("hex")).toLowerCase();
   const row=(await pool.query("INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role) VALUES($1,$2,$3,'male',$4,$5,'user') RETURNING id,email,username,display_name",[suffix+"@example.invalid",suffix,label,passwordHash("Group4!Pass123"),status])).rows[0];
   return row;
 }
