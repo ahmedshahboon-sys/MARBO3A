@@ -1,4 +1,5 @@
 import {pool} from "./runtime.mjs";
+import {operationalFeature} from "./operational-controls.mjs";
 
 export const DEFAULT_NOTIFICATION_CATEGORIES={
   dms:true,friend_requests:true,comments:true,reactions:true,rooms:true,live:true,calls:true,moderation_system:true
@@ -35,7 +36,9 @@ function inQuietWindow(now,start,end){
   return start<end?now>=start&&now<end:now>=start||now<end;
 }
 export async function notificationDeliveryState(userId,{category,type,actorId,conversationId,title="",body=""}={}){
-  const settings=await userSettings(userId),cat=category||notificationCategory(type),categories=normalizeNotificationCategories(settings.notification_categories);
+  const cat=category||notificationCategory(type);
+  if(!await operationalFeature("push"))return{allowed:false,reason:"push_disabled",quiet:false,sounds:false,category:cat};
+  const settings=await userSettings(userId),categories=normalizeNotificationCategories(settings.notification_categories);
   if(!settings.notifications_enabled||categories[cat]===false)return{allowed:false,reason:"category_or_master",quiet:false,sounds:false,category:cat};
   if(actorId&&Number(actorId)!==Number(userId)){
     const muted=(await pool.query(`SELECT 1 FROM user_mutes WHERE muter_id=$1 AND muted_id=$2 LIMIT 1`,[userId,actorId])).rowCount>0;
