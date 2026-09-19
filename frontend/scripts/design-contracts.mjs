@@ -22,7 +22,7 @@ await must("app/ui-contract-lock.css",[
   ".chat-stream>*{position:relative", ".chat-bubble{position:relative", ".social-dock"
 ]);
 await must("app/layout.js",[
-  'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-contract-additions.css"','import "./ui-audience.css"',
+  'import "./ui-v3-unified-scale.css"','import "./ui-contract-lock.css"','import "./ui-audience.css"',
   'data-site-font="readex"','import ThemeRuntime from "./ThemeRuntime"','<ThemeRuntime/>'
 ]);
 await must("app/PremiumChrome.js",["/api/public/site-stats","v3-audience-stats","totalVisitors","onlineNow","trackingStartedAt","v3-unread-badge"]);
