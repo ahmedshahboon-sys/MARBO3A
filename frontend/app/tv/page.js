@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useState} from "react";
 import Icon from "../Icon";
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
-async function api(path,options={}){const r=await fetch(path,{...options,headers:{authorization:`Bearer ${token()}`,...(options.headers||{})},cache:"no-store",credentials:"same-origin"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const r=await fetch(path,{...options,headers:{"x-marbo3a-session-mode":"cookie",...(options.headers||{})},cache:"no-store",credentials:"same-origin"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 export default function TvPage(){
  const[channels,setChannels]=useState([]),[active,setActive]=useState(null),[q,setQ]=useState(""),[group,setGroup]=useState("الكل"),[status,setStatus]=useState("جاري تحميل القنوات..."),[playing,setPlaying]=useState(false);
  async function play(channel,scroll=false){if(!channel||playing)return;setPlaying(true);setStatus("جاري تجهيز البث...");try{const d=await api(`/api/tv/channels/${channel.id}/play`,{method:"POST"});setActive({...channel,play_url:d.playUrl});setStatus("");if(scroll)window.scrollTo({top:0,behavior:"smooth"})}catch(e){setStatus(e.message==="CHANNEL_NOT_FOUND"?"القناة مش متاحة توا":"ما قدرناش نجهزوا البث. جرّب مرة ثانية.")}finally{setPlaying(false)}}
