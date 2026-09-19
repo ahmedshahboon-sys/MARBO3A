@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import {fileURLToPath} from "url";
 
 const root=new URL("../app/",import.meta.url);
 const offenders=[];
@@ -9,13 +10,13 @@ function walk(dir){
     if(entry.isDirectory())walk(full);
     else if(entry.isFile()&&/\.(js|jsx|mjs|ts|tsx)$/.test(entry.name)){
       const src=fs.readFileSync(full,"utf8");
-      if(/\bBearer\b|headers\.authorization|authorization\s*:/.test(src))offenders.push(path.relative(path.fileURLToPath(root),full));
+      if(/\bBearer\b|headers\.authorization|authorization\s*:/.test(src))offenders.push(path.relative(fileURLToPath(root),full));
       const secretWrite=src.match(/(?:localStorage|sessionStorage)\.setItem\(\s*["']marbo3a_token["']\s*,\s*([^\n;)]+)/g)||[];
-      for(const write of secretWrite)if(!/["']cookie["']/.test(write))offenders.push(path.relative(path.fileURLToPath(root),full)+"#token-write");
+      for(const write of secretWrite)if(!/["']cookie["']/.test(write))offenders.push(path.relative(fileURLToPath(root),full)+"#token-write");
     }
   }
 }
-walk(path.fileURLToPath(root));
+walk(fileURLToPath(root));
 if(offenders.length){
   console.error("Cookie-only web session contract failed:");
   for(const item of [...new Set(offenders)].sort())console.error(" -",item);
