@@ -96,7 +96,11 @@ jobs:
           # Their filenames are immutable because renaming an applied migration would make it look new.
           test "$(find migrations -maxdepth 1 -type f -name '021_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "021_group13_performance.sql,021_stories.sql" || { echo "Historical 021 migration set changed" >&2; exit 1; }
           test "$(find migrations -maxdepth 1 -type f -name '034_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "034_room_rail_admin_controls.sql,034_site_font.sql" || { echo "Historical 034 migration set changed" >&2; exit 1; }
-          unexpected="$(printf '%s\n' "$duplicates" | grep -Ev '^(021|034)
+          unexpected="$(printf '%s\n' "$duplicates" | grep -Ev '^(021|034)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected duplicate migration prefixes: $unexpected" >&2
+            exit 1
+          fi
           npm run migrate
           expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)"
           actual="$(psql "$DATABASE_URL" -Atc 'SELECT name FROM schema_migrations ORDER BY name')"
