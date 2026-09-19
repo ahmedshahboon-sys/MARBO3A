@@ -11,6 +11,7 @@
 - `routes/core-stories.mjs` — canonical Stories & Media lifecycle: rail discovery, create/view/viewers, reactions/replies, mutes, highlights, expiry and safe owned-media cleanup.
 - `routes/core-messaging.mjs` — direct conversation/message core API.
 - `routes/core-calls.mjs` — canonical audio/video call lifecycle, signaling authorization and TURN/ICE configuration.
+- `routes/core-room-voice.mjs` — canonical voice-room membership, seats, moderation, signaling, capacity and TURN state.
 - `routes/core-rooms.mjs` — room membership/core room API.
 - `routes/core-admin-rooms.mjs` — role-protected room administration.
 - `routes/core-location.mjs` — core user location API.
@@ -98,4 +99,15 @@ Remaining migration rule: retire an allowlisted compatibility duplicate only aft
 - Calls respect bidirectional blocks and `who_can_call` (everyone/friends/friends_of_friends/nobody). Signaling is accepted only while a call is active, offer/answer roles are enforced, and privacy/block rules are re-checked during signaling and signal reads.
 - TURN credentials remain ephemeral. CI validates `TURN_EXTERNAL_IP` fallback URLs on both UDP and TCP port 3478 without exposing `TURN_SECRET`.
 - `scripts/group6-messaging-calls.mjs` exercises text/rich/voice messaging, cross-conversation reply rejection, forwarding scope, pending requests, block/privacy changes, call roles, terminal signaling and TURN fallback against a live CI database.
+
+## Group 7 Calls / TURN / Voice Rooms / Live — 2026-09-19
+
+- Calls, room voice and live high-frequency actions use the shared Redis-backed `actionRateLimit` helper and return structured 429 responses with `Retry-After`.
+- `routes/core-room-voice.mjs` is the single authenticated room-voice owner. The historical `room-voice.mjs`, `room-voice-discovery.mjs`, `r1-voice-preserve-mute.mjs` and duplicated R1 voice registrations are retired.
+- Voice authorization includes membership/ban/visibility, participant capacity, forced-mute persistence, seat locks, moderator hierarchy and active-recipient/role-aware SDP/ICE signaling.
+- `routes/live.mjs` owns join, messages, reactions and signaling with serialized join capacity, block/restriction checks, slow mode and signal isolation. `routes/live-hardening.mjs` now owns only host moderation/settings/announce/report extensions.
+- RTC duplicate route ownership fell from 14 to 6 total platform duplicates; none of the remaining allowlisted duplicates are call, voice-room or live routes.
+- TURN relay range is `49152-49663` (512 ports). Capacity contract models 24 voice participants / 6 speakers as 123 P2P connections (246 forced-relay allocations), 8 live viewers (16), 16 reserved simultaneous calls (32), then 50% headroom: 441 required <= 512 available.
+- TURN HMAC credentials remain one-hour ephemeral credentials; the shared secret is never returned. Secret rotation is explicit rather than automatic.
+- CI proves ownership, authorization, limits, cleanup and calculated relay capacity. Production port availability, firewall parity and real relay success require the read-only server audit plus a two-network forced-relay E2E before the Group 7 production gate can be called GREEN.
 
