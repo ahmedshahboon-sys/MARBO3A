@@ -6,14 +6,14 @@ import Icon from "./Icon";
 
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
 const roomFromPath=p=>Number(String(p||"").match(/^\/room\/(\d+)\/chat$/)?.[1]||0)||null;
-async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 
 export default function RoomVoiceR1Runtime(){
   const pathname=usePathname(),roomId=useMemo(()=>roomFromPath(pathname),[pathname]);
   const[host,setHost]=useState(null),[state,setState]=useState(null),[open,setOpen]=useState(false),[status,setStatus]=useState("");
 
   useEffect(()=>{let prev=Number(sessionStorage.getItem("marbo3a_voice_room")||0)||null;if(prev&&prev!==roomId&&token()){
-    try{fetch(`/api/rooms/${prev}/voice/leave`,{method:"POST",headers:{authorization:`Bearer ${token()}`,"content-type":"application/json"},body:JSON.stringify({beforeMs:Date.now()}),credentials:"same-origin",keepalive:true}).catch(()=>{})}catch{}
+    try{fetch(`/api/rooms/${prev}/voice/leave`,{method:"POST",headers:{"x-marbo3a-session-mode":"cookie","content-type":"application/json"},body:JSON.stringify({beforeMs:Date.now()}),credentials:"same-origin",keepalive:true}).catch(()=>{})}catch{}
     document.querySelectorAll(".room-voice-remote-audio").forEach(a=>{try{a.pause();a.srcObject=null;a.remove()}catch{}})
   }
   if(roomId)sessionStorage.setItem("marbo3a_voice_room",String(roomId));else sessionStorage.removeItem("marbo3a_voice_room");
