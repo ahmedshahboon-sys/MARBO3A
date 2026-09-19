@@ -15,7 +15,7 @@
 - `routes/core-rooms.mjs` — room membership/core room API.
 - `routes/core-admin-rooms.mjs` — role-protected room administration.
 - `routes/core-location.mjs` — core user location API.
-- `routes/core-presence.mjs` — username availability and presence fallback API.
+- `routes/core-presence.mjs` — username availability and presence fallback API.\n- `routes/core-user-settings.mjs` — canonical app/notification preferences, mute management, data export and accessibility/media settings.
 - `realtime.mjs` — the only Socket.IO server, realtime rooms, typing and realtime presence.
 - `runtime.mjs` — the only long-lived PostgreSQL pool, Redis client, auth/session helpers and realtime emit access.
 
@@ -33,7 +33,7 @@ The stability audit confirmed that compatibility wrappers can still shadow later
 
 Closed during this audit:
 
-- `/api/notifications/unread-count` had duplicate compatibility registrations in `v1-social-extra.mjs` and `social-experience.mjs`. The later duplicate was retired; `v1-social-extra.mjs` is the single transitional owner until the notification domain is migrated explicitly. `tests/architecture.test.mjs` guards against reintroducing the duplicate.
+- `/api/notifications/unread-count` is explicitly owned by `routes/core-social.mjs`; the historical `v1-social-extra.mjs` and `social-experience.mjs` registrations are retired. `tests/architecture.test.mjs` guards against reintroducing duplicates.
 - The comment-preview regression test no longer uses an unrelated notification route as a source-code boundary.
 
 Group 1 route-ownership consolidation — 2026-09-19:
@@ -110,4 +110,17 @@ Remaining migration rule: retire an allowlisted compatibility duplicate only aft
 - TURN relay range is `49152-49663` (512 ports). Capacity contract models 24 voice participants / 6 speakers as 123 P2P connections (246 forced-relay allocations), 8 live viewers (16), 16 reserved simultaneous calls (32), then 50% headroom: 441 required <= 512 available.
 - TURN HMAC credentials remain one-hour ephemeral credentials; the shared secret is never returned. Secret rotation is explicit rather than automatic.
 - CI proves ownership, authorization, limits, cleanup and calculated relay capacity. Production port availability, firewall parity and real relay success require the read-only server audit plus a two-network forced-relay E2E before the Group 7 production gate can be called GREEN.
+
+## Group 8 User Settings + Privacy + Notifications — 2026-09-19
+
+- `routes/core-user-settings.mjs` is the single explicit owner for `/api/settings`, mute/hidden-word management and account data export. The historical `instrumentation.mjs` settings registrations are retired.
+- Privacy remains one backend source of truth in `routes/fgh-social.mjs`: both compatibility paths use the same full-row update helper, now including mention/tag audiences. The frontend likewise uses one shared `PrivacySettingsPanel` from both Settings and the dedicated privacy route.
+- Notification preferences are category-aware for DMs, friend requests, comments, reactions, rooms, live, calls and moderation/system. A database trigger classifies new notification rows and marks muted/category/hidden-word notifications as `suppressed`; canonical list/count/realtime emitters exclude suppressed rows.
+- Push delivery uses the same preference policy and additionally respects Quiet Hours, muted conversations and notification sounds without deleting in-app history.
+- Existing user mutes are reused; conversation notification mutes and hidden words are additive Group 8 state.
+- App preferences cover theme, media autoplay, data saver, reduced motion and text scale. Startup runtime reapplies them, and the media gallery honors autoplay/data-saver settings.
+- Session metadata supports user-defined device names. Password/email/2FA/delete remain under the established account-security owner.
+- Data rights include a credential-safe JSON export plus step-up-protected account deactivation. Deactivation hides the account and revokes the current session; a later valid login reactivates it, and a 2FA account is not reactivated until the second factor succeeds.
+- Account deletion remains the separate seven-day grace workflow with cancellation support.
+- `scripts/group8-settings-privacy.mjs` verifies full/partial privacy and settings writes, suppression, mutes, device names, export safety and deactivate/reactivate behavior against live CI Postgres/Redis.
 
