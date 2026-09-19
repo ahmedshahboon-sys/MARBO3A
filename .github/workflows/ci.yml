@@ -92,8 +92,88 @@ jobs:
         run: |
           set -euo pipefail
           duplicates="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sed -E 's/^([0-9]+)_.*/\1/' | sort | uniq -d)"
-          if [ -n "$duplicates" ]; then
-            echo "Duplicate migration prefixes: $duplicates" >&2
+          # Historical production migrations 021 and 034 already share prefixes.
+          # Their filenames are immutable because renaming an applied migration would make it look new.
+          test "$(find migrations -maxdepth 1 -type f -name '021_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "021_group13_performance.sql,021_stories.sql" || { echo "Historical 021 migration set changed" >&2; exit 1; }
+          test "$(find migrations -maxdepth 1 -type f -name '034_*.sql' -printf '%f\n' | sort | paste -sd ',' -)" = "034_room_rail_admin_controls.sql,034_site_font.sql" || { echo "Historical 034 migration set changed" >&2; exit 1; }
+          unexpected="$(printf '%s\n' "$duplicates" | grep -Ev '^(021|034)
+          npm run migrate
+          expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)"
+          actual="$(psql "$DATABASE_URL" -Atc 'SELECT name FROM schema_migrations ORDER BY name')"
+          if [ "$actual" != "$expected" ]; then
+            echo "=== EXPECTED MIGRATIONS ==="
+            printf '%s\n' "$expected"
+            echo "=== APPLIED MIGRATIONS ==="
+            printf '%s\n' "$actual"
+            exit 1
+          fi
+      - name: API integration smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo mkdir -p /app/uploads
+          sudo chown -R "$(id -u):$(id -g)" /app/uploads
+          mkdir -p "$UPLOAD_DIR" "$STORAGE_LOCAL_DIR"
+          LOG=/tmp/marbo3a-api.log
+          : >"$LOG"
+          npm start >"$LOG" 2>&1 &
+          PID=$!
+          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          dump_log(){ echo "=== MARBO3A API STARTUP LOG ==="; cat "$LOG" || true; echo "=== END API STARTUP LOG ==="; }
+          trap cleanup EXIT
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null 2>&1; then READY=1; break; fi
+            if ! kill -0 "$PID" >/dev/null 2>&1; then dump_log; echo "API process exited before becoming healthy" >&2; exit 1; fi
+            sleep 1
+          done
+          if [ "$READY" != "1" ]; then dump_log; echo "API did not become healthy in time" >&2; exit 1; fi
+          curl -fsS http://127.0.0.1:4000/api/health
+          test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401" || { dump_log; cat /tmp/me.json || true; exit 1; }
+          test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200" || { dump_log; cat /tmp/push.json || true; exit 1; }
+          node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)" || { dump_log; exit 1; }
+
+  frontend:
+    runs-on: ubuntu-latest
+    needs: [lockfiles]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Refresh main only for direct main pushes
+        if: github.event_name == 'push'
+        working-directory: .
+        run: git fetch origin main && git reset --hard origin/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Reject browser-native dialogs in product UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RPIn --include='*.js' '(^|[^.[:alnum:]_$])(window\.)?(alert|confirm|prompt)\(' app; then
+            echo "Use AppDialog/toasts instead of browser-native dialogs" >&2
+            exit 1
+          fi
+      - run: npm run build
+      - name: Verify generated PWA assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/pwa-192.png
+          test -s public/pwa-512.png
+          test -s public/pwa-maskable-512.png
+          test -s public/apple-touch-icon.png
+          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('./public/manifest.webmanifest','utf8')); const i=m.icons||[]; if(!i.some(x=>x.src==='/pwa-192.png')||!i.some(x=>x.src==='/pwa-512.png')||!i.some(x=>x.purpose==='maskable')) process.exit(1)"
+ || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected duplicate migration prefixes: $unexpected" >&2
             exit 1
           fi
           npm run migrate
