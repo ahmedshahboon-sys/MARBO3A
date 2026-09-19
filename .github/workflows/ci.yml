@@ -13,10 +13,14 @@ jobs:
   lockfiles:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        working-directory: .
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Verify deterministic lockfiles
@@ -69,14 +73,14 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: Refresh main only for direct main pushes
-        if: github.event_name == 'push'
+      - name: Verify exact workflow SHA
+        shell: bash
         working-directory: .
-        run: git fetch origin main && git reset --hard origin/main
-      - uses: actions/setup-node@v4
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
@@ -160,14 +164,14 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: Refresh main only for direct main pushes
-        if: github.event_name == 'push'
+      - name: Verify exact workflow SHA
+        shell: bash
         working-directory: .
-        run: git fetch origin main && git reset --hard origin/main
-      - uses: actions/setup-node@v4
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
