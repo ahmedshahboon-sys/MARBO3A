@@ -140,6 +140,7 @@ jobs:
           test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401" || { dump_log; cat /tmp/me.json || true; exit 1; }
           test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200" || { dump_log; cat /tmp/push.json || true; exit 1; }
           node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)" || { dump_log; exit 1; }
+          node scripts/group1-runtime.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
