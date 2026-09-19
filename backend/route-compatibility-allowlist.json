@@ -1,7 +1,7 @@
 {
   "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
   "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
-  "observedDuplicateCount": 15,
+  "observedDuplicateCount": 14,
   "duplicates": {
     "GET /api/map/cities": [
       "real-map.mjs",
@@ -19,10 +19,6 @@
     "GET /api/rooms/:id/voice/state": [
       "r1-core-experience.mjs",
       "room-voice.mjs"
-    ],
-    "GET /api/stories": [
-      "ijkl-experience.mjs",
-      "stories.mjs"
     ],
     "PATCH /api/rooms/:id/settings": [
       "ijkl-experience.mjs",
@@ -66,5 +62,5 @@
       "room-voice.mjs"
     ]
   },
-  "lastOwnershipMigration": "GROUP 4: canonical core social feed/profile ownership plus friend removal consolidation"
+  "lastOwnershipMigration": "GROUP 5: canonical Stories & Media lifecycle ownership"
 }
