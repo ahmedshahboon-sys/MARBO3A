@@ -143,6 +143,7 @@ jobs:
           node scripts/group1-runtime.mjs || { dump_log; exit 1; }
           node scripts/group2-realtime-runtime.mjs || { dump_log; exit 1; }
           node scripts/group3-account-security.mjs || { dump_log; exit 1; }
+          node scripts/group4-social-lifecycle.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
