@@ -8,7 +8,7 @@ test("canonical story visibility rejects bidirectional blocks",()=>{
   const src=read("routes/core-stories.mjs");
   assert.match(src,/user_blocks/);
   assert.match(src,/blocker_id=\$1 AND blocked_id=\$2/);
-  assert.match(src,/blocked_id=\$1 AND blocker_id=\$2/);
+  assert.match(src,/(blocked_id=\\$1 AND blocker_id=\\$2|blocker_id=\\$2 AND blocked_id=\\$1)/);
   assert.match(src,/if\(await blocked\(ownerId,viewerId\)\)return false/);
   assert.match(src,/who_can_see_story/);
 });
