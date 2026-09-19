@@ -37,7 +37,7 @@ test("request foundation applies real admin abuse and feature controls before ro
     "login_rate_limit_15m","reports_limit_per_hour","friend_requests_limit_per_hour","dm_limit_per_minute",
     "post_limit_per_hour","comment_limit_per_hour","room_create_limit_per_day","room_invite_limit_per_hour",
     "live_create_limit_per_hour","new_account_restrictions_enabled","captcha_escalation_enabled",
-    "verifyTurnstile","CAPTCHA_REQUIRED","OPERATIONAL_CONTROL_UNAVAILABLE",
+    "verifyTurnstile","CAPTCHA_REQUIRED","/api/auth/captcha-config","TURNSTILE_SITE_KEY","OPERATIONAL_CONTROL_UNAVAILABLE",
     'features.live===false','features.push===false',"REGISTRATION_DISABLED","ROOMS_DISABLED"
   ])assert.ok(src.includes(token),`${token} missing`);
 });
@@ -50,6 +50,16 @@ test("content room live and push paths consume operational controls",()=>{
   assert.match(guest,/voice_participant_max/);assert.match(guest,/VOICE_ROOM_FULL/);
   assert.match(live,/livePolicy/);assert.match(live,/live_max_viewers/);assert.match(live,/live_default_slow_mode_seconds/);
   assert.match(prefs,/operationalFeature\("push"\)/);assert.match(prefs,/push_disabled/);
+});
+
+test("Turnstile escalation is complete from capability guard to auth UI",()=>{
+  const request=read("request-foundation.mjs"),admin=read("routes/group-o-admin.mjs"),ui=readRepo("frontend/app/page.js"),env=readRepo(".env.example");
+  assert.match(request,/\/api\/auth\/captcha-config/);
+  assert.match(request,/TURNSTILE_SITE_KEY/);assert.match(request,/TURNSTILE_SECRET_KEY/);
+  assert.match(request,/frame-src https:\/\/challenges\.cloudflare\.com/);
+  assert.match(admin,/TURNSTILE_SITE_KEY/);assert.match(admin,/TURNSTILE_NOT_CONFIGURED/);
+  for(const token of ["TurnstileChallenge","captchaNeeded","captchaToken","captchaBody","CAPTCHA_REQUIRED","CAPTCHA_INVALID"])assert.ok(ui.includes(token),token+" missing from auth UI");
+  assert.match(env,/TURNSTILE_SITE_KEY=CHANGE_ME/);assert.match(env,/TURNSTILE_SECRET_KEY=CHANGE_ME/);
 });
 
 test("admin operations expose factual DB Redis TURN backup restore and release status",()=>{
