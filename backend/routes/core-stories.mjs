@@ -55,7 +55,7 @@ async function canSee(story,viewerId){if(String(story.user_id)===String(viewerId
 const STORY_EMOJI=new Set(["❤️","😂","😍","😢","🔥"]);
 async function ruleAllows(rule,owner,viewer){if(String(owner)===String(viewer))return true;if(rule==="everyone")return true;if(rule==="nobody")return false;if(await areFriends(owner,viewer))return true;return rule==="friends_of_friends"&&(await mutualCount(owner,viewer))>0}
 async function storyAllowed(story,viewer){return canSee(story,viewer.id)}
-async function notify(userId,actor,type,title,body,refId){if(!userId||String(userId)===String(actor?.id))return null;const row=(await pool.query(`INSERT INTO notifications(user_id,actor_id,type,title,body,ref_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING id,user_id,actor_id,type,title,body,ref_id,read_at,created_at`,[userId,actor?.id||null,type,title,body||"",refId||null])).rows[0];emitUser(userId,"notification:new",{...row,actor_username:actor?.username||null,actor_name:actor?.display_name||null,actor_avatar:actor?.avatar_url||null});return row}
+async function notify(userId,actor,type,title,body,refId){if(!userId||String(userId)===String(actor?.id))return null;const row=(await pool.query(`INSERT INTO notifications(user_id,actor_id,type,title,body,ref_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING id,user_id,actor_id,type,title,body,ref_id,read_at,category,suppressed,created_at`,[userId,actor?.id||null,type,title,body||"",refId||null])).rows[0];if(!row.suppressed)emitUser(userId,"notification:new",{...row,actor_username:actor?.username||null,actor_name:actor?.display_name||null,actor_avatar:actor?.avatar_url||null});return row}
 
 export function registerCoreStories(app){
  cleanupExpiredStories().catch(e=>console.error("story expiry cleanup",e));
