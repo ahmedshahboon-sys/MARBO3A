@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import pg from "pg";
 import {createClient} from "redis";
 
@@ -21,6 +22,8 @@ try{
   const adminToken="b".repeat(32)+Number(admin.id).toString(16).padStart(32,"0").slice(-32);
   await redis.set(`session:${userToken}`,String(user.id),{EX:600});
   await redis.set(`session:${adminToken}`,String(admin.id),{EX:600});
+  const tokenHash=token=>crypto.createHash("sha256").update(token).digest("hex");
+  await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+make_interval(secs=>600),NOW()),($3,$4,NOW()+make_interval(secs=>600),NOW())`,[tokenHash(userToken),user.id,tokenHash(adminToken),admin.id]);
 
   const cookieMe=await expect("/api/auth/me",{headers:{cookie:`marbo3a_session=${userToken}`}});
   if(Number(cookieMe.user?.id)!==Number(user.id))throw new Error("HttpOnly cookie auth did not resolve the expected user");
