@@ -20,6 +20,12 @@
   --ui-success:#31c779;--ui-warning:#efb64f;--ui-danger:#e35b66;--ui-info:#56a8ff;
   --ui-shadow:0 14px 38px rgba(0,0,0,.28);
   --ui-focus:0 0 0 3px rgba(255,122,0,.22);
+  /* Legacy shell/layer compatibility tokens retain their current effective values.
+     They live here so the --ui-* namespace has one owner; Groups 2/3 retire
+     the geometry/stack aliases only after route-by-route equivalence checks. */
+  --ui-top-h:64px;--ui-dock-h:64px;--ui-dock-gap:10px;
+  --ui-layer-header:100;--ui-layer-float:130;--ui-layer-dock:160;--ui-layer-overlay:600;--ui-layer-dialog:700;
+  --ui-muted-strong:#a7b0bd;
 }
 html[data-theme="light"]{
   --ui-bg:#f4f5f7;--ui-bg-elevated:#fff;--ui-surface:#fff;--ui-surface-2:#f8f9fb;--ui-surface-3:#eef1f4;
