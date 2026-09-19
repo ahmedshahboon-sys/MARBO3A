@@ -117,7 +117,7 @@ http.createServer=function requestFoundationCreateServer(app,...args){
     });
 
     app.use((_req,res,next)=>{
-      res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:");
+      res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; font-src 'self' data:");
       res.setHeader("Referrer-Policy","strict-origin-when-cross-origin");
       res.setHeader("Permissions-Policy","camera=(self), microphone=(self), geolocation=(self)");
       res.setHeader("X-Content-Type-Options","nosniff");
@@ -130,6 +130,15 @@ http.createServer=function requestFoundationCreateServer(app,...args){
       res.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
       res.setHeader("Pragma","no-cache");
       res.json({ok:true,...await maintenanceState()});
+    });
+
+    app.get("/api/auth/captcha-config",async(_req,res)=>{
+      res.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
+      const {settings}=await operationalControls({fresh:true});
+      const siteKey=String(process.env.TURNSTILE_SITE_KEY||"").trim();
+      const secretKey=String(process.env.TURNSTILE_SECRET_KEY||"").trim();
+      const configured=Boolean(siteKey&&secretKey);
+      res.json({ok:true,enabled:Boolean(settings.captcha_escalation_enabled&&configured),siteKey:configured?siteKey:""});
     });
 
     // Operational controls live here because this wrapper is registered before
