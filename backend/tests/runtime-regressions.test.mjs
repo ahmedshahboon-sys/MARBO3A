@@ -149,3 +149,18 @@ test("advanced search respects blocks, profile privacy, and post audiences",()=>
   assert.match(route,/b\.blocker_id=\$3 AND b\.blocked_id=p\.user_id/);
   assert.match(route,/b\.blocker_id=p\.user_id AND b\.blocked_id=\$3/);
 });
+
+test("realtime sockets reject query tokens and authorize scopes before typing",()=>{
+  const src=read("realtime.mjs");
+  assert.doesNotMatch(src,/handshake\.query\?\.token/);
+  assert.match(src,/socket\.handshake\.auth\?\.token/);
+  assert.match(src,/async function roomAccess/);
+  assert.match(src,/async function chatAccess/);
+  assert.match(src,/REALTIME_SCOPE_FORBIDDEN/);
+  assert.match(src,/realtimeLimited\(uid,"typing"\)/);
+  assert.match(src,/realtimeLimited\(uid,"presence"\)/);
+  assert.match(src,/maxHttpBufferSize:64\*1024/);
+  const web=fs.readFileSync(new URL("../../frontend/app/RealtimeClient.js",import.meta.url),"utf8");
+  assert.doesNotMatch(web,/auth:\{token:/);
+  assert.match(web,/withCredentials:true/);
+});
