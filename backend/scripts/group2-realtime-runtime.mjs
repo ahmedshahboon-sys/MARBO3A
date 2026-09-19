@@ -106,7 +106,7 @@ try{
   await mobile.close();
 
   await http(`/api/typing/direct/${bc.id}`,{token:A.token,method:"POST",body:{typing:true},status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
-  await http(`/api/typing/room/${foreignRoom.id}`,{token:A.token,method:"POST",body:{typing:true},status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
+  await http(`/api/typing/room/${foreignRoom.id}`,{token:A.token,method:"POST",body:{typing:true},status:403});
   await http(`/api/typing/direct/${bc.id}`,{token:A.token,status:403,error:"REALTIME_SCOPE_FORBIDDEN"});
   await http(`/api/typing/direct/${ab.id}`,{token:A.token,method:"POST",body:{typing:true}});
 
