@@ -28,7 +28,6 @@ const modules=[
   "./v1-social-extra.mjs",
   "./v1-completion.mjs",
   "./closure-routes.mjs",
-  "./stories.mjs",
   "./guest-explore.mjs",
   // security/map/auth
   "./security-p0.mjs",
