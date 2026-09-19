@@ -1,7 +1,7 @@
 {
   "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
   "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
-  "observedDuplicateCount": 10,
+  "observedDuplicateCount": 6,
   "duplicates": {
     "GET /api/map/cities": [
       "real-map.mjs",
@@ -24,26 +24,10 @@
       "ijkl-room-guard.mjs",
       "core-extensions.mjs"
     ],
-    "POST /api/live/:id/join": [
-      "routes/live-hardening.mjs",
-      "routes/live.mjs"
-    ],
-    "POST /api/live/:id/messages": [
-      "routes/live-hardening.mjs",
-      "routes/live.mjs"
-    ],
-    "POST /api/live/:id/reactions": [
-      "routes/live-hardening.mjs",
-      "routes/live.mjs"
-    ],
-    "POST /api/live/:id/signals": [
-      "routes/live-hardening.mjs",
-      "routes/live.mjs"
-    ],
     "POST /api/profile/location": [
       "real-map.mjs",
       "instrumentation.mjs"
     ]
   },
-  "lastOwnershipMigration": "GROUP 7: canonical hardened Room Voice owner"
+  "lastOwnershipMigration": "GROUP 7: canonical Room Voice and Live runtime ownership"
 }
