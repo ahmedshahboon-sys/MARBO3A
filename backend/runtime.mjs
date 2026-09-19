@@ -126,6 +126,20 @@ export async function destroySession(token){
   await redis.del(`session:${token}`).catch(()=>{});
 }
 
+export async function actionRateLimit(scope,identity,{limit,windowSeconds}){
+  await ensureRedis();
+  const safeScope=String(scope||"action").replace(/[^a-z0-9:_-]/gi,"_").slice(0,80),safeIdentity=String(identity||"anon").replace(/[^a-z0-9:._-]/gi,"_").slice(0,120);
+  const window=Math.max(1,Math.min(3600,Number(windowSeconds)||60)),max=Math.max(1,Math.min(10000,Number(limit)||30));
+  const bucket=Math.floor(Date.now()/1000/window),key=`actionlimit:${safeScope}:${safeIdentity}:${bucket}`;
+  const count=Number(await redis.incr(key));if(count===1)await redis.expire(key,window*2);
+  const retryAfter=Math.max(1,window-Math.floor(Date.now()/1000)%window);
+  return{allowed:count<=max,count,limit:max,retryAfter,windowSeconds:window};
+}
+export function rejectRateLimit(res,result,code="RATE_LIMITED"){
+  res.setHeader("Retry-After",String(result?.retryAfter||1));
+  return res.status(429).json({ok:false,error:code,retryAfter:result?.retryAfter||1,limit:result?.limit||null});
+}
+
 export const clean=(v="",n=300)=>String(v??"").trim().replace(/\s+/g," ").slice(0,n);
 export const ipOf=req=>String(req?.headers?.["x-forwarded-for"]||req?.socket?.remoteAddress||"").split(",")[0].trim().slice(0,80);
 
