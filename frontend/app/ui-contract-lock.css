@@ -121,3 +121,31 @@ html[data-theme="light"] .reaction-hold-palette{background:#fff!important;border
   .real-map-canvas{height:calc(var(--app-viewport-h) - var(--app-header-total-h) - var(--app-dock-total-h) - 250px)!important;min-height:360px!important}
   .admin-guest-summary{grid-template-columns:1fr 1fr!important}.admin-guest-row{grid-template-columns:1fr!important}.admin-guest-row>button{width:100%!important}
 }
+
+
+/* Group 3 overlay and stacking contract. */
+html[data-modal-open="true"] body{overflow:hidden!important;overscroll-behavior:none!important}
+html[data-modal-open="true"] .social-dock{visibility:hidden!important;pointer-events:none!important}
+html[data-modal-layer="media"] .v3-global-header,
+html[data-modal-layer="critical"] .v3-global-header{visibility:hidden!important;pointer-events:none!important}
+html[data-modal-layer="critical"] :is(.install-nudge,.live-notification-toast){display:none!important}
+
+.ui-v3 .v3-global-header{z-index:var(--ui-z-header)!important}
+.ui-v3 .social-dock{z-index:var(--ui-z-dock)!important}
+.drawer-overlay{z-index:var(--ui-z-drawer)!important}
+.settings-overlay{z-index:var(--ui-z-dialog)!important}
+:is(.app-dialog-backdrop,.message-sheet-backdrop){z-index:var(--ui-z-dialog)!important}
+:is(.reaction-hold-palette,.share-qr details,.post-menu-popover,.context-menu){z-index:var(--ui-z-popover)!important}
+:is(.install-nudge,.live-notification-toast,.settings-status){z-index:var(--ui-z-toast)!important}
+:is(.media-viewer,.story-viewer,.story-modal-backdrop,.live-immersive){z-index:var(--ui-z-media)!important}
+.call-overlay{z-index:var(--ui-z-call)!important}
+.proximity-cover{z-index:var(--ui-z-emergency)!important}
+
+:is(.app-dialog,.settings-card,.social-drawer,.media-viewer,.call-screen){isolation:isolate}
+:is(.app-dialog-backdrop,.settings-overlay,.drawer-overlay,.media-viewer,.call-overlay){overscroll-behavior:contain}
+:is(.app-dialog,.settings-card,.social-drawer){max-height:calc(var(--app-viewport-h) - var(--app-safe-top) - var(--app-safe-bottom) - 16px)!important}
+:is(.app-dialog,.settings-card,.social-drawer)>header{position:sticky;top:0;z-index:var(--ui-z-sticky);padding-top:max(6px,var(--app-safe-top));background:inherit}
+.media-close{top:max(8px,var(--app-safe-top))!important;left:max(8px,env(safe-area-inset-left,0px))!important;min-width:44px!important;min-height:44px!important}
+.share-qr details{max-width:min(320px,calc(100vw - 16px));overflow-wrap:anywhere}
+.share-qr details img{max-width:100%;height:auto}
+.install-nudge,.live-notification-toast{bottom:calc(var(--app-dock-total-h) + var(--marbo3a-keyboard-h,0px) + 8px)!important}
