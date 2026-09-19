@@ -10,6 +10,7 @@
 - `routes/core-feed.mjs` — canonical smart/public feed, post reactions, threaded comments/replies and authenticated social-profile feed.
 - `routes/core-stories.mjs` — canonical Stories & Media lifecycle: rail discovery, create/view/viewers, reactions/replies, mutes, highlights, expiry and safe owned-media cleanup.
 - `routes/core-messaging.mjs` — direct conversation/message core API.
+- `routes/core-calls.mjs` — canonical audio/video call lifecycle, signaling authorization and TURN/ICE configuration.
 - `routes/core-rooms.mjs` — room membership/core room API.
 - `routes/core-admin-rooms.mjs` — role-protected room administration.
 - `routes/core-location.mjs` — core user location API.
@@ -87,4 +88,14 @@ Remaining migration rule: retire an allowlisted compatibility duplicate only aft
 - Non-highlighted expired stories are soft-deleted and their owned media is removed when it is not referenced elsewhere. Highlighted stories survive expiry; removing an expired highlight allows normal expiry cleanup.
 - Manual story deletion transactionally clears highlights and story notifications, then removes orphaned owned media safely.
 - `scripts/group5-stories-media.mjs` and the Group 5 frontend contract cover upload → create → privacy/block/mute → view/viewers → reaction/reply → highlight/expiry → delete, plus responsive viewer and Live rail integration.
+
+## Group 6 Messaging & Calls — 2026-09-19
+
+- `routes/core-messaging.mjs` is the single owner for room/direct message reads, rich sends, replies, attachments/voice notes, search, edit/delete and forwarding. The historical `direct-extensions.mjs` wrapper is retired.
+- Direct sends re-check conversation membership, target account state, bidirectional block state, pending incoming message requests and `who_can_message` on every send, including already-existing conversations.
+- Reply targets must belong to the same room/conversation and must not be deleted. Forwarding requires access to the source scope and authorization in the destination scope.
+- `routes/core-calls.mjs` is the explicit owner for audio/video call creation, incoming/history/config, answer/decline/end/fail and SDP/ICE signaling. The historical `calls.mjs` wrapper is retired.
+- Calls respect bidirectional blocks and `who_can_call` (everyone/friends/friends_of_friends/nobody). Signaling is accepted only while a call is active, offer/answer roles are enforced, and privacy/block rules are re-checked during signaling and signal reads.
+- TURN credentials remain ephemeral. CI validates `TURN_EXTERNAL_IP` fallback URLs on both UDP and TCP port 3478 without exposing `TURN_SECRET`.
+- `scripts/group6-messaging-calls.mjs` exercises text/rich/voice messaging, cross-conversation reply rejection, forwarding scope, pending requests, block/privacy changes, call roles, terminal signaling and TURN fallback against a live CI database.
 
