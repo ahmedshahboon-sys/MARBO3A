@@ -42,6 +42,24 @@ for(const [token,owner] of protectedOwners){
   if(!ownership.includes(token)||!ownership.includes(owner))fail(`STYLE_OWNERSHIP.md must document ${token} owner ${owner}`);
 }
 
+const protectedNamespaces=new Map([
+  ["--ui-","design-system.css"],
+  ["--app-","ui-v3-unified-scale.css"]
+]);
+const declarationPrefixFor=prefix=>new RegExp(`(?:^|[;{]\\s*)(${prefix}[a-z0-9_-]+)\\s*:`,`gmi`);
+for(const file of cssFiles){
+  const src=fs.readFileSync(path.join(root,file),"utf8");
+  for(const [prefix,owner] of protectedNamespaces){
+    for(const match of src.matchAll(declarationPrefixFor(prefix))){
+      const token=match[1];
+      if(file!==owner)fail(`${token} belongs to namespace owner ${owner}, but is redefined in ${file}`);
+    }
+  }
+}
+for(const [prefix,owner] of protectedNamespaces){
+  if(!ownership.includes(`${prefix}*`)||!ownership.includes(owner))fail(`STYLE_OWNERSHIP.md must document namespace ${prefix}* owner ${owner}`);
+}
+
 const grandfatheredNames=new Set(["ui-v3-final-audit.css","r1-brand-override.css"]);
 for(const file of cssFiles){
   if(/(?:repair|fix|final|override)/i.test(file)&&!grandfatheredNames.has(file))fail(`new repair/fix/final/override layer is forbidden: ${file}`);

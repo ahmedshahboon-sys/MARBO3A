@@ -29,6 +29,23 @@ Each shared concern has one final owner. Route files may consume shared tokens a
 - `--v3-header-h` -> `ui-v3-unified-scale.css` temporarily, preserving current effective legacy values until Group 2.
 - `--v3-dock-h` -> `ui-v3-unified-scale.css` temporarily, preserving current effective legacy values until Group 2.
 
+### Namespace ownership guard
+
+- `--ui-*` -> `design-system.css` only. Shared typography, colors, spacing, control sizes, radii and shadows must enter the product through this namespace owner.
+- `--app-*` -> `ui-v3-unified-scale.css` only during the coherence round. These tokens are app-shell geometry/spacing contracts and will be rationalized further in Group 2.
+- `--v3-*` remains a temporary compatibility namespace. No new shared design token should be introduced there. The protected header/dock aliases above are already single-owner; the remaining legacy V3 tokens are retired gradually rather than deleted in bulk.
+
+### Deferred compatibility inventory
+
+These existing definitions are intentionally **not** treated as final design-system owners. They are compatibility debt recorded for later groups so Group 1 does not cause a visual rewrite:
+
+- `ui-v3.css`: legacy V3 palette/surface/text/border/shadow tokens.
+- `ui-v3-density.css`: legacy density/control/radius/gap tokens.
+- `ui-v3-reference.css`: legacy page-width/mobile-gap/card-radius tokens.
+- Fixed dark literals inside legacy/reference layers are a Theme parity concern for Group 5, not a reason to add another override layer here.
+
+The contract now rejects any future `--ui-*` or `--app-*` declaration outside its namespace owner, even if the individual token was not previously listed in the protected-token table.
+
 The legacy V3 geometry values were centralized without changing their effective cascade:
 - base: `72px / 78px`;
 - <=720px: `66px / 78px`;
