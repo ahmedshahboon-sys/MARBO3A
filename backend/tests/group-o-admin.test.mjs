@@ -23,7 +23,7 @@ test("advanced admin exposes requested analytics and strict private-message poli
 test("operational controls are enforced before compatibility routes",()=>{
  const src=read("request-foundation.mjs");
  assert.match(src,/REGISTRATION_DISABLED/);assert.match(src,/ROOMS_DISABLED/);assert.match(src,/FILE_TOO_LARGE/);assert.match(src,/PINNING_DISABLED/);assert.match(src,/FEATURE_DISABLED/);
- assert.match(src,/admin_system_settings/);assert.match(src,/feature_flags/);
+ assert.match(src,/operationalControls/);assert.match(src,/actionRateLimit/);
 });
 
 test("Group O route is explicitly registered",()=>{
