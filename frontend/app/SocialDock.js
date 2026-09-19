@@ -3,13 +3,13 @@ import {useEffect,useMemo,useState} from "react";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import Icon from "./Icon";
-import {isAppShellPath} from "./navigation-policy";
+import {getNavigationPolicy} from "./navigation-policy";
 const getToken=()=>typeof window==="undefined"?"":(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"");
 export default function SocialDock(){
- const path=usePathname(),[visible,setVisible]=useState(false),[unread,setUnread]=useState(0);
+ const path=usePathname(),[visible,setVisible]=useState(false),[unread,setUnread]=useState(0),policy=getNavigationPolicy(path);
  useEffect(()=>{const t=getToken();setVisible(Boolean(t));if(!t){setUnread(0);return}const onCount=e=>setUnread(Math.max(0,Number(e?.detail?.count)||0));window.addEventListener("marbo3a:message-unread-count",onCount);window.dispatchEvent(new CustomEvent("marbo3a:reconcile-counts"));return()=>window.removeEventListener("marbo3a:message-unread-count",onCount)},[path]);
  const badge=useMemo(()=>unread>99?"99+":String(unread),[unread]);
- if(!visible||!isAppShellPath(path))return null;
+ if(!visible||!policy.showDock)return null;
  const active=p=>path===p||path?.startsWith(p+"/");
  const openDrawer=()=>window.dispatchEvent(new CustomEvent("marbo3a:open-drawer"));
  return <nav className="social-dock" aria-label="التنقل الرئيسي"><div className="social-dock-track">
