@@ -42,7 +42,6 @@ const modules=[
   "./social-experience.mjs",
   // Corrected F/G/H routes wrap the original F/G/H compatibility layer.
   "./fgh-privacy-compat.mjs",
-  "./fgh-regression-hotfix.mjs",
   // I/J/K/L surfaces wrap older room/story/map/guest handlers.
   "./ijkl-experience.mjs",
   "./ijkl-room-guard.mjs",
