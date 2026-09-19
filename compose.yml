@@ -23,8 +23,8 @@ services:
     ports:
       - "3478:3478/tcp"
       - "3478:3478/udp"
-      - "49160-49200:49160-49200/udp"
-      - "49160-49200:49160-49200/tcp"
+      - "49152-49663:49152-49663/udp"
+      - "49152-49663:49152-49663/tcp"
     command:
       - -n
       - --fingerprint
@@ -34,8 +34,8 @@ services:
       - --server-name=$${TURN_REALM:-marbo3a.ly}
       - --external-ip=$${TURN_EXTERNAL_IP}
       - --listening-port=3478
-      - --min-port=49160
-      - --max-port=49200
+      - --min-port=49152
+      - --max-port=49663
       - --no-tls
       - --no-multicast-peers
       - --log-file=stdout
