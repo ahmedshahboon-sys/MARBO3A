@@ -142,6 +142,7 @@ jobs:
           node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)" || { dump_log; exit 1; }
           node scripts/group1-runtime.mjs || { dump_log; exit 1; }
           node scripts/group2-realtime-runtime.mjs || { dump_log; exit 1; }
+          node scripts/group3-account-security.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
