@@ -55,7 +55,6 @@ http.createServer=function closureRoutesCreateServer(app,...args){
 
     app.get("/api/me/room-memberships",async(req,res)=>{try{const user=await requireAuth(req,res);if(!user)return;const[joined,pending,banned]=await Promise.all([pool.query(`SELECT room_id FROM room_members WHERE user_id=$1`,[user.id]),pool.query(`SELECT room_id FROM room_join_requests WHERE user_id=$1 AND status='pending'`,[user.id]),pool.query(`SELECT room_id FROM room_bans WHERE user_id=$1`,[user.id])]);const states={};for(const row of joined.rows)states[String(row.room_id)]="joined";for(const row of pending.rows)if(!states[String(row.room_id)])states[String(row.room_id)]="pending";for(const row of banned.rows)states[String(row.room_id)]="banned";res.json({ok:true,states})}catch(error){console.error("room membership states",error);res.status(500).json({ok:false,error:"ROOM_MEMBERSHIP_LOAD_FAILED"})}});
 
-    app.get("/api/admin/readiness",async(req,res)=>{try{const user=await requireAdmin(req,res);if(!user)return;const checks={database:false,redis:false,uploads:false,sessions:false,feed:false,realtime:false,turn:false,email:false,push:false};
       try{await pool.query(`SELECT 1`);checks.database=true}catch{}
       try{await ensureRedis();checks.redis=(await redis.ping())==="PONG"}catch{}
       try{const saved=await saveObject({buffer:Buffer.from("marbo3a-readiness"),extension:"txt",contentType:"text/plain"});await deleteObject(saved.key);checks.uploads=true}catch{}
