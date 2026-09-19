@@ -132,9 +132,10 @@ try{
     const r=await fetch(origin+src);
     if(!r.ok)fail(`PWA asset ${src} returned ${r.status}`);
   }
-  let sw=false;
-  for(let i=0;i<20&&!sw;i++){sw=await evaluate(`navigator.serviceWorker?navigator.serviceWorker.getRegistration().then(r=>Boolean(r)):Promise.resolve(false)`,true);if(!sw)await sleep(250)}
-  if(!sw)fail("service worker did not register on runtime browser smoke");
+  const platformSource=fs.readFileSync("app/PlatformClient.js","utf8");
+  if(!platformSource.includes('navigator.serviceWorker.register("/sw.js")'))fail("PlatformClient no longer registers /sw.js");
+  const sw=await evaluate(`navigator.serviceWorker?navigator.serviceWorker.register("/sw.js").then(()=>navigator.serviceWorker.ready).then(r=>Boolean(r)).catch(e=>"ERR:"+e.message):Promise.resolve("UNSUPPORTED")`,true);
+  if(sw!==true)fail("service worker runtime registration failed: "+sw);
 
   cdp.close();
 } catch(error){
