@@ -116,6 +116,8 @@ jobs:
             printf '%s\n' "$actual"
             exit 1
           fi
+      - name: Verify Group 7 TURN capacity plan
+        run: node scripts/group7-turn-capacity.mjs
       - name: API integration smoke test
         shell: bash
         run: |
@@ -147,6 +149,7 @@ jobs:
           node scripts/group4-social-lifecycle.mjs || { dump_log; exit 1; }
           node scripts/group5-stories-media.mjs || { dump_log; exit 1; }
           node scripts/group6-messaging-calls.mjs || { dump_log; exit 1; }
+          node scripts/group7-rtc-live.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
