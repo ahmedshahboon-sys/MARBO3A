@@ -39,6 +39,7 @@ jobs:
       STORAGE_LOCAL_DIR: /tmp/marbo3a-uploads
       STORAGE_PUBLIC_PREFIX: /api/uploads
       TURN_HOST: 127.0.0.1
+      TURN_EXTERNAL_IP: 127.0.0.2
       TURN_SECRET: ci_turn_secret_not_for_production
     defaults:
       run:
