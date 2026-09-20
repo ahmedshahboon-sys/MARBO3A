@@ -34,6 +34,15 @@ const userDir=fs.mkdtempSync(path.join(os.tmpdir(),"marbo3a-chrome-"));
 let browser;
 try{
   await waitHttp(origin+"/");
+  const documentResponse=await fetch(origin+"/",{redirect:"manual"});
+  const csp=documentResponse.headers.get("content-security-policy")||"";
+  const scriptSrc=csp.split(";").map(x=>x.trim()).find(x=>x.startsWith("script-src"))||"";
+  if(!/nonce-[a-f0-9]{32}/i.test(scriptSrc))fail("runtime CSP nonce missing from script-src");
+  if(!scriptSrc.includes("'strict-dynamic'"))fail("runtime CSP strict-dynamic missing");
+  if(scriptSrc.includes("'unsafe-inline'"))fail("runtime CSP script-src still contains unsafe-inline");
+  for(const name of ["strict-transport-security","referrer-policy","x-content-type-options","x-frame-options","permissions-policy","cross-origin-opener-policy"]){
+    if(!documentResponse.headers.get(name))fail("runtime security header missing: "+name);
+  }
   browser=child(chrome,[
     "--headless=new","--no-sandbox","--disable-gpu","--no-first-run",
     `--remote-debugging-port=${chromePort}`,`--user-data-dir=${userDir}`,"about:blank"
