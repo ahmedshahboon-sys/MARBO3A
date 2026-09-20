@@ -156,6 +156,7 @@ jobs:
           node scripts/group7-rtc-live.mjs || { dump_log; exit 1; }
           node scripts/group8-settings-privacy.mjs || { dump_log; exit 1; }
           node scripts/group9-admin-ops.mjs || { dump_log; exit 1; }
+          node scripts/group11-web-hardening.mjs || { dump_log; exit 1; }
 
   frontend:
     runs-on: ubuntu-latest
