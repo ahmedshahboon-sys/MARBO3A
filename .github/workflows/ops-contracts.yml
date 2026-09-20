@@ -102,16 +102,10 @@ jobs:
           set -euo pipefail
           grep -q '/api/system/maintenance' ops/maintenance/maintenance.js
           grep -q 'src="/maintenance/maintenance.js"' ops/maintenance/index.html
-          if grep -q '<script>[[:space:]]*
-          grep -q 'maintenance_mode' backend/request-foundation.mjs
-          grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
-          grep -q 'docker builder prune -af' ops/deploy-production.sh
-          grep -q 'MARBO3A_DISK_WARN_PERCENT:-70' ops/disk-monitor.sh
-          grep -q 'MARBO3A_DISK_CRITICAL_PERCENT:-85' ops/disk-monitor.sh
-          grep -q 'backup_success' ops/backup-database.sh
-          grep -q 'restore_success' ops/verify-backup-restore.sh
-          grep -q '/api/admin/operations' backend/routes/core-admin-control.mjs
- ops/maintenance/index.html; then echo "inline maintenance script found" >&2; exit 1; fi
+          if grep -Eq '<script[[:space:]]*>' ops/maintenance/index.html; then
+            echo "inline maintenance script found" >&2
+            exit 1
+          fi
           grep -q 'maintenance_mode' backend/request-foundation.mjs
           grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
           grep -q 'docker builder prune -af' ops/deploy-production.sh
