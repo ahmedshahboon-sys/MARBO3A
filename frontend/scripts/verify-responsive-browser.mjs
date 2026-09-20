@@ -166,6 +166,14 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
         }
       }
     }
+    await send("Emulation.setEmulatedMedia",{features:[{name:"prefers-reduced-motion",value:"reduce"}]});
+    const motion=await send("Runtime.evaluate",{expression:`(()=>{const e=document.querySelector(".live-badge i"),s=e&&getComputedStyle(e);return {animation:s?.animationDuration||"",transition:s?.transitionDuration||""}})()`,returnByValue:true});
+    const mv=motion.result?.value||{};
+    const duration=v=>String(v||"").split(",").map(x=>parseFloat(x)||0).reduce((a,b)=>Math.max(a,b),0);
+    if(duration(mv.animation)>.01||duration(mv.transition)>.01){
+      failed=true;
+      console.error("RESPONSIVE_GEOMETRY_FAILED: reduced-motion did not collapse animation/transition duration");
+    }
     ws.close();
   }finally{
     chromeProc.kill("SIGKILL");
