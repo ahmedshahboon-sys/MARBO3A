@@ -7,9 +7,12 @@ const SESSION_TTL=7*24*60*60;
 const state=globalThis[KEY]||(globalThis[KEY]={
   pool:new pg.Pool({
     connectionString:process.env.DATABASE_URL,
-    max:Math.max(4,Number(process.env.PG_POOL_MAX)||20),
-    idleTimeoutMillis:30000,
-    connectionTimeoutMillis:5000
+    max:Math.max(4,Math.min(50,Number(process.env.PG_POOL_MAX)||20)),
+    idleTimeoutMillis:Math.max(5000,Math.min(300000,Number(process.env.PG_IDLE_TIMEOUT_MS)||30000)),
+    connectionTimeoutMillis:Math.max(1000,Math.min(30000,Number(process.env.PG_CONNECT_TIMEOUT_MS)||5000)),
+    statement_timeout:Math.max(1000,Math.min(120000,Number(process.env.PG_STATEMENT_TIMEOUT_MS)||15000)),
+    query_timeout:Math.max(1000,Math.min(180000,Number(process.env.PG_QUERY_TIMEOUT_MS)||20000)),
+    idle_in_transaction_session_timeout:Math.max(5000,Math.min(300000,Number(process.env.PG_IDLE_TX_TIMEOUT_MS)||30000))
   }),
   redis:createClient({url:process.env.REDIS_URL}),
   redisReady:null,
@@ -22,6 +25,27 @@ if(!state.redis.__marbo3aErrorHook){
 
 export const pool=state.pool;
 export const redis=state.redis;
+
+const SLOW_QUERY_MS=Math.max(100,Math.min(60000,Number(process.env.PG_SLOW_QUERY_MS)||750));
+if(!pool.__marbo3aSlowQueryHook){
+  const rawQuery=pool.query.bind(pool);
+  pool.query=(...args)=>{
+    const started=process.hrtime.bigint(),result=rawQuery(...args);
+    if(!result||typeof result.then!=="function")return result;
+    return result.then(value=>{
+      const durationMs=Number(process.hrtime.bigint()-started)/1e6;
+      if(durationMs>=SLOW_QUERY_MS&&process.env.NODE_ENV!=="test"){
+        console.warn("slow database query",{durationMs:Math.round(durationMs),command:String(value?.command||"UNKNOWN"),rowCount:Number(value?.rowCount||0)});
+      }
+      return value;
+    },error=>{
+      const durationMs=Number(process.hrtime.bigint()-started)/1e6;
+      if(durationMs>=SLOW_QUERY_MS&&process.env.NODE_ENV!=="test")console.warn("slow failed database query",{durationMs:Math.round(durationMs),code:String(error?.code||"UNKNOWN")});
+      throw error;
+    });
+  };
+  pool.__marbo3aSlowQueryHook=true;
+}
 
 export async function ensureRedis(){
   if(redis.isOpen)return redis;
