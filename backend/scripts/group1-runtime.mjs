@@ -17,9 +17,10 @@ async function makeUser(label,role="user"){
   await pool.query(`INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+make_interval(secs=>900),NOW())`,[tokenHash(token),row.id]);
   return{...row,email,password,token};
 }
-async function api(path,{token,method="GET",body,status,error}={}){
+async function api(path,{token,stepUp,method="GET",body,status,error}={}){
   const headers={};
   if(token)headers.authorization=`Bearer ${token}`;
+  if(stepUp)headers["x-marbo3a-step-up"]=stepUp;
   if(body!==undefined)headers["content-type"]="application/json";
   const r=await fetch(`${base}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
   const data=await r.json().catch(()=>({}));
@@ -27,6 +28,13 @@ async function api(path,{token,method="GET",body,status,error}={}){
   if(!expected.includes(r.status))throw new Error(`${method} ${path}: expected ${expected.join("/")}, got ${r.status}: ${JSON.stringify(data)}`);
   if(error&&data.error!==error)throw new Error(`${method} ${path}: expected error ${error}, got ${JSON.stringify(data)}`);
   return{status:r.status,data};
+}
+
+async function adminGrant(user){
+  await pool.query("UPDATE users SET two_factor_enabled=TRUE WHERE id=$1",[user.id]);
+  const grant=crypto.randomBytes(32).toString("hex");
+  await redis.set(`adminstepup:grant:${user.id}:${tokenHash(user.token)}:${grant}`,"1",{EX:900});
+  return grant;
 }
 
 try{
@@ -82,14 +90,18 @@ try{
   if(!system||typeof system.uptimeSeconds!=="number")throw new Error("Canonical admin system contract missing");
 
   await api(`/api/admin/users/${C.id}/status`,{token:A.token,method:"PATCH",body:{status:"frozen",reason:"group1 unauthorized check"},status:403,error:"ADMIN_ONLY"});
-  await api(`/api/admin/users/${C.id}/status`,{token:admin.token,method:"PATCH",body:{status:"frozen",reason:"group1 authorization matrix"}});
+  await api(`/api/admin/users/${C.id}/status`,{token:admin.token,method:"PATCH",body:{status:"frozen",reason:"group1 missing admin 2fa"},status:403,error:"ADMIN_2FA_REQUIRED"});
+  await pool.query("UPDATE users SET two_factor_enabled=TRUE WHERE id=$1",[admin.id]);
+  await api(`/api/admin/users/${C.id}/status`,{token:admin.token,method:"PATCH",body:{status:"frozen",reason:"group1 missing admin step-up"},status:403,error:"ADMIN_STEP_UP_REQUIRED"});
+  const adminStepUp=await adminGrant(admin);
+  await api(`/api/admin/users/${C.id}/status`,{token:admin.token,stepUp:adminStepUp,method:"PATCH",body:{status:"frozen",reason:"group1 authorization matrix"}});
   await api("/api/auth/me",{token:C.token,status:401});
   const statusAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM admin_change_audit WHERE action='user_status_change' AND entity_id=$1`,[String(C.id)])).rows[0]?.c||0);
   if(statusAudit<1)throw new Error("Admin status change missing change-audit row");
 
   const report=(await pool.query(`INSERT INTO reports(reporter_id,target_type,target_id,reason,details) VALUES($1,'user',$2,'group1-test','runtime authorization matrix') RETURNING id`,[A.id,B.id])).rows[0];
   await api(`/api/admin/reports/${report.id}/action`,{token:A.token,method:"POST",body:{action:"dismiss",reason:"not authorized"},status:403,error:"ADMIN_ONLY"});
-  await api(`/api/admin/reports/${report.id}/action`,{token:admin.token,method:"POST",body:{action:"dismiss",reason:"group1 dismissal"}});
+  await api(`/api/admin/reports/${report.id}/action`,{token:admin.token,stepUp:adminStepUp,method:"POST",body:{action:"dismiss",reason:"group1 dismissal"}});
   const moderationAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM moderation_actions WHERE report_id=$1 AND action='dismiss'`,[report.id])).rows[0]?.c||0);
   if(moderationAudit<1)throw new Error("Canonical report action missing moderation audit");
 
