@@ -29,8 +29,20 @@ jobs:
           bash -n ops/audit-turn-runtime.sh
           bash -n ops/backup-database.sh
           bash -n ops/verify-backup-restore.sh
+          bash -n ops/verify-latest-backup.sh
+          bash -n ops/install-backup-schedule.sh
       - name: Validate Group 10 supply-chain contracts
         run: node scripts/group10-supply-chain-contracts.mjs
+      - name: Validate Group 12 recovery contracts
+        run: node scripts/group12-recovery-contracts.mjs
+      - name: Validate backup schedule assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'OnCalendar=.*00,06,12,18' ops/systemd/marbo3a-backup.timer
+          grep -q 'OnCalendar=Sun' ops/systemd/marbo3a-restore-drill.timer
+          grep -q 'verify-latest-backup.sh' ops/systemd/marbo3a-restore-drill.service
+          grep -q 'BACKUP_REQUIRE_OFFSITE' ops/backup-database.sh
       - name: Validate compose gate topology
         shell: bash
         run: |
