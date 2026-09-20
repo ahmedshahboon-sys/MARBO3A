@@ -67,6 +67,23 @@ try{
   const image=d.file;
   if(!image?.url||!/^\/api\/uploads\/\d{4}-\d{2}-\d{2}\//.test(image.url))throw new Error("canonical image upload did not expose nested owned storage path");
 
+  // Group 15 upload negatives + metadata stripping.
+  form=new FormData();form.append("file",new Blob([Buffer.from("not really a png")],{type:"image/png"}),"fake.png");
+  await api("/api/uploads",{token:ownerToken,method:"POST",form,status:415,error:"UNSUPPORTED_FILE"});
+
+  const oversized=Buffer.alloc(8*1024*1024+1024);Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]).copy(oversized,0);
+  form=new FormData();form.append("file",new Blob([oversized],{type:"image/png"}),"too-large.png");
+  await api("/api/uploads",{token:ownerToken,method:"POST",form,status:413,error:"FILE_TOO_LARGE"});
+
+  const exifPayload=Buffer.from("Exif\0\0GPSLatitude=32.8872;GPSLongitude=13.1913","utf8"),exifLen=Buffer.alloc(2);
+  exifLen.writeUInt16BE(exifPayload.length+2,0);
+  const jpegWithExif=Buffer.concat([Buffer.from([0xff,0xd8,0xff,0xe1]),exifLen,exifPayload,Buffer.from([0xff,0xd9])]);
+  form=new FormData();form.append("file",new Blob([jpegWithExif],{type:"image/jpeg"}),"gps.jpg");
+  d=await api("/api/uploads",{token:ownerToken,method:"POST",form,status:201});
+  if(d.file?.metadataStripped!==true)throw new Error("image upload did not report metadata stripping");
+  const sanitizedPath=localMediaPath(d.file?.url),sanitized=await fs.readFile(sanitizedPath);
+  if(sanitized.includes(Buffer.from("Exif"))||sanitized.includes(Buffer.from("GPSLatitude"))||sanitized.includes(Buffer.from("GPSLongitude")))throw new Error("EXIF/GPS metadata remained in stored image");
+
   d=await api("/api/stories",{token:ownerToken,method:"POST",body:{kind:"image",text:"nested owned image",mediaUrl:image.url,mediaType:image.type,privacy:"everyone"},status:201});
   const imageStory=Number(d.story?.id);if(!imageStory)throw new Error("image story missing id");
 
