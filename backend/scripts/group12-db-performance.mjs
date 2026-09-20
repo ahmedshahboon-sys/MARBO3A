@@ -13,7 +13,7 @@ async function seed(){
   await pool.query("DELETE FROM users WHERE username LIKE 'g12_perf_%'");
   const users=(await pool.query(`INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role,created_at)
     SELECT 'g12_perf_'||g||'@example.invalid','g12_perf_'||g,'Group12 Perf '||g,CASE WHEN g%2=0 THEN 'male' ELSE 'female' END,'scrypt:00:00','active','user',NOW()-(g||' minutes')::interval
-    FROM generate_series(1,160) g RETURNING id ORDER BY id`)).rows;
+    FROM generate_series(1,160) g RETURNING id`)).rows.sort((a,b)=>Number(a.id)-Number(b.id));
   const viewer=users[0].id,ids=users.map(x=>Number(x.id));
   await pool.query(`INSERT INTO friendships(requester_id,addressee_id,status,created_at,updated_at)
     SELECT $1,x,'accepted',NOW(),NOW() FROM unnest($2::bigint[]) x ON CONFLICT DO NOTHING`,[viewer,ids.slice(1,81)]);
