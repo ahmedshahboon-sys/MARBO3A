@@ -18,7 +18,7 @@ const viewport=read("app/ViewportRuntime.js");
 for(const t of ["window.visualViewport","data-keyboard-open","--marbo3a-keyboard-h","focusin","focusout"])must(viewport,t,"keyboard viewport");
 
 const settings=read("app/SettingsPanel.js");
-for(const t of ['aria-label="إعدادات مربوعة"','settings-empty','تعذر حفظ الإعدادات','reduced_motion','text_scale'])must(settings,t,"settings states");
+for(const t of ['إعدادات مربوعة','aria-modal={path==="/settings"?undefined:true}','settings-empty','تعذر حفظ الإعدادات','reduced_motion','text_scale'])must(settings,t,"settings states");
 
 const notifications=read("app/notifications/page.js");
 for(const t of ["تعذر تحميل التنبيهات","ما فيش تنبيهات توا",'role="status"',"disabled={busy||unread===0}"])must(notifications,t,"notification states");
