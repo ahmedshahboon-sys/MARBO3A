@@ -368,3 +368,24 @@ html[data-theme="light"] :where(.about-page,.group-e-admin,.debug-admin-page){ba
 }
 .ui-v3 :where(.live-studio-chat>form button,.live-watch-chat>form button){width:44px!important;height:44px!important}
 .ui-v3 :where(.live-studio-chat>form,.live-watch-chat>form){grid-template-columns:minmax(0,1fr) 44px!important;min-height:52px!important}
+
+
+/* Group 14 global touch-target floor. Loaded last to neutralize legacy 32–42px overrides. */
+.ui-v3 :where(button,[role="button"],.ui-button,.ui-icon-button){
+  min-height:44px!important;
+}
+.ui-v3 :where(
+  .ui-icon-button,
+  .notification-actions button,
+  .message-request-actions button,
+  .friend-card-actions button,
+  .profile-photo-lightbox>button,
+  .profile-photo-lightbox>div:not(.profile-photo-post) button,
+  .feed-friend-suggestions-track article>button,
+  .story-viewer-head-actions button,
+  .story-muted-list article>button,
+  .real-map-controls button,
+  .install-nudge-close
+){
+  min-width:44px!important;
+}
