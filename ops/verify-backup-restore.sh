@@ -9,6 +9,12 @@ set -a; . ./.env; set +a
 command -v age >/dev/null || { echo "ERROR: age missing" >&2; exit 2; }
 [ -n "${BACKUP_AGE_IDENTITY:-}" ] || { echo "ERROR: BACKUP_AGE_IDENTITY must point to the private age identity" >&2; exit 3; }
 [ -f "$BACKUP_AGE_IDENTITY" ] || { echo "ERROR: age identity file missing" >&2; exit 4; }
+MANIFEST="${BACKUP%.dump.age}.sha256"
+if [ -f "$MANIFEST" ]; then
+  (cd "$(dirname "$BACKUP")" && sha256sum -c "$(basename "$MANIFEST")" >/dev/null)
+else
+  echo "WARN: checksum manifest not found beside backup; continuing restore verification" >&2
+fi
 TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
 age -d -i "$BACKUP_AGE_IDENTITY" -o "$TMP" "$BACKUP"
 test -s "$TMP"
