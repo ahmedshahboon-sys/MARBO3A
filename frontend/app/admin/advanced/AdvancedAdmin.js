@@ -2,10 +2,12 @@
 import {useEffect,useMemo,useState} from "react";
 import Link from "next/link";
 import AppDialog from "../../AppDialog";
+import {useAdminStepUp} from "../AdminStepUpContext";
 import styles from "./AdvancedAdmin.module.css";
 
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
 async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t?{"x-marbo3a-session-mode":"cookie"}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+const human=e=>({ADMIN_2FA_REQUIRED:"فعّل المصادقة الثنائية قبل عمليات الإدارة الحساسة",ADMIN_STEP_UP_REQUIRED:"فعّل جلسة أمان الإدارة أولًا"}[e]||e||"تعذر تنفيذ الطلب");
 const nf=v=>Number(v||0).toLocaleString("en-US");
 const dt=v=>v?new Date(v).toLocaleString("ar-LY"):"-";
 const labels={
@@ -21,12 +23,17 @@ const modLabels={posts:"المنشورات",images:"الصور",stories:"الس�
 const anomalyLabels={registration_spike:"ارتفاع التسجيلات",error_spike:"ارتفاع الأخطاء",login_anomaly:"محاولات دخول غير طبيعية",room_spam:"إنشاء غرف بشكل غير طبيعي",abuse_reports:"بلاغات إساءة متكررة"};
 
 export default function AdvancedAdmin(){
+ const step=useAdminStepUp();
  const[tab,setTab]=useState("analytics"),[loading,setLoading]=useState(false),[error,setError]=useState("");
  const[analytics,setAnalytics]=useState(null),[users,setUsers]=useState([]),[q,setQ]=useState("");
  const[modType,setModType]=useState("reports"),[modItems,setModItems]=useState([]),[settings,setSettings]=useState({}),[features,setFeatures]=useState([]),[schema,setSchema]=useState({}),[operations,setOperations]=useState(null),[controlReason,setControlReason]=useState("");
  const[audit,setAudit]=useState([]),[alerts,setAlerts]=useState([]),[dialog,setDialog]=useState(null),[dialogReason,setDialogReason]=useState(""),[messageContext,setMessageContext]=useState(null);
  const stats=useMemo(()=>analytics?[['تسجيلات اليوم',analytics.registrations?.today],['تسجيلات 7 أيام',analytics.registrations?.week],['تسجيلات 30 يوم',analytics.registrations?.month],['نشطون 30 يوم',analytics.users?.active],['غير نشطين',analytics.users?.inactive],['دخول اليوم',analytics.logins?.today],['منشورات اليوم',analytics.posts?.today],['رسائل اليوم',analytics.messages?.today],['غرف جديدة اليوم',analytics.rooms?.today],['تفاعلات اليوم',analytics.reactions?.today],['مستخدمون عائدون',analytics.returningUsers],['متوسط الجلسة',`${Math.round(Number(analytics.averageSessionSeconds||0)/60)} د`]]:[],[analytics]);
- async function run(fn){setLoading(true);setError("");try{await fn()}catch(e){setError(e.message||"REQUEST_FAILED")}finally{setLoading(false)}}
+ async function run(fn){setLoading(true);setError("");try{await fn()}catch(e){setError(human(e.message))}finally{setLoading(false)}}
+ async function sensitiveApi(path,options={}){
+   try{return await api(path,{...options,headers:{...(options.headers||{}),...step.headers()}})}
+   catch(e){if(e.message==="ADMIN_STEP_UP_REQUIRED"||e.message==="ADMIN_2FA_REQUIRED")step.clear();throw e}
+ }
  async function loadAnalytics(){setAnalytics((await api("/api/admin/advanced/analytics")).analytics)}
  async function loadUsers(){setUsers((await api(`/api/admin/advanced/users?q=${encodeURIComponent(q.trim())}`)).users||[])}
  async function loadModeration(){setModItems((await api(`/api/admin/advanced/moderation?type=${encodeURIComponent(modType)}&q=${encodeURIComponent(q.trim())}`)).items||[])}
@@ -35,12 +42,12 @@ export default function AdvancedAdmin(){
  async function loadAlerts(){setAlerts((await api("/api/admin/advanced/anomalies")).alerts||[])}
  async function refresh(){await run(async()=>{if(tab==="analytics")await loadAnalytics();if(tab==="users")await loadUsers();if(tab==="moderation")await loadModeration();if(tab==="controls")await loadSettings();if(tab==="audit")await loadAudit();if(tab==="alerts")await loadAlerts()})}
  useEffect(()=>{if(!token()){location.replace("/");return}refresh()},[tab,modType]);
- async function saveSetting(key,value){if(controlReason.trim().length<3){setError("اكتب سبب التعديل قبل الحفظ");return}await run(async()=>{await api("/api/admin/advanced/settings",{method:"PATCH",body:JSON.stringify({key,value,reason:controlReason.trim()})});if(key==="site_font")window.dispatchEvent(new CustomEvent("marbo3a:site-font",{detail:{font:value}}));await loadSettings()})}
- async function toggleFeature(feature){if(controlReason.trim().length<3){setError("اكتب سبب التعديل قبل تغيير Feature Flag");return}await run(async()=>{await api(`/api/admin/advanced/features/${feature.key}`,{method:"PATCH",body:JSON.stringify({enabled:!feature.enabled,reason:controlReason.trim()})});await loadSettings()})}
+ async function saveSetting(key,value){if(controlReason.trim().length<3){setError("اكتب سبب التعديل قبل الحفظ");return}await run(async()=>{await sensitiveApi("/api/admin/advanced/settings",{method:"PATCH",body:JSON.stringify({key,value,reason:controlReason.trim()})});if(key==="site_font")window.dispatchEvent(new CustomEvent("marbo3a:site-font",{detail:{font:value}}));await loadSettings()})}
+ async function toggleFeature(feature){if(controlReason.trim().length<3){setError("اكتب سبب التعديل قبل تغيير Feature Flag");return}await run(async()=>{await sensitiveApi(`/api/admin/advanced/features/${feature.key}`,{method:"PATCH",body:JSON.stringify({enabled:!feature.enabled,reason:controlReason.trim()})});await loadSettings()})}
  function askModerate(type,item){setDialogReason("");setDialog({kind:"moderate",type,item})}
  function askMessage(item){setDialogReason("");setDialog({kind:"message",item})}
  function askAck(item){setDialogReason("");setDialog({kind:"ack",item})}
- async function confirmDialog(){if(dialogReason.trim().length<3){setError("السبب مطلوب للتدقيق");return}await run(async()=>{if(dialog.kind==="moderate"){const singular={posts:"post",images:"image",stories:"story",comments:"comment",rooms:"room"}[dialog.type];await api(`/api/admin/advanced/moderation/${singular}/${dialog.item.id}/action`,{method:"POST",body:JSON.stringify({reason:dialogReason.trim()})});setDialog(null);await loadModeration()}else if(dialog.kind==="message"){const d=await api(`/api/admin/advanced/reported-messages/${dialog.item.report_id}?reason=${encodeURIComponent(dialogReason.trim())}`);setMessageContext(d.context);setDialog(null)}else if(dialog.kind==="ack"){await api(`/api/admin/advanced/anomalies/${dialog.item.id}/ack`,{method:"POST",body:JSON.stringify({reason:dialogReason.trim()})});setDialog(null);await loadAlerts()}})}
+ async function confirmDialog(){if(dialogReason.trim().length<3){setError("السبب مطلوب للتدقيق");return}await run(async()=>{if(dialog.kind==="moderate"){const singular={posts:"post",images:"image",stories:"story",comments:"comment",rooms:"room"}[dialog.type];await sensitiveApi(`/api/admin/advanced/moderation/${singular}/${dialog.item.id}/action`,{method:"POST",body:JSON.stringify({reason:dialogReason.trim()})});setDialog(null);await loadModeration()}else if(dialog.kind==="message"){const d=await sensitiveApi(`/api/admin/advanced/reported-messages/${dialog.item.report_id}?reason=${encodeURIComponent(dialogReason.trim())}`);setMessageContext(d.context);setDialog(null)}else if(dialog.kind==="ack"){await api(`/api/admin/advanced/anomalies/${dialog.item.id}/ack`,{method:"POST",body:JSON.stringify({reason:dialogReason.trim()})});setDialog(null);await loadAlerts()}})}
  function settingEditor(key,item){
   const spec=schema[key]||{},value=item?.value;
   if(spec.type==="boolean"||typeof value==="boolean")return <button className={value?styles.on:styles.off} onClick={()=>saveSetting(key,!value)}>{value?"مفعّل":"متوقف"}</button>;
