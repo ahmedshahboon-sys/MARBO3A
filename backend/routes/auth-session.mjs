@@ -123,17 +123,18 @@ export function registerAuthSession(app){
   app.post("/api/account/step-up/confirm",async(req,res)=>{
     const u=await requireAuth(req,res);if(!u)return;
     await ensureRedis();
-    const challengeId=String(req.body?.challengeId||""),code=String(req.body?.code||"");
-    if(!/^[a-f0-9]{48}$/i.test(challengeId)||!/^\d{6}$/.test(code))return res.status(400).json({ok:false,error:"INVALID_STEP_UP"});
+    const challengeId=String(req.body?.challengeId||""),code=String(req.body?.code||""),recoveryCode=String(req.body?.recoveryCode||"");
+    if(!/^[a-f0-9]{48}$/i.test(challengeId)||(!/^\d{6}$/.test(code)&&!recoveryCode))return res.status(400).json({ok:false,error:"INVALID_STEP_UP"});
     const key=`stepup:challenge:${u.id}:${challengeId}`,raw=await redis.get(key);
     if(!raw)return res.status(400).json({ok:false,error:"STEP_UP_EXPIRED"});
     const p=JSON.parse(raw);
     if(Number(p.attempts||0)>=TWO_FACTOR_MAX_ATTEMPTS){await redis.del(key);return res.status(429).json({ok:false,error:"STEP_UP_TOO_MANY_ATTEMPTS"})}
-    if(hashCode(u.id,code)!==p.hash){const retry=await failedAttempt(key,p);return res.status(retry?400:429).json({ok:false,error:retry?"STEP_UP_INVALID":"STEP_UP_TOO_MANY_ATTEMPTS",attemptsLeft:retry?TWO_FACTOR_MAX_ATTEMPTS-p.attempts:0})}
+    const recoveryUsed=recoveryCode?await consumeRecoveryCode(u.id,recoveryCode):false,valid=recoveryUsed||hashCode(u.id,code)===p.hash;
+    if(!valid){const retry=await failedAttempt(key,p);return res.status(retry?400:429).json({ok:false,error:retry?"STEP_UP_INVALID":"STEP_UP_TOO_MANY_ATTEMPTS",attemptsLeft:retry?TWO_FACTOR_MAX_ATTEMPTS-p.attempts:0})}
     await redis.del(key);
     const stepUpToken=await issueStepUpGrant(u.id,{sessionToken:tokenFrom(req),admin:isAdmin(u)});
-    await recordSecurity(u.id,"step_up_verified",req,{factor:"password+2fa",admin:isAdmin(u)});
-    res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL});
+    await recordSecurity(u.id,"step_up_verified",req,{factor:recoveryUsed?"password+2fa-recovery":"password+2fa",admin:isAdmin(u)});
+    res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL,recoveryUsed});
   });
 
   app.post("/api/account/2fa/request",async(req,res)=>{
