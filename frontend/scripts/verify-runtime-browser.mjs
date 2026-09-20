@@ -111,13 +111,16 @@ try{
   async function runCase(route,width,height,mode){
     current={route,mode,width,height,exceptions:[],consoleErrors:[],network:[]};
     await cdp.send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile:width<=520,screenWidth:width,screenHeight:height});
+    await cdp.send("Emulation.setPageScaleFactor",{pageScaleFactor:mode==="zoom200"?2:1});
     if(mode==="standalone")await cdp.send("Page.addScriptToEvaluateOnNewDocument",{source:standaloneBootstrap});
     await cdp.send("Page.navigate",{url:origin+route});
     await sleep(1400);
-    const result=await evaluate(`(()=>{const d=document.documentElement,b=document.body;const focusables=[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);const badButtons=focusables.filter(x=>{const r=x.getBoundingClientRect();return (x.tagName==="BUTTON"||x.getAttribute("role")==="button")&&(r.width<44||r.height<44)}).length;const unlabeled=focusables.filter(x=>{if(x.tagName==="INPUT"||x.tagName==="TEXTAREA"||x.tagName==="SELECT")return !(x.labels?.length||x.getAttribute("aria-label")||x.getAttribute("aria-labelledby")||x.getAttribute("placeholder"));return false}).length;return {title:document.title,bodyText:(b?.innerText||"").trim().length,scrollWidth:d.scrollWidth,innerWidth:innerWidth,overflow:d.scrollWidth>innerWidth+1,focusables:focusables.length,badButtons,unlabeled,theme:d.dataset.theme||"",manifest:document.querySelector('link[rel="manifest"]')?.getAttribute("href")||"",standalone:matchMedia("(display-mode: standalone)").matches,hydrationText:/hydration failed|hydration mismatch/i.test(b?.innerText||"")}})()`,false);
+    const result=await evaluate(`(()=>{const d=document.documentElement,b=document.body;const focusables=[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);const badButtons=focusables.filter(x=>{const r=x.getBoundingClientRect();return (x.tagName==="BUTTON"||x.getAttribute("role")==="button")&&(r.width<44||r.height<44)}).length;const unlabeled=focusables.filter(x=>{if(x.tagName==="INPUT"||x.tagName==="TEXTAREA"||x.tagName==="SELECT")return !(x.labels?.length||x.getAttribute("aria-label")||x.getAttribute("aria-labelledby")||x.getAttribute("placeholder"));return false}).length;return {title:document.title,bodyText:(b?.innerText||"").trim().length,scrollWidth:d.scrollWidth,innerWidth:innerWidth,overflow:d.scrollWidth>innerWidth+1,focusables:focusables.length,badButtons,unlabeled,theme:d.dataset.theme||"",manifest:document.querySelector('link[rel="manifest"]')?.getAttribute("href")||"",standalone:matchMedia("(display-mode: standalone)").matches,zoom:Number(visualViewport?.scale||1),hydrationText:/hydration failed|hydration mismatch/i.test(b?.innerText||"")}})()`,false);
     if(!result.bodyText)fail(`${route} ${width}x${height} ${mode}: empty body`);
     if(result.overflow)fail(`${route} ${width}x${height} ${mode}: horizontal overflow ${result.scrollWidth} > ${result.innerWidth}`);
     if(result.unlabeled)fail(`${route} ${width}x${height} ${mode}: ${result.unlabeled} unlabeled form control(s)`);
+    if(result.badButtons)fail(`${route} ${width}x${height} ${mode}: ${result.badButtons} interactive button target(s) below 44px`);
+    if(mode==="zoom200"&&result.zoom<1.9)fail(`${route}: 200% zoom emulation not observed (${result.zoom})`);
     if(route==="/"&&!result.manifest)fail(`${route}: manifest link missing`);
     if(mode==="standalone"&&!result.standalone)fail(`${route}: standalone emulation not observed`);
     if(result.hydrationText)fail(`${route}: hydration failure text rendered`);
@@ -126,6 +129,7 @@ try{
     await sleep(80);
     const focus=await evaluate(`(()=>{const e=document.activeElement,s=e&&getComputedStyle(e);return {tag:e?.tagName||"",body:e===document.body,outline:s?.outlineStyle||"",box:s?.boxShadow||""}})()`);
     if(result.focusables&&focus.body)fail(`${route} ${width}x${height}: Tab did not enter interactive content`);
+    if(result.focusables&&!focus.body&&focus.outline==="none"&&(!focus.box||focus.box==="none"))fail(`${route} ${width}x${height}: focused control has no visible focus indicator`);
     if(current.exceptions.length)fail(`${route} ${width}x${height}: runtime exceptions: ${[...new Set(current.exceptions)].join(" | ")}`);
     if(current.consoleErrors.length)fail(`${route} ${width}x${height}: console/hydration errors: ${[...new Set(current.consoleErrors)].join(" | ")}`);
     if(current.network.length)fail(`${route} ${width}x${height}: missing/failed assets: ${[...new Set(current.network)].join(" | ")}`);
@@ -134,6 +138,7 @@ try{
 
   for(const [width,height] of viewports)for(const route of routes)await runCase(route,width,height,"browser");
   await runCase("/",390,844,"standalone");
+  await runCase("/explore",390,844,"zoom200");
 
   const manifest=await (await fetch(origin+"/manifest.webmanifest")).json();
   if(manifest.display!=="standalone")fail(`manifest display must be standalone, got ${manifest.display}`);
