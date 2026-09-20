@@ -32,10 +32,14 @@ async function consumeRecoveryCode(userId,value){
   return Boolean(row);
 }
 async function recoveryRemaining(userId){return Number((await pool.query(`SELECT COUNT(*)::int c FROM two_factor_recovery_codes WHERE user_id=$1 AND used_at IS NULL`,[userId]).catch(()=>({rows:[{c:0}]}))).rows[0]?.c||0)}
-async function issueStepUpGrant(userId){
+async function issueStepUpGrant(userId,{sessionToken="",admin=false}={}){
   await ensureRedis();
   const token=crypto.randomBytes(32).toString("hex");
   await redis.set(`stepup:grant:${userId}:${token}`,"1",{EX:STEP_UP_TTL});
+  if(admin&&/^[a-f0-9]{64}$/i.test(sessionToken)){
+    const sessionHash=crypto.createHash("sha256").update(sessionToken).digest("hex");
+    await redis.set(`adminstepup:grant:${userId}:${sessionHash}:${token}`,"1",{EX:STEP_UP_TTL});
+  }
   return token;
 }
 async function failedAttempt(key,p){
@@ -106,7 +110,8 @@ export function registerAuthSession(app){
     await ensureRedis();
     const password=String(req.body?.currentPassword||""),stored=(await pool.query(`SELECT password_hash,email,two_factor_enabled FROM users WHERE id=$1`,[u.id])).rows[0];
     if(!await verifyPassword(password,stored?.password_hash)){await recordSecurity(u.id,"step_up_password_failed",req);return res.status(403).json({ok:false,error:"WRONG_PASSWORD"})}
-    if(!stored.two_factor_enabled){const stepUpToken=await issueStepUpGrant(u.id);await recordSecurity(u.id,"step_up_verified",req,{factor:"password"});return res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL,twoFactorRequired:false})}
+    if(isAdmin(u)&&!stored.two_factor_enabled)return res.status(403).json({ok:false,error:"ADMIN_2FA_REQUIRED"});
+    if(!stored.two_factor_enabled){const stepUpToken=await issueStepUpGrant(u.id,{sessionToken:tokenFrom(req)});await recordSecurity(u.id,"step_up_verified",req,{factor:"password"});return res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL,twoFactorRequired:false})}
     const challengeId=crypto.randomBytes(24).toString("hex"),code=String(crypto.randomInt(100000,1000000)),key=`stepup:challenge:${u.id}:${challengeId}`;
     await redis.set(key,JSON.stringify({hash:hashCode(u.id,code),attempts:0}),{EX:STEP_UP_TTL});
     try{await sendCode({...u,email:stored.email},code,"stepup")}catch(e){await redis.del(key);return res.status(502).json({ok:false,error:e.message})}
@@ -125,8 +130,8 @@ export function registerAuthSession(app){
     if(Number(p.attempts||0)>=TWO_FACTOR_MAX_ATTEMPTS){await redis.del(key);return res.status(429).json({ok:false,error:"STEP_UP_TOO_MANY_ATTEMPTS"})}
     if(hashCode(u.id,code)!==p.hash){const retry=await failedAttempt(key,p);return res.status(retry?400:429).json({ok:false,error:retry?"STEP_UP_INVALID":"STEP_UP_TOO_MANY_ATTEMPTS",attemptsLeft:retry?TWO_FACTOR_MAX_ATTEMPTS-p.attempts:0})}
     await redis.del(key);
-    const stepUpToken=await issueStepUpGrant(u.id);
-    await recordSecurity(u.id,"step_up_verified",req,{factor:"password+2fa"});
+    const stepUpToken=await issueStepUpGrant(u.id,{sessionToken:tokenFrom(req),admin:isAdmin(u)});
+    await recordSecurity(u.id,"step_up_verified",req,{factor:"password+2fa",admin:isAdmin(u)});
     res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL});
   });
 
