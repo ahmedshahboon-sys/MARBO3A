@@ -83,7 +83,7 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
         const dockActions=[...document.querySelectorAll(".social-dock a,.social-dock button")].map(x=>x.getBoundingClientRect());
         const input=rect("#matrix-input");
         const inputCss=css("#matrix-input");
-        const interactive=[...document.querySelectorAll('button,[role="button"]')].filter(x=>x.getClientRects().length).map(x=>x.getBoundingClientRect());
+        const interactive=[...document.querySelectorAll('button,[role="button"]')].filter(x=>x.getClientRects().length).map(x=>{const r=x.getBoundingClientRect();return{width:r.width,height:r.height,label:(x.tagName.toLowerCase()+"."+String(x.className||"").trim().replace(/\\s+/g,".")+" "+String(x.getAttribute("aria-label")||x.textContent||"").trim().slice(0,32)).trim()}}),badInteractive=interactive.filter(r=>r.width<44||r.height<44);
         const dialogs=[...document.querySelectorAll('[role="dialog"]')].filter(x=>x.getClientRects().length);
         const pageCss=css(".social-page");
         const viewportW=innerWidth,viewportH=innerHeight;
@@ -96,7 +96,7 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
         check(headerActions.length>=2&&headerActions.every(r=>r.width>=44&&r.height>=44),"header hit target below 44px");
         check(dockActions.length>=5&&dockActions.every(r=>r.height>=44),"dock hit target below 44px");
         check(input&&input.height>=44,"input height "+input?.height);
-        check(interactive.every(r=>r.width>=44&&r.height>=44),"interactive target below 44x44");
+        check(!badInteractive.length,"interactive target below 44x44: "+badInteractive.map(r=>r.label+"="+Math.round(r.width)+"x"+Math.round(r.height)).join(", "));
         check(dialogs.every(x=>x.getAttribute("aria-modal")==="true"&&Boolean(x.getAttribute("aria-label")||x.getAttribute("aria-labelledby"))),"dialog semantics incomplete");
         check(document.documentElement.dir==="rtl","document direction is not RTL");
         if(expected.width<=520)check(parseFloat(inputCss?.fontSize||"0")>=16,"mobile input font "+inputCss?.fontSize);
