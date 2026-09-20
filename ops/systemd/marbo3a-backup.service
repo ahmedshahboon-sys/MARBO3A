@@ -1,0 +1,13 @@
+[Unit]
+Description=MARBO3A encrypted database backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/marbo3a
+ExecStart=/usr/bin/env bash /opt/marbo3a/ops/backup-database.sh /opt/marbo3a
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
