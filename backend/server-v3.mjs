@@ -15,8 +15,13 @@ restoreHttpCreateServer();
 registerExplicitRoutes(app);
 attachRealtime(server);
 
-app.get("/health",async(_req,res)=>{try{await pool.query("SELECT 1");res.json({ok:true,project:"MARBO3A",database:true,redis:redis.isReady})}catch{res.status(503).json({ok:false,project:"MARBO3A",database:false,redis:redis.isReady})}});
-app.get("/api/health",async(_req,res)=>{let database="connected";try{await pool.query("SELECT 1")}catch{database="disconnected"}res.status(database==="connected"?200:503).json({ok:database==="connected",api:"MARBO3A API",database,realtime:"ready",redis:redis.isReady?"connected":"disconnected",email:process.env.BREVO_API_KEY?"configured":"missing",time:new Date().toISOString()})});
+async function publicHealth(_req,res){
+  res.setHeader("Cache-Control","no-store");
+  try{await pool.query("SELECT 1");return res.json({ok:true})}
+  catch{return res.status(503).json({ok:false})}
+}
+app.get("/health",publicHealth);
+app.get("/api/health",publicHealth);
 
 await ensureRedis();
 server.listen(4000,"0.0.0.0",()=>console.log("MARBO3A API listening on 4000 · explicit routes · realtime + presence"));

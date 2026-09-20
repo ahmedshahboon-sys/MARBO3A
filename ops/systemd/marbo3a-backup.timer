@@ -1,0 +1,11 @@
+[Unit]
+Description=Run MARBO3A encrypted backup every 6 hours
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:15:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=marbo3a-backup.service
+
+[Install]
+WantedBy=timers.target

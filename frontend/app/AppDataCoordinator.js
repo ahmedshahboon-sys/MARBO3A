@@ -2,9 +2,10 @@
 import {useEffect} from "react";
 import {usePathname} from "next/navigation";
 import {isAppShellPath} from "./navigation-policy";
+import {sessionMarker,cookieHeaders} from "./webSession";
 
-const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-const authHeaders=()=>{const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}};
+const token=()=>sessionMarker();
+const authHeaders=()=>cookieHeaders();
 const emit=(name,detail)=>window.dispatchEvent(new CustomEvent(`marbo3a:${name}`,{detail}));
 
 export default function AppDataCoordinator(){

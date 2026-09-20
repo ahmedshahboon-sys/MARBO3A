@@ -5,7 +5,7 @@ import {usePathname} from "next/navigation";
 import Icon from "./Icon";
 
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const t=token(),headers={...(options.headers||{})};if(t&&t!=="cookie")headers.authorization=`Bearer ${t}`;if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(options.headers||{})};if(t&&t!=="cookie")headers["x-marbo3a-session-mode"]="cookie";if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 
 export default function RoomExperienceRuntime(){
  const path=usePathname(),roomId=useMemo(()=>path?.match(/^\/room\/(\d+)\/chat/)?.[1]||null,[path]),[actionsHost,setActionsHost]=useState(null),[streamHost,setStreamHost]=useState(null),[events,setEvents]=useState([]),[busy,setBusy]=useState(false),[status,setStatus]=useState("");

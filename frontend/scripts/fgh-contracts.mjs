@@ -2,7 +2,8 @@ import fs from "fs/promises";
 const checks=[
  ["app/GenderMark.js",["♂","♀","gender-mark"]],
  ["app/profile/edit/page.js",["/api/profile/social","birthVisibility","birthDate","GenderMark","/api/profile/completeness","profile-completeness-card"]],
- ["app/settings/privacy/page.js",["/api/privacy/v2","message_requests_enabled","who_can_see_story","read_receipts","who_can_invite_room"]],
+ ["app/PrivacySettingsPanel.js",["/api/privacy","message_requests_enabled","who_can_see_story","read_receipts","who_can_invite_room","who_can_mention","who_can_tag"]],
+ ["app/settings/privacy/page.js",["PrivacySettingsPanel","مصدر واحد"]],
  ["app/messages/page.js",["/api/message-requests","طلبات المراسلة","message-request:new","message-request:accepted","GenderMark"]],
  ["app/RealtimeClient.js",["message-request:new","message-request:accepted"]],
  ["app/SocialFeed.js",["GenderMark","post-friend-action","/api/friends/request","تم الإرسال ✓","/api/profile/pin-post","pinnedId","onPinnedChange"]],

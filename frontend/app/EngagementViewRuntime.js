@@ -1,14 +1,14 @@
 "use client";
 import {useEffect} from "react";
 import {usePathname} from "next/navigation";
+import {sessionMarker,cookieHeaders} from "./webSession";
 
-const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
 
 export default function EngagementViewRuntime(){
  const path=usePathname();
  useEffect(()=>{
-   const t=token();if(!t)return;
-   const headers=t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{},seen=new Set(),timers=new Map();
+   if(!sessionMarker())return;
+   const headers=cookieHeaders(),seen=new Set(),timers=new Map();
    const postView=(type,contentId)=>{const key=`${type}:${contentId}`;if(seen.has(key))return;seen.add(key);fetch("/api/engagement/views",{method:"POST",headers:{...headers,"content-type":"application/json"},credentials:"same-origin",keepalive:true,body:JSON.stringify({contentType:type,contentId})}).catch(()=>{})};
    const profile=path?.match(/^\/u\/([^/?#]+)/)?.[1];
    if(profile)fetch(`/api/social/profile/${encodeURIComponent(profile)}`,{headers,credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{const id=d?.profile?.id||d?.user?.id;if(id)postView("profile",Number(id))}).catch(()=>{});

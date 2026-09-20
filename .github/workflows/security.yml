@@ -1,0 +1,71 @@
+name: MARBO3A Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  dependency-audit:
+    name: Dependency audit (${{ matrix.directory }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [backend, frontend]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+      - name: Fail on High or Critical dependency vulnerabilities
+        working-directory: ${{ matrix.directory }}
+        run: npm audit --audit-level=high
+      - name: Warn on Moderate dependency vulnerabilities
+        working-directory: ${{ matrix.directory }}
+        shell: bash
+        run: npm audit --audit-level=moderate || echo "::warning::Moderate dependency vulnerabilities detected; High/Critical gate already passed."
+
+  source-security:
+    name: Secret and static security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Secret scanning
+        run: node scripts/group10-secret-scan.mjs
+      - name: Static unsafe-pattern scanning
+        run: node scripts/group10-static-security.mjs
+      - name: Supply-chain contract
+        run: node scripts/group10-supply-chain-contracts.mjs
+
+  codeql:
+    name: CodeQL JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: github/codeql-action/init@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3
+        with:
+          category: "/language:javascript-typescript"

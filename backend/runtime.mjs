@@ -7,9 +7,12 @@ const SESSION_TTL=7*24*60*60;
 const state=globalThis[KEY]||(globalThis[KEY]={
   pool:new pg.Pool({
     connectionString:process.env.DATABASE_URL,
-    max:Math.max(4,Number(process.env.PG_POOL_MAX)||20),
-    idleTimeoutMillis:30000,
-    connectionTimeoutMillis:5000
+    max:Math.max(4,Math.min(50,Number(process.env.PG_POOL_MAX)||20)),
+    idleTimeoutMillis:Math.max(5000,Math.min(300000,Number(process.env.PG_IDLE_TIMEOUT_MS)||30000)),
+    connectionTimeoutMillis:Math.max(1000,Math.min(30000,Number(process.env.PG_CONNECT_TIMEOUT_MS)||5000)),
+    statement_timeout:Math.max(1000,Math.min(120000,Number(process.env.PG_STATEMENT_TIMEOUT_MS)||15000)),
+    query_timeout:Math.max(1000,Math.min(180000,Number(process.env.PG_QUERY_TIMEOUT_MS)||20000)),
+    idle_in_transaction_session_timeout:Math.max(5000,Math.min(300000,Number(process.env.PG_IDLE_TX_TIMEOUT_MS)||30000))
   }),
   redis:createClient({url:process.env.REDIS_URL}),
   redisReady:null,
@@ -22,6 +25,27 @@ if(!state.redis.__marbo3aErrorHook){
 
 export const pool=state.pool;
 export const redis=state.redis;
+
+const SLOW_QUERY_MS=Math.max(100,Math.min(60000,Number(process.env.PG_SLOW_QUERY_MS)||750));
+if(!pool.__marbo3aSlowQueryHook){
+  const rawQuery=pool.query.bind(pool);
+  pool.query=(...args)=>{
+    const started=process.hrtime.bigint(),result=rawQuery(...args);
+    if(!result||typeof result.then!=="function")return result;
+    return result.then(value=>{
+      const durationMs=Number(process.hrtime.bigint()-started)/1e6;
+      if(durationMs>=SLOW_QUERY_MS&&process.env.NODE_ENV!=="test"){
+        console.warn("slow database query",{durationMs:Math.round(durationMs),command:String(value?.command||"UNKNOWN"),rowCount:Number(value?.rowCount||0)});
+      }
+      return value;
+    },error=>{
+      const durationMs=Number(process.hrtime.bigint()-started)/1e6;
+      if(durationMs>=SLOW_QUERY_MS&&process.env.NODE_ENV!=="test")console.warn("slow failed database query",{durationMs:Math.round(durationMs),code:String(error?.code||"UNKNOWN")});
+      throw error;
+    });
+  };
+  pool.__marbo3aSlowQueryHook=true;
+}
 
 export async function ensureRedis(){
   if(redis.isOpen)return redis;
@@ -104,6 +128,25 @@ export async function requireAdmin(req,res){
   return u;
 }
 
+export async function requireAdminStepUp(req,res){
+  const u=await requireAdmin(req,res);
+  if(!u)return null;
+  if(!u.two_factor_enabled){res.status(403).json({ok:false,error:"ADMIN_2FA_REQUIRED"});return null}
+  const grant=String(req.headers["x-marbo3a-step-up"]||"").trim();
+  const session=tokenFrom(req);
+  if(!/^[a-f0-9]{64}$/i.test(grant)||!/^[a-f0-9]{64}$/i.test(session)){
+    res.status(403).json({ok:false,error:"ADMIN_STEP_UP_REQUIRED"});
+    return null;
+  }
+  await ensureRedis();
+  const key=`adminstepup:grant:${u.id}:${tokenHash(session)}:${grant}`;
+  if(await redis.get(key)!=="1"){
+    res.status(403).json({ok:false,error:"ADMIN_STEP_UP_REQUIRED"});
+    return null;
+  }
+  return u;
+}
+
 export async function createSession(userId,ttl=SESSION_TTL){
   await ensureRedis();
   const token=crypto.randomBytes(32).toString("hex");
@@ -124,6 +167,20 @@ export async function destroySession(token){
   const hash=tokenHash(token);
   await pool.query(`DELETE FROM durable_sessions WHERE token_hash=$1`,[hash]);
   await redis.del(`session:${token}`).catch(()=>{});
+}
+
+export async function actionRateLimit(scope,identity,{limit,windowSeconds}){
+  await ensureRedis();
+  const safeScope=String(scope||"action").replace(/[^a-z0-9:_-]/gi,"_").slice(0,80),safeIdentity=String(identity||"anon").replace(/[^a-z0-9:._-]/gi,"_").slice(0,120);
+  const window=Math.max(1,Math.min(3600,Number(windowSeconds)||60)),max=Math.max(1,Math.min(10000,Number(limit)||30));
+  const bucket=Math.floor(Date.now()/1000/window),key=`actionlimit:${safeScope}:${safeIdentity}:${bucket}`;
+  const count=Number(await redis.incr(key));if(count===1)await redis.expire(key,window*2);
+  const retryAfter=Math.max(1,window-Math.floor(Date.now()/1000)%window);
+  return{allowed:count<=max,count,limit:max,retryAfter,windowSeconds:window};
+}
+export function rejectRateLimit(res,result,code="RATE_LIMITED"){
+  res.setHeader("Retry-After",String(result?.retryAfter||1));
+  return res.status(429).json({ok:false,error:code,retryAfter:result?.retryAfter||1,limit:result?.limit||null});
 }
 
 export const clean=(v="",n=300)=>String(v??"").trim().replace(/\s+/g," ").slice(0,n);

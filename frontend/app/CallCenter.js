@@ -3,7 +3,7 @@ import {useEffect,useRef,useState} from "react";
 import Icon from "./Icon";
 import useModalLayer from "./useModalLayer";
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const headers={authorization:`Bearer ${token()}`,...(options.headers||{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||"REQUEST_FAILED");e.status=r.status;throw e}return d}
+async function api(path,options={}){const headers={"x-marbo3a-session-mode":"cookie",...(options.headers||{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||"REQUEST_FAILED");e.status=r.status;throw e}return d}
 const trace=(type,data={})=>{try{window.dispatchEvent(new CustomEvent("marbo3a:rtc-debug",{detail:{type,...data}}))}catch{}};
 const fmt=s=>`${String(Math.floor((s||0)/60)).padStart(2,"0")}:${String((s||0)%60).padStart(2,"0")}`;
 const terminalStatus=s=>["declined","ended","missed","cancelled","failed"].includes(String(s||""));

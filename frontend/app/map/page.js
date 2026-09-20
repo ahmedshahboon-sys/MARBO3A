@@ -5,7 +5,7 @@ import RealPeopleMap from "../RealPeopleMap";
 import "./real-map.css";
 
 const token=()=>localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";
-async function api(path,options={}){const t=token(),headers=t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{ };if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||"REQUEST_FAILED");e.status=r.status;throw e}return d}
+async function api(path,options={}){const t=token(),headers=t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{ };if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||"REQUEST_FAILED");e.status=r.status;throw e}return d}
 const mapError=e=>({UNAUTHORIZED:"سجل دخولك لاستخدام خريطة مربوعة",FEATURE_DISABLED:"الخريطة موقوفة مؤقتًا",INVALID_PRECISE_LOCATION:"تعذر التحقق من الموقع الدقيق",INVALID_LOCATION_VISIBILITY:"إعداد ظهور الموقع غير صالح"}[e?.message]||"تعذر تحميل الخريطة الآن");
 export default function MapPage(){
  const[users,setUsers]=useState([]),[viewerId,setViewerId]=useState(null),[error,setError]=useState(""),[filter,setFilter]=useState("all"),[cities,setCities]=useState([]),[prefs,setPrefs]=useState({city:"",sharePrecise:false,visibilityMode:"everyone",ghostMode:false,latitude:null,longitude:null}),[settings,setSettings]=useState(false),[saving,setSaving]=useState(false),[notice,setNotice]=useState("");

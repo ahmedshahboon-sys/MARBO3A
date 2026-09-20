@@ -20,7 +20,7 @@ http.createServer=function observabilityFoundationCreateServer(app,...args){
         if(!shouldPersist(status,durationMs))return;
         const level=status>=500?"ERROR":durationMs>=SLOW_MS?"WARN":"INFO",category=status>=500?"HTTP_ERROR":durationMs>=SLOW_MS?"SLOW_REQUEST":"HTTP_SAMPLE";
         const details={requestId:rid,method:req.method,durationMs:Math.round(durationMs),contentLength:Number(res.getHeader("content-length")||0)||null,userAgent:clean(req.headers["user-agent"],180)};
-        pool.query(`INSERT INTO operation_logs(user_id,level,category,action,status_code,path,ip_address,details) VALUES(NULL,$1,$2,$3,$4,$5,$6,$7::jsonb)`,[level,category,`${req.method} ${routePath(req)}`,status,routePath(req),ipOf(req),JSON.stringify(details)]).catch(e=>{if(process.env.NODE_ENV!=="test")console.error("request observability",e?.message||e)});
+        pool.query(`INSERT INTO operation_logs(user_id,level,category,action,status_code,path,ip_address,meta) VALUES(NULL,$1,$2,$3,$4,$5,$6,$7::jsonb)`,[level,category,`${req.method} ${routePath(req)}`,status,routePath(req),ipOf(req),JSON.stringify(details)]).catch(e=>{if(process.env.NODE_ENV!=="test")console.error("request observability",e?.message||e)});
       });
       next();
     });

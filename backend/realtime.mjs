@@ -3,12 +3,39 @@ import {pool,ensureRedis,sessionUser,isAdmin,setRealtimeServer,redis} from "./ru
 
 const allowedOrigin=o=>!o||o==="https://marbo3a.ly"||o==="https://www.marbo3a.ly"||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(o);
 const connections=new Map();
+const REALTIME_LIMITS={presence:{limit:18,window:10},roomJoin:{limit:20,window:10},chatJoin:{limit:20,window:10},typing:{limit:30,window:10}};
 
+function socketCookieToken(socket){
+  const item=String(socket.request?.headers?.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("marbo3a_session="));
+  if(!item)return"";
+  try{const value=decodeURIComponent(item.slice("marbo3a_session=".length));return /^[a-f0-9]{64}$/i.test(value)?value:""}catch{return""}
+}
 function tokenFromSocket(socket){
-  const direct=String(socket.handshake.auth?.token||socket.handshake.query?.token||"");
-  if(/^[a-f0-9]{64}$/i.test(direct))return direct;
-  const cookie=String(socket.request?.headers?.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("marbo3a_session="));
-  return cookie?decodeURIComponent(cookie.slice("marbo3a_session=".length)):"";
+  const cookie=socketCookieToken(socket);
+  if(cookie)return cookie;
+  const direct=String(socket.handshake.auth?.token||"");
+  return /^[a-f0-9]{64}$/i.test(direct)?direct:"";
+}
+async function realtimeLimited(userId,action){
+  const policy=REALTIME_LIMITS[action];if(!policy)return false;
+  await ensureRedis();
+  const bucket=Math.floor(Date.now()/1000/policy.window),key=`rtlimit:${action}:${userId}:${bucket}`;
+  const count=Number(await redis.incr(key));
+  if(count===1)await redis.expire(key,policy.window*2);
+  return count>policy.limit;
+}
+function reply(ack,payload){if(typeof ack==="function")try{ack(payload)}catch{}}
+async function roomAccess(roomId,user){
+  if(!Number.isInteger(roomId)||roomId<1)return false;
+  if(isAdmin(user))return true;
+  return Boolean((await pool.query(`SELECT 1 FROM room_members m WHERE m.room_id=$1 AND m.user_id=$2 AND NOT EXISTS(SELECT 1 FROM room_bans b WHERE b.room_id=m.room_id AND b.user_id=m.user_id) LIMIT 1`,[roomId,user.id])).rows[0]);
+}
+async function chatAccess(chatId,userId){
+  if(!Number.isInteger(chatId)||chatId<1)return false;
+  const row=(await pool.query(`SELECT user1_id,user2_id FROM direct_conversations WHERE id=$1 AND(user1_id=$2 OR user2_id=$2) LIMIT 1`,[chatId,userId])).rows[0];
+  if(!row)return false;
+  const peer=String(row.user1_id)===String(userId)?row.user2_id:row.user1_id;
+  return !(await pool.query(`SELECT 1 FROM user_blocks WHERE(blocker_id=$1 AND blocked_id=$2)OR(blocker_id=$2 AND blocked_id=$1) LIMIT 1`,[userId,peer])).rows[0];
 }
 
 async function touchPresence(userId){
@@ -59,12 +86,12 @@ async function snapshot(ids,viewerId){
 }
 
 export function attachRealtime(server){
-  const io=new Server(server,{path:"/rt-v2/socket.io",cors:{origin:(origin,cb)=>allowedOrigin(origin)?cb(null,true):cb(new Error("ORIGIN_NOT_ALLOWED")),credentials:true},transports:["websocket","polling"]});
+  const io=new Server(server,{path:"/rt-v2/socket.io",cors:{origin:(origin,cb)=>allowedOrigin(origin)?cb(null,true):cb(new Error("ORIGIN_NOT_ALLOWED")),credentials:true},transports:["websocket","polling"],maxHttpBufferSize:64*1024});
   setRealtimeServer(io);
   io.use(async(socket,next)=>{try{
     await ensureRedis();
     const token=tokenFromSocket(socket);
-    const u=await sessionUser({headers:{authorization:`Bearer ${token}`}});
+    const u=await sessionUser({headers:{authorization:token?`Bearer ${token}`:""}});
     if(!u||(!isAdmin(u)&&u.account_status!=="active"))return next(new Error("UNAUTHORIZED"));
     socket.user=u;next();
   }catch(e){next(e)}});
@@ -76,20 +103,33 @@ export function attachRealtime(server){
     const heartbeat=setInterval(()=>{touchPresence(uid).then(()=>publishConnectedPrivacy(io,uid)).catch(()=>{})},30000);
     socket.emit("welcome:v2",{realtime:true,userId:Number(uid)});
 
-    socket.on("presence:watch",async data=>{try{
+    socket.on("presence:watch",async(data,ack)=>{try{
+      if(await realtimeLimited(uid,"presence"))return reply(ack,{ok:false,error:"REALTIME_RATE_LIMITED",retryAfter:10});
       const ids=[...new Set((Array.isArray(data?.userIds)?data.userIds:[]).map(Number).filter(Number.isInteger).filter(x=>x>0).slice(0,100))];
       const current=await snapshot(ids,uid);
       const allowed=new Set(current.filter(x=>x.visible||String(x.userId)===uid).map(x=>String(x.userId)));
       for(const old of socket.data.presenceRooms||[])if(!allowed.has(old)){socket.leave(`presence:${old}`);socket.data.presenceRooms.delete(old)}
       for(const id of allowed)if(!socket.data.presenceRooms.has(id)){socket.join(`presence:${id}`);socket.data.presenceRooms.add(id)}
       socket.emit("presence:snapshot",{users:current.filter(x=>x.visible||String(x.userId)===uid).map(({visible,...x})=>x)});
-    }catch{}});
+      reply(ack,{ok:true,count:current.length});
+    }catch{reply(ack,{ok:false,error:"REALTIME_FAILED"})}});
 
-    socket.on("room:join",async roomId=>{roomId=Number(roomId);if(!Number.isInteger(roomId))return;const ok=isAdmin(socket.user)||(await pool.query(`SELECT 1 FROM room_members WHERE room_id=$1 AND user_id=$2`,[roomId,uid])).rows[0];if(ok)socket.join(`room:${roomId}`)});
-    socket.on("room:leave",roomId=>socket.leave(`room:${Number(roomId)}`));
-    socket.on("chat:join",async id=>{id=Number(id);const ok=(await pool.query(`SELECT 1 FROM direct_conversations WHERE id=$1 AND (user1_id=$2 OR user2_id=$2)`,[id,uid])).rows[0];if(ok)socket.join(`chat:${id}`)});
-    socket.on("chat:leave",id=>socket.leave(`chat:${Number(id)}`));
-    socket.on("typing",async data=>{try{const kind=data?.kind==="room"?"room":"direct",scope=Number(data?.scopeId);if(!Number.isInteger(scope))return;const key=`typing:${kind}:${scope}:${uid}`;if(data?.active)await redis.set(key,JSON.stringify({userId:Number(uid),username:socket.user.username,displayName:socket.user.display_name}),{EX:8});else await redis.del(key);const event={kind,scopeId:scope,userId:Number(uid),username:socket.user.username,displayName:socket.user.display_name,active:Boolean(data?.active)};io.to(`${kind==="room"?"room":"chat"}:${scope}`).emit("typing:update",event)}catch{}});
+    socket.on("room:join",async(roomId,ack)=>{try{roomId=Number(roomId);if(!Number.isInteger(roomId)||roomId<1)return reply(ack,{ok:false,error:"INVALID_SCOPE"});if(await realtimeLimited(uid,"roomJoin"))return reply(ack,{ok:false,error:"REALTIME_RATE_LIMITED",retryAfter:10});if(!await roomAccess(roomId,socket.user))return reply(ack,{ok:false,error:"REALTIME_SCOPE_FORBIDDEN"});socket.join(`room:${roomId}`);reply(ack,{ok:true})}catch{reply(ack,{ok:false,error:"REALTIME_FAILED"})}});
+    socket.on("room:leave",roomId=>{roomId=Number(roomId);if(Number.isInteger(roomId)&&roomId>0)socket.leave(`room:${roomId}`)});
+    socket.on("chat:join",async(id,ack)=>{try{id=Number(id);if(!Number.isInteger(id)||id<1)return reply(ack,{ok:false,error:"INVALID_SCOPE"});if(await realtimeLimited(uid,"chatJoin"))return reply(ack,{ok:false,error:"REALTIME_RATE_LIMITED",retryAfter:10});if(!await chatAccess(id,uid))return reply(ack,{ok:false,error:"REALTIME_SCOPE_FORBIDDEN"});socket.join(`chat:${id}`);reply(ack,{ok:true})}catch{reply(ack,{ok:false,error:"REALTIME_FAILED"})}});
+    socket.on("chat:leave",id=>{id=Number(id);if(Number.isInteger(id)&&id>0)socket.leave(`chat:${id}`)});
+    socket.on("typing",async(data,ack)=>{try{
+      const kind=String(data?.kind||""),scope=Number(data?.scopeId);
+      if(!["room","direct"].includes(kind)||!Number.isInteger(scope)||scope<1)return reply(ack,{ok:false,error:"INVALID_SCOPE"});
+      if(await realtimeLimited(uid,"typing"))return reply(ack,{ok:false,error:"REALTIME_RATE_LIMITED",retryAfter:10});
+      const allowed=kind==="room"?await roomAccess(scope,socket.user):await chatAccess(scope,uid);
+      if(!allowed)return reply(ack,{ok:false,error:"REALTIME_SCOPE_FORBIDDEN"});
+      const key=`typing:${kind}:${scope}:${uid}`;
+      if(data?.active)await redis.set(key,JSON.stringify({userId:Number(uid),username:socket.user.username,displayName:socket.user.display_name}),{EX:8});else await redis.del(key);
+      const event={kind,scopeId:scope,userId:Number(uid),username:socket.user.username,displayName:socket.user.display_name,active:Boolean(data?.active)};
+      io.to(`${kind==="room"?"room":"chat"}:${scope}`).emit("typing:update",event);
+      reply(ack,{ok:true});
+    }catch{reply(ack,{ok:false,error:"REALTIME_FAILED"})}});
     socket.on("disconnect",()=>{clearInterval(heartbeat);markOffline(io,uid).catch(()=>{})});
   });
   console.log("MARBO3A realtime attached · presence events enabled");

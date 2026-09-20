@@ -8,7 +8,7 @@ function isStandalone(){return window.matchMedia?.("(display-mode: standalone)")
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
 function isSocialBrowser(){return /FBAN|FBAV|FB_IAB|FB4A|Instagram/i.test(navigator.userAgent||"");}
 function token(){return localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||"";}
-function authHeader(){const t=token();return t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{}}
+function authHeader(){const t=token();return t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{}}
 function safeActionUrl(raw){try{if(!raw)return"";const u=new URL(String(raw),location.origin);return u.origin===location.origin?`${u.pathname}${u.search}${u.hash}`:""}catch{return""}}
 function installRouteAllowed(){if(typeof location==="undefined")return true;return !/^\/(admin|chat|room|live)(\/|$)/.test(location.pathname)}
 function installDismissed(){try{return Date.now()<Number(localStorage.getItem("marbo3a_install_nudge_until")||0)}catch{return false}}

@@ -49,7 +49,7 @@ try{
   if(!Array.isArray(adminUsers.users))throw new Error("Role-based admin access did not return users");
 
   await expect("/api/health",{status:403,headers:{origin:"https://evil.example"}});
-  await expect("/api/health",{status:200,headers:{origin:"https://marbo3a.ly"}});
+  await expect("/api/health",{status:200,headers:{origin:new URL(base).origin}});
 
   console.log("foundation smoke ok");
 }finally{

@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import {PostCard} from "./SocialFeed";
 
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
-async function api(path){const t=token(),headers=t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{},r=await fetch(path,{headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path){const t=token(),headers=t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{},r=await fetch(path,{headers,credentials:"same-origin",cache:"no-store"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 
 export default function DeepLinkedPost(){
  const[post,setPost]=useState(null),[me,setMe]=useState(null),[error,setError]=useState("");

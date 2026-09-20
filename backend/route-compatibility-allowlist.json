@@ -1,0 +1,33 @@
+{
+  "description": "Temporary compatibility duplicates observed on the verified Group 0 baseline. Owner sets are exact; any new route duplicate, removed duplicate, or owner-set drift fails CI. Entries must be retired as GROUP 1+ moves sensitive routes to one canonical owner.",
+  "baselineMain": "3456838e77e9c82e9c05f75871f7b8dba623e883",
+  "observedDuplicateCount": 6,
+  "duplicates": {
+    "GET /api/map/cities": [
+      "real-map.mjs",
+      "security-p0.mjs",
+      "routes/core-location.mjs"
+    ],
+    "GET /api/map/people": [
+      "real-map.mjs",
+      "security-p0.mjs"
+    ],
+    "GET /api/map/places": [
+      "real-map.mjs",
+      "instrumentation.mjs"
+    ],
+    "PATCH /api/rooms/:id/settings": [
+      "ijkl-experience.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/invites/:token/redeem": [
+      "ijkl-room-guard.mjs",
+      "core-extensions.mjs"
+    ],
+    "POST /api/profile/location": [
+      "real-map.mjs",
+      "instrumentation.mjs"
+    ]
+  },
+  "lastOwnershipMigration": "GROUP 7: canonical Room Voice and Live runtime ownership"
+}

@@ -13,10 +13,14 @@ jobs:
   lockfiles:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        working-directory: .
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Verify deterministic lockfiles
@@ -63,24 +67,30 @@ jobs:
       STORAGE_LOCAL_DIR: /tmp/marbo3a-uploads
       STORAGE_PUBLIC_PREFIX: /api/uploads
       TURN_HOST: 127.0.0.1
+      TURN_EXTERNAL_IP: 127.0.0.2
       TURN_SECRET: ci_turn_secret_not_for_production
+      POSTGRES_PASSWORD: marbo3a_ci
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: Refresh main only for direct main pushes
-        if: github.event_name == 'push'
+      - name: Verify exact workflow SHA
+        shell: bash
         working-directory: .
-        run: git fetch origin main && git reset --hard origin/main
-      - uses: actions/setup-node@v4
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --no-audit --no-fund
+      - name: Runtime route ownership inventory
+        env:
+          ROUTE_INVENTORY_OUT: /tmp/marbo3a-runtime-route-inventory.json
+        run: npm run test:routes
       - name: Syntax check every backend module
         shell: bash
         run: |
@@ -111,6 +121,10 @@ jobs:
             printf '%s\n' "$actual"
             exit 1
           fi
+      - name: Group 12 EXPLAIN ANALYZE matrix
+        run: npm run test:db-performance
+      - name: Verify Group 7 TURN capacity plan
+        run: node scripts/group7-turn-capacity.mjs
       - name: API integration smoke test
         shell: bash
         run: |
@@ -136,6 +150,51 @@ jobs:
           test "$(curl -sS -o /tmp/me.json -w '%{http_code}' http://127.0.0.1:4000/api/auth/me)" = "401" || { dump_log; cat /tmp/me.json || true; exit 1; }
           test "$(curl -sS -o /tmp/push.json -w '%{http_code}' http://127.0.0.1:4000/api/push/config)" = "200" || { dump_log; cat /tmp/push.json || true; exit 1; }
           node -e "const x=require('/tmp/push.json'); if(typeof x.enabled!=='boolean') process.exit(1)" || { dump_log; exit 1; }
+          node scripts/group1-runtime.mjs || { dump_log; exit 1; }
+          node scripts/group2-realtime-runtime.mjs || { dump_log; exit 1; }
+          node scripts/group3-account-security.mjs || { dump_log; exit 1; }
+          node scripts/group4-social-lifecycle.mjs || { dump_log; exit 1; }
+          node scripts/group5-stories-media.mjs || { dump_log; exit 1; }
+          node scripts/group6-messaging-calls.mjs || { dump_log; exit 1; }
+          node scripts/group7-rtc-live.mjs || { dump_log; exit 1; }
+          node scripts/group8-settings-privacy.mjs || { dump_log; exit 1; }
+          node scripts/group9-admin-ops.mjs || { dump_log; exit 1; }
+          node scripts/group11-web-hardening.mjs || { dump_log; exit 1; }
+      - name: Production-like clone restore and migration rehearsal
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLONE="marbo3a_group12_clone"
+          DUMP="/tmp/marbo3a-group12-prodlike.dump"
+          export PGPASSWORD="$POSTGRES_PASSWORD"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO users(email,username,display_name,gender,password_hash,account_status,role) VALUES('group12-clone@example.invalid','group12_clone_fixture','Group 12 Clone','male','scrypt:00:00','active','user') ON CONFLICT(username) DO NOTHING" >/dev/null
+          dropdb -h 127.0.0.1 -U marbo3a --if-exists "$CLONE"
+          pg_dump "$DATABASE_URL" -Fc -f "$DUMP"
+          test -s "$DUMP"
+          createdb -h 127.0.0.1 -U marbo3a "$CLONE"
+          trap 'dropdb -h 127.0.0.1 -U marbo3a --if-exists "$CLONE" >/dev/null 2>&1 || true; rm -f "$DUMP"' EXIT
+          pg_restore -h 127.0.0.1 -U marbo3a -d "$CLONE" --no-owner --no-privileges "$DUMP"
+          CLONE_URL="postgresql://marbo3a:marbo3a_ci@127.0.0.1:5432/$CLONE"
+          DATABASE_URL="$CLONE_URL" npm run migrate
+          test "$(psql "$CLONE_URL" -Atc "SELECT COUNT(*) FROM users WHERE username='group12_clone_fixture'")" = "1"
+          expected="$(find migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort | wc -l | tr -d ' ')"
+          actual="$(psql "$CLONE_URL" -Atc 'SELECT COUNT(*) FROM schema_migrations')"
+          test "$actual" = "$expected"
+          echo "Group 12 production-like clone restore/migration OK"
+      - name: Exact-SHA rollback rehearsal
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          PREVIOUS="$(git rev-parse "$GITHUB_SHA^")"
+          test "$PREVIOUS" != "$GITHUB_SHA"
+          TMP="$(mktemp -d)"
+          cleanup_worktree(){ git worktree remove --force "$TMP" >/dev/null 2>&1 || true; rm -rf "$TMP"; }
+          trap cleanup_worktree EXIT
+          git worktree add --detach "$TMP" "$GITHUB_SHA" >/dev/null
+          git -C "$TMP" reset --hard "$PREVIOUS" >/dev/null
+          test "$(git -C "$TMP" rev-parse HEAD)" = "$PREVIOUS"
+          echo "Group 12 exact-SHA rollback rehearsal OK: $PREVIOUS"
 
   frontend:
     runs-on: ubuntu-latest
@@ -144,14 +203,14 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: Refresh main only for direct main pushes
-        if: github.event_name == 'push'
+      - name: Verify exact workflow SHA
+        shell: bash
         working-directory: .
-        run: git fetch origin main && git reset --hard origin/main
-      - uses: actions/setup-node@v4
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm

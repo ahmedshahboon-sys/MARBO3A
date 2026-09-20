@@ -13,7 +13,11 @@ jobs:
   operations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify exact workflow SHA
+        shell: bash
+        working-directory: .
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - name: Shell syntax
         shell: bash
         run: |
@@ -21,6 +25,24 @@ jobs:
           bash -n ops/deploy-production.sh
           bash -n ops/disk-monitor.sh
           bash -n ops/audit-foundation.sh
+          bash -n ops/setup-turn.sh
+          bash -n ops/audit-turn-runtime.sh
+          bash -n ops/backup-database.sh
+          bash -n ops/verify-backup-restore.sh
+          bash -n ops/verify-latest-backup.sh
+          bash -n ops/install-backup-schedule.sh
+      - name: Validate Group 10 supply-chain contracts
+        run: node scripts/group10-supply-chain-contracts.mjs
+      - name: Validate Group 12 recovery contracts
+        run: node scripts/group12-recovery-contracts.mjs
+      - name: Validate backup schedule assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'OnCalendar=.*00,06,12,18' ops/systemd/marbo3a-backup.timer
+          grep -q 'OnCalendar=Sun' ops/systemd/marbo3a-restore-drill.timer
+          grep -q 'verify-latest-backup.sh' ops/systemd/marbo3a-restore-drill.service
+          grep -q 'BACKUP_REQUIRE_OFFSITE' ops/backup-database.sh
       - name: Validate compose gate topology
         shell: bash
         run: |
@@ -36,6 +58,16 @@ jobs:
           ports=s['gate'].get('ports') or []
           assert any(str(p.get('published'))=='3000' and str(p.get('target'))=='8080' for p in ports), ports
           PY
+      - name: Validate TURN relay capacity wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '49152-49663:49152-49663/udp' compose.yml
+          grep -q '49152-49663:49152-49663/tcp' compose.yml
+          grep -q -- '--min-port=49152' compose.yml
+          grep -q -- '--max-port=49663' compose.yml
+          grep -q '49152:49663/udp' ops/setup-turn.sh
+          grep -q '49152:49663/tcp' ops/setup-turn.sh
       - name: Validate maintenance nginx config
         shell: bash
         run: |
@@ -65,14 +97,32 @@ jobs:
           done
           test "$(curl -sS -o /tmp/maintenance.html -w '%{http_code}' http://127.0.0.1:18080/)" = "503"
           grep -q 'مربوعة' /tmp/maintenance.html
-          curl -sSI http://127.0.0.1:18080/ | grep -qi '^Retry-After: 30'
+          curl -fsS http://127.0.0.1:18080/maintenance/maintenance.js | grep -q '/api/system/maintenance'
+          HEADERS="$(curl -sSI http://127.0.0.1:18080/)"
+          printf '%s\n' "$HEADERS" | grep -qi '^Retry-After: 30'
+          printf '%s\n' "$HEADERS" | grep -qi '^Strict-Transport-Security:'
+          printf '%s\n' "$HEADERS" | grep -qi '^X-Content-Type-Options: nosniff'
+          printf '%s\n' "$HEADERS" | grep -qi '^X-Frame-Options: DENY'
+          printf '%s\n' "$HEADERS" | grep -qi "^Content-Security-Policy:.*script-src 'self'"
+          if printf '%s\n' "$HEADERS" | grep -qi "^Content-Security-Policy:.*script-src[^;]*unsafe-inline"; then
+            echo "maintenance script-src must not allow unsafe-inline" >&2
+            exit 1
+          fi
       - name: Verify maintenance contracts
         shell: bash
         run: |
           set -euo pipefail
-          grep -q '/api/system/maintenance' ops/maintenance/index.html
+          grep -q '/api/system/maintenance' ops/maintenance/maintenance.js
+          grep -q 'src="/maintenance/maintenance.js"' ops/maintenance/index.html
+          if grep -Eq '<script[[:space:]]*>' ops/maintenance/index.html; then
+            echo "inline maintenance script found" >&2
+            exit 1
+          fi
           grep -q 'maintenance_mode' backend/request-foundation.mjs
           grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
           grep -q 'docker builder prune -af' ops/deploy-production.sh
           grep -q 'MARBO3A_DISK_WARN_PERCENT:-70' ops/disk-monitor.sh
           grep -q 'MARBO3A_DISK_CRITICAL_PERCENT:-85' ops/disk-monitor.sh
+          grep -q 'backup_success' ops/backup-database.sh
+          grep -q 'restore_success' ops/verify-backup-restore.sh
+          grep -q '/api/admin/operations' backend/routes/core-admin-control.mjs

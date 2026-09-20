@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import Icon from "../../Icon";
 
 const token=()=>typeof window!=="undefined"?(localStorage.getItem("marbo3a_token")||sessionStorage.getItem("marbo3a_token")||""):"";
-async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t&&t!=="cookie"?{authorization:`Bearer ${t}`}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store",credentials:"same-origin"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
+async function api(path,options={}){const t=token(),headers={...(options.headers||{}),...(t&&t!=="cookie"?{"x-marbo3a-session-mode":"cookie"}:{})};if(options.body)headers["content-type"]="application/json";const r=await fetch(path,{...options,headers,cache:"no-store",credentials:"same-origin"}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"REQUEST_FAILED");return d}
 export default function SponsoredAdminPage(){
  const[list,setList]=useState([]),[postId,setPostId]=useState(""),[label,setLabel]=useState("مموّل"),[cta,setCta]=useState("اعرف أكثر"),[url,setUrl]=useState(""),[weight,setWeight]=useState("100"),[active,setActive]=useState(true),[busy,setBusy]=useState(false),[status,setStatus]=useState(""),[allowed,setAllowed]=useState(false);
  async function load(){try{const me=await api("/api/auth/me");if(!(me.isAdmin||me.user?.role==="admin")){location.href="/home";return}setAllowed(true);const d=await api("/api/admin/sponsored-posts");setList(d.sponsoredPosts||[])}catch{setStatus("تعذر تحميل الإعلانات")}}

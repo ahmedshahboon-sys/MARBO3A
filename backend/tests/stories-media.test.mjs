@@ -4,20 +4,20 @@ import fs from "node:fs";
 
 const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 
-test("story visibility rejects bidirectional blocks in both story owners",()=>{
-  const legacy=read("stories.mjs"),ijkl=read("ijkl-experience.mjs");
-  for(const src of [legacy,ijkl]){
-    assert.match(src,/user_blocks/);
-    assert.match(src,/blocker_id=\$1 AND blocked_id=\$2/);
-    assert.match(src,/(blocked_id=\$1 AND blocker_id=\$2|blocker_id=\$1 AND blocked_id=\$2)/);
-  }
-  assert.match(legacy,/if\(await blocked\(ownerId,viewerId\)\)return false/);
-  assert.match(ijkl,/if\(await blocked\(story\.user_id,viewer\.id\)\)return false/);
+test("canonical story visibility rejects bidirectional blocks",()=>{
+  const src=read("routes/core-stories.mjs");
+  assert.match(src,/user_blocks/);
+  assert.match(src,/blocker_id=\$1 AND blocked_id=\$2/);
+  assert.ok(src.includes("blocker_id=$2 AND blocked_id=$1"));
+  assert.match(src,/if\(await blocked\(ownerId,viewerId\)\)return false/);
+  assert.match(src,/who_can_see_story/);
 });
 
-test("story creation only accepts local media with matching media kind",()=>{
-  const src=read("stories.mjs");
-  assert.match(src,/const localMediaUrl=/);
+test("story creation accepts owned nested media paths and enforces matching media kind",()=>{
+  const src=read("routes/core-stories.mjs");
+  assert.match(src,/const ownMediaUrl=/);
+  assert.match(src,/mediaKindFromUrl/);
+  assert.match(src,/parts\.every/);
   assert.match(src,/INVALID_STORY_MEDIA/);
   assert.match(src,/INVALID_STORY_MEDIA_TYPE/);
   assert.match(src,/startsWith\("image\/"\)/);
@@ -26,14 +26,14 @@ test("story creation only accepts local media with matching media kind",()=>{
 });
 
 test("story reaction notifications track the current reaction lifecycle",()=>{
-  const src=read("ijkl-experience.mjs");
+  const src=read("routes/core-stories.mjs");
   assert.match(src,/DELETE FROM notifications WHERE user_id=\$1 AND actor_id=\$2 AND type='story_reaction' AND ref_id=\$3/);
   assert.match(src,/DELETE FROM story_reactions WHERE story_id=\$1 AND user_id=\$2/);
   assert.match(src,/if\(story\)await pool\.query\(`DELETE FROM notifications/);
 });
 
 test("story deletion removes stale highlights and story notifications transactionally",()=>{
-  const src=read("stories.mjs");
+  const src=read("routes/core-stories.mjs");
   const start=src.indexOf('app.delete("/api/stories/:id"');
   assert.ok(start>=0,"story delete route missing");
   const route=src.slice(start);
@@ -52,3 +52,13 @@ test("video uploads verify container signatures and discard invalid files",()=>{
   assert.match(src,/discard\(req\.file\)/);
   assert.match(src,/process\.env\.UPLOAD_DIR/);
 });
+
+test("expired and deleted stories clean orphaned owned media",()=>{
+  const src=read("routes/core-stories.mjs");
+  assert.match(src,/cleanupStoryMedia/);
+  assert.match(src,/cleanupExpiredStories/);
+  assert.match(src,/mediaReferencedElsewhere/);
+  assert.match(src,/deleteObject/);
+  assert.match(src,/NOT EXISTS\(SELECT 1 FROM story_highlights/);
+});
+

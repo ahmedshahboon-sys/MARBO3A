@@ -5,10 +5,10 @@ import fs from "node:fs";
 const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 
 test("comment preview uses the real post_comments edit timestamp",()=>{
-  const src=read("social-experience.mjs");
-  const start=src.indexOf('app.get("/api/feed/:id/comments/preview"');
-  const end=src.indexOf('app.get("/api/profile/identity"',start);
-  assert.ok(start>=0&&end>start,"comment preview route must exist before profile identity route");
+  const src=read("routes/core-feed.mjs");
+  const start=src.indexOf("async function commentRows");
+  const end=src.indexOf("async function commentById",start);
+  assert.ok(start>=0&&end>start,"canonical commentRows helper must exist");
   const preview=src.slice(start,end);
   assert.match(preview,/c\.edited_at/);
   assert.doesNotMatch(preview,/c\.updated_at/);
@@ -63,7 +63,7 @@ test("map city activity honors privacy and validates precise coordinates",()=>{
 });
 
 test("chat list respects show_online independently from last seen",()=>{
-  const src=read("message-media-fix.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/COALESCE\(pp\.show_online,TRUE\) show_online/);
   assert.match(src,/COALESCE\(pp\.show_last_seen,TRUE\) show_last_seen/);
   assert.match(src,/online:showOnline&&actualOnline/);
@@ -83,12 +83,12 @@ test("direct post interactions enforce the smart-feed visibility contract",()=>{
 });
 
 test("authenticated profile feed honors post visibility and blocks",()=>{
-  const src=read("feed-extensions.mjs");
+  const src=read("routes/core-feed.mjs");
   assert.match(src,/who_can_see_posts/);
-  assert.match(src,/canSeePosts/);
   assert.match(src,/await blocked\(viewer\.id,p\.id\)/);
-  assert.match(src,/postVisible\?/);
-  assert.match(src,/postRows=postVisible\?/);
+  assert.match(src,/canPosts/);
+  assert.match(src,/if\(canPosts\)\{/);
+  assert.match(src,/account_status=\'active\'/);
 });
 
 test("public profile summary only counts guest-visible posts",()=>{
@@ -148,4 +148,19 @@ test("advanced search respects blocks, profile privacy, and post audiences",()=>
   assert.match(route,/FROM friendships mine JOIN friendships theirs/);
   assert.match(route,/b\.blocker_id=\$3 AND b\.blocked_id=p\.user_id/);
   assert.match(route,/b\.blocker_id=p\.user_id AND b\.blocked_id=\$3/);
+});
+
+test("realtime sockets reject query tokens and authorize scopes before typing",()=>{
+  const src=read("realtime.mjs");
+  assert.doesNotMatch(src,/handshake\.query\?\.token/);
+  assert.match(src,/socket\.handshake\.auth\?\.token/);
+  assert.match(src,/async function roomAccess/);
+  assert.match(src,/async function chatAccess/);
+  assert.match(src,/REALTIME_SCOPE_FORBIDDEN/);
+  assert.match(src,/realtimeLimited\(uid,"typing"\)/);
+  assert.match(src,/realtimeLimited\(uid,"presence"\)/);
+  assert.match(src,/maxHttpBufferSize:64\*1024/);
+  const web=fs.readFileSync(new URL("../../frontend/app/RealtimeClient.js",import.meta.url),"utf8");
+  assert.doesNotMatch(web,/auth:\{token:/);
+  assert.match(web,/withCredentials:true/);
 });

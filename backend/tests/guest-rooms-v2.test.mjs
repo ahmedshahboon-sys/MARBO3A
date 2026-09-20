@@ -28,7 +28,7 @@ test("guest rooms expose read-only discovery and listener voice endpoints",()=>{
 });
 
 test("room voice v2 owns data-driven seats and guest signaling bridge",()=>{
-  const src=read("room-voice.mjs");
+  const src=read("routes/core-room-voice.mjs");
   for(const token of ["DEFAULT_SEATS","speaker_seat_count","seat_index","chooseSeat","SEAT_TAKEN","guestSignals","recipient_guest_id","sender_guest_id"])
     assert.ok(src.includes(token),`missing ${token}`);
   assert.match(src,/role='speaker'/);

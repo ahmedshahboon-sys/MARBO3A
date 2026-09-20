@@ -2,11 +2,18 @@
 set -euo pipefail
 ROOT="${1:-/opt/marbo3a}"
 PREVIOUS="${2:-}"
+REQUESTED_RELEASE_SHA="${3:-}"
 cd "$ROOT"
 if [ ! -f .env ]; then echo "ERROR: .env missing" >&2; exit 1; fi
-if [ -z "$PREVIOUS" ]; then PREVIOUS="$(git rev-parse HEAD^1 2>/dev/null || true)"; fi
+if ! [[ "$REQUESTED_RELEASE_SHA" =~ ^[a-fA-F0-9]{40}$ ]]; then echo "ERROR: explicit 40-character release SHA required" >&2; exit 2; fi
+if ! [[ "$PREVIOUS" =~ ^[a-fA-F0-9]{40}$ ]]; then echo "ERROR: explicit 40-character rollback SHA required" >&2; exit 3; fi
+git cat-file -e "$REQUESTED_RELEASE_SHA^{commit}"
+git cat-file -e "$PREVIOUS^{commit}"
+CURRENT_HEAD="$(git rev-parse HEAD)"
+if [ "$CURRENT_HEAD" != "$REQUESTED_RELEASE_SHA" ]; then echo "ERROR: worktree HEAD $CURRENT_HEAD does not match requested release $REQUESTED_RELEASE_SHA" >&2; exit 4; fi
 chmod 600 .env
 set -a; . ./.env; set +a
+export MARBO3A_RELEASE_SHA="$REQUESTED_RELEASE_SHA"
 mkdir -p .runtime/maintenance .deploy-backups
 exec 9>"$ROOT/.runtime/deploy.lock"
 if ! flock -n 9; then echo "ERROR: another MARBO3A deploy/maintenance operation is active" >&2; exit 1; fi
@@ -53,7 +60,16 @@ rollback(){
   if [ "$MAINTENANCE_STARTED" = "1" ]; then echo "[rollback] keeping maintenance visible while restoring the previous release" >&2; fi
   if [ -n "$PREVIOUS" ]; then
     echo "[rollback] restoring application code to $PREVIOUS"
-    git reset --hard "$PREVIOUS" || true
+    if ! git reset --hard "$PREVIOUS"; then
+      echo "[rollback] ERROR: could not reset to exact previous SHA; maintenance remains enabled" >&2
+      exit "$code"
+    fi
+    ROLLBACK_HEAD="$(git rev-parse HEAD 2>/dev/null || true)"
+    if [ "$ROLLBACK_HEAD" != "$PREVIOUS" ]; then
+      echo "[rollback] ERROR: rollback HEAD mismatch; expected $PREVIOUS got $ROLLBACK_HEAD" >&2
+      exit "$code"
+    fi
+    export MARBO3A_RELEASE_SHA="$ROLLBACK_HEAD"
     if grep -qE '^  gate:' compose.yml 2>/dev/null; then
       docker compose build api web || true
       docker compose up -d api web gate || true
@@ -173,9 +189,11 @@ echo "[deploy] final foundation audit"
 bash ops/audit-foundation.sh "$ROOT"
 
 echo "[deploy] final status"
+FINAL_HEAD="$(git rev-parse HEAD)"
+test "$FINAL_HEAD" = "$REQUESTED_RELEASE_SHA"
 docker compose ps
 git log -1 --oneline
 df -h /
 docker system df
 trap - ERR
-echo "MARBO3A deploy completed"
+echo "MARBO3A deploy completed at immutable SHA $FINAL_HEAD"

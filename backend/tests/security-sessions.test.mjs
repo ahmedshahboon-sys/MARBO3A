@@ -74,12 +74,13 @@ test("2FA setup and login challenges cap verification attempts",()=>{
   assert.match(src,/TWO_FACTOR_MAX_ATTEMPTS=5/);
   assert.match(src,/JSON\.stringify\(\{hash:hashCode\(u\.id,code\),enable,attempts:0\}\)/);
   assert.match(src,/2FA_TOO_MANY_ATTEMPTS/);
-  assert.match(src,/u\.account_status!=="active"/);
+  assert.ok(src.includes('!["active","deactivated"].includes(u.account_status)'));
+  assert.ok(src.includes('reactivate:u.account_status==="deactivated"'));
 });
 
 test("request foundation rate-limits mutations and normalizes OAuth sessions",()=>{
   const src=read("request-foundation.mjs");
-  assert.match(src,/import \{pool,sessionUser,tokenFrom\} from "\.\/runtime\.mjs"/);
+  assert.match(src,/import \{[^}]*pool[^}]*sessionUser[^}]*tokenFrom[^}]*\} from "\.\/runtime\.mjs"/);
   assert.match(src,/app\.use\("\/api\/auth",rateLimit/);
   assert.match(src,/app\.use\("\/api",rateLimit/);
   assert.match(src,/\["GET","HEAD","OPTIONS"\]\.includes\(req\.method\)/);

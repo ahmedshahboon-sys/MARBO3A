@@ -1,3 +1,4 @@
+import {cookieHeaders} from "./webSession";
 const nativeImageTypes=new Set(["image/jpeg","image/png","image/webp","image/gif"]);
 const looksLikeImage=file=>Boolean(file?.type?.startsWith("image/")||/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file?.name||""));
 const isHeic=file=>/image\/(heic|heif)/i.test(file?.type||"")||/\.(heic|heif)$/i.test(file?.name||"");
@@ -63,7 +64,7 @@ export async function compressImage(file,{maxDimension=2200,targetBytes=1800000}
   }finally{decoded.cleanup?.(src)}
 }
 
-export async function uploadMedia(file,token,{compress=true,onState}={}){
+export async function uploadMedia(file,_token,{compress=true,onState}={}){
   if(!file)throw new Error("NO_FILE");
   onState?.("processing");
   let prepared=file;
@@ -72,7 +73,7 @@ export async function uploadMedia(file,token,{compress=true,onState}={}){
   if(prepared.size>8*1024*1024)throw new Error("FILE_TOO_LARGE");
   onState?.("uploading");
   const fd=new FormData();fd.append("file",prepared,prepared.name||file.name||"upload");
-  const r=await fetch("/api/uploads",{method:"POST",headers:token?{authorization:`Bearer ${token}`}:{},body:fd,cache:"no-store"});
+  const r=await fetch("/api/uploads",{method:"POST",headers:cookieHeaders(),credentials:"same-origin",body:fd,cache:"no-store"});
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||"UPLOAD_FAILED");
   if(!d.file?.url)throw new Error("UPLOAD_FAILED");

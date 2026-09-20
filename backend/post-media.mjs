@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 import {requireAuth} from "./runtime.mjs";
+import {operationalControls} from "./operational-controls.mjs";
 
 const prior=http.createServer.bind(http);
 const uploadsDir=path.resolve(process.env.UPLOAD_DIR||"/app/uploads");
@@ -29,13 +30,17 @@ function validVideoSignature(filePath,mime){
 function discard(file){try{if(file?.path)fs.unlinkSync(file.path)}catch{}}
 
 function receive(req,res){
-  uploadVideo.single("file")(req,res,err=>{
+  uploadVideo.single("file")(req,res,async err=>{
     if(err){
       const code=err?.code==="LIMIT_FILE_SIZE"?"FILE_TOO_LARGE":err?.message==="UNSUPPORTED_FILE"?"UNSUPPORTED_FILE":"UPLOAD_FAILED";
       return res.status(code==="FILE_TOO_LARGE"?413:400).json({ok:false,error:code});
     }
     if(!req.file)return res.status(400).json({ok:false,error:"FILE_REQUIRED"});
     try{if(!validVideoSignature(req.file.path,req.file.mimetype)){discard(req.file);return res.status(400).json({ok:false,error:"UNSUPPORTED_FILE"})}}catch(e){discard(req.file);console.error("video signature validation",e);return res.status(500).json({ok:false,error:"UPLOAD_FAILED"})}
+    const {settings}=await operationalControls(),allowed=Array.isArray(settings.allowed_media_types)?settings.allowed_media_types:[];
+    if(!allowed.includes(req.file.mimetype)){discard(req.file);return res.status(415).json({ok:false,error:"MEDIA_TYPE_DISABLED",receivedType:req.file.mimetype})}
+    const maxMb=Math.max(1,Math.min(8,Number(settings.upload_max_mb)||8,Number(settings.upload_max_video_mb)||8));
+    if(Number(req.file.size)>maxMb*1024*1024){discard(req.file);return res.status(413).json({ok:false,error:"FILE_TOO_LARGE",maxMb,mediaFamily:"video"})}
     res.status(201).json({ok:true,file:{url:`/api/uploads/${req.file.filename}`,type:req.file.mimetype,size:req.file.size,name:req.file.originalname}});
   });
 }

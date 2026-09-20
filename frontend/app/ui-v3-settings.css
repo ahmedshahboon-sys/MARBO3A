@@ -19,8 +19,15 @@ body.ui-v3:has(.settings-route-marker) .settings-status{position:sticky!importan
  .ui-v3 .settings-route-head h1{font-size:30px}
  .ui-v3 .settings-route-head p{font-size:14px}
  body.ui-v3:has(.settings-route-marker) .settings-card{width:calc(100% - 20px)!important}
- body.ui-v3:has(.settings-route-marker) .settings-tabs{grid-template-columns:repeat(4,minmax(82px,1fr))!important;overflow-x:auto!important;overscroll-behavior-inline:contain!important;scroll-snap-type:x proximity!important;scrollbar-width:none}
+ body.ui-v3:has(.settings-route-marker) .settings-tabs{display:flex!important;grid-template-columns:none!important;overflow-x:auto!important;overscroll-behavior-inline:contain!important;scroll-snap-type:x proximity!important;scrollbar-width:none}
  body.ui-v3:has(.settings-route-marker) .settings-tabs::-webkit-scrollbar{display:none}
- body.ui-v3:has(.settings-route-marker) .settings-tabs button{min-height:44px!important;scroll-snap-align:start!important}
+ body.ui-v3:has(.settings-route-marker) .settings-tabs button{min-height:44px!important;min-width:96px!important;flex:0 0 auto!important;scroll-snap-align:start!important}
  body.ui-v3:has(.settings-route-marker) .setting-row{min-height:88px!important;padding:14px!important}
 }
+
+html[data-reduced-motion="true"]{scroll-behavior:auto!important}
+html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,html[data-reduced-motion="true"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+.settings-section,.privacy-settings-panel{display:grid;gap:12px}
+.settings-inline-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.settings-inline-form input{min-width:0;flex:1 1 180px}
+.settings-empty{padding:12px;color:var(--ui-muted)}

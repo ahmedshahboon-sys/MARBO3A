@@ -1,0 +1,11 @@
+[Unit]
+Description=Verify MARBO3A backup restore weekly
+
+[Timer]
+OnCalendar=Sun *-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=600
+Unit=marbo3a-restore-drill.service
+
+[Install]
+WantedBy=timers.target

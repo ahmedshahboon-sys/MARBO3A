@@ -14,10 +14,11 @@ must(landing,"/api/auth/oauth/link/confirm","auth link confirmation route");
 must(landing,"/api/auth/verify-2fa","2FA login flow");
 must(landing,"/api/auth/reset-password","password reset flow");
 
-const privacy=read("app/settings/privacy/page.js");
-for(const key of ["who_can_message","who_can_add","show_last_seen","show_online","read_receipts","message_requests_enabled","who_can_call","who_can_see_friends","who_can_invite_room"]){must(privacy,key,`privacy ${key}`)}
+const privacy=read("app/PrivacySettingsPanel.js"),privacyRoute=read("app/settings/privacy/page.js");
+for(const key of ["who_can_message","who_can_add","show_last_seen","show_online","read_receipts","message_requests_enabled","who_can_call","who_can_see_friends","who_can_invite_room","who_can_mention","who_can_tag"]){must(privacy,key,`privacy ${key}`)}
 must(privacy,"disabled={saving}","privacy controls must serialize saves");
 must(privacy,'aria-busy={saving}',"privacy save state accessibility");
+must(privacyRoute,"PrivacySettingsPanel","privacy route must reuse canonical panel");
 
 const notifications=read("app/notifications/page.js");
 for(const item of ["/api/notifications","/read-all","friend_request","friend_accepted","marbo3a:notification:new","marbo3a:notification:updated","notification-actions"]){must(notifications,item,`notifications ${item}`)}

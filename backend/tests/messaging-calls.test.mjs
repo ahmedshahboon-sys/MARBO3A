@@ -6,15 +6,19 @@ const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),"utf8");
 const readFrontend=file=>fs.readFileSync(new URL(`../../frontend/app/${file}`,import.meta.url),"utf8");
 
 test("rich direct messages emit realtime delivery and validate reply ownership",()=>{
-  const src=read("direct-extensions.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/emitChat/);
   assert.match(src,/direct:new/);
   assert.match(src,/conversation_id=\$2/);
   assert.match(src,/INVALID_REPLY_TARGET/);
+  assert.match(src,/directSendGate/);
+  assert.match(src,/USER_BLOCKED/);
+  assert.match(src,/MESSAGE_REQUEST_PENDING/);
+  assert.match(src,/PRIVACY_RESTRICTED/);
 });
 
 test("message forwarding requires access to the source message scope",()=>{
-  const src=read("message-media-fix.mjs");
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/JOIN direct_conversations c ON c\.id=dm\.conversation_id/);
   assert.match(src,/c\.user1_id=\$2 OR c\.user2_id=\$2/);
   assert.match(src,/EXISTS\(SELECT 1 FROM room_members rm WHERE rm\.room_id=m\.room_id AND rm\.user_id=\$2\)/);
@@ -23,7 +27,7 @@ test("message forwarding requires access to the source message scope",()=>{
 });
 
 test("calls enforce blocks and who_can_call privacy",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/async function callAllowed/);
   assert.match(src,/who_can_call/);
   assert.match(src,/user_blocks/);
@@ -32,7 +36,7 @@ test("calls enforce blocks and who_can_call privacy",()=>{
 });
 
 test("call signaling is limited to active calls and correct offer answer roles",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/CALL_NOT_ACTIVE/);
   assert.match(src,/BAD_SIGNAL_ROLE/);
   assert.match(src,/kind==="offer"&&Number\(c\.caller_id\)!==Number\(u\.id\)/);
@@ -40,7 +44,7 @@ test("call signaling is limited to active calls and correct offer answer roles",
 });
 
 test("call ICE config advertises external IP relay fallback",()=>{
-  const src=read("calls.mjs");
+  const src=read("routes/core-calls.mjs");
   assert.match(src,/TURN_EXTERNAL_IP/);
   assert.match(src,/turn:\$\{external\}:3478\?transport=udp/);
   assert.match(src,/turn:\$\{external\}:3478\?transport=tcp/);
@@ -53,4 +57,20 @@ test("voice recorder keeps one pointer target mounted while recording",()=>{
   assert.match(src,/document\.addEventListener\("pointerup",upGlobal/);
   assert.match(src,/finish\(true\)/);
   assert.match(src,/finish\(false\)/);
+});
+
+
+test("deleted messages are not resurrected by edit",()=>{
+  const src=read("routes/core-messaging.mjs");
+  assert.match(src,/SELECT \* FROM direct_messages WHERE id=\$1 AND deleted_at IS NULL/);
+  assert.match(src,/UPDATE direct_messages SET body=\$1,edited_at=NOW\(\) WHERE id=\$2 AND deleted_at IS NULL/);
+  assert.match(src,/SELECT \* FROM messages WHERE id=\$1 AND deleted_at IS NULL/);
+});
+
+
+test("legacy messaging and calls wrappers are retired",()=>{
+  const boot=read("bootstrap.mjs"),routes=read("routes/index.mjs"),calls=read("routes/core-calls.mjs");
+  assert.doesNotMatch(boot,/direct-extensions\.mjs|calls\.mjs/);
+  assert.match(routes,/registerCoreCalls/);
+  assert.ok((calls.match(/CALL_PRIVACY_RESTRICTED/g)||[]).length>=4);
 });

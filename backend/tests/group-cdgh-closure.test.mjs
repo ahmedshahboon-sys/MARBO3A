@@ -45,8 +45,8 @@ test("notification friend request lifecycle stays synchronized",()=>{
   assert.match(src,/expired/);
 });
 
-test("direct message media layer keeps presence privacy and pending-request guards",()=>{
-  const src=read("message-media-fix.mjs");
+test("core messaging keeps presence privacy and pending-request guards",()=>{
+  const src=read("routes/core-messaging.mjs");
   assert.match(src,/show_online/);
   assert.match(src,/show_last_seen/);
   assert.match(src,/pendingIncoming/);
