@@ -2,11 +2,27 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import {pool,sessionUser,tokenFrom,actionRateLimit,rejectRateLimit,ipOf} from "./runtime.mjs";
+import {pool,sessionUser,tokenFrom,cookieToken,bearerToken,actionRateLimit,rejectRateLimit,ipOf} from "./runtime.mjs";
 import {operationalControls} from "./operational-controls.mjs";
 
 const prior=http.createServer.bind(http);
-const allowedOrigin=origin=>!origin||origin==="https://marbo3a.ly"||origin==="https://www.marbo3a.ly"||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+const normalizeOrigin=value=>{try{return new URL(String(value||"")).origin}catch{return""}};
+const canonicalOrigin=normalizeOrigin(process.env.APP_ORIGIN)||"https://marbo3a.ly";
+const configuredAliases=String(process.env.APP_ORIGIN_ALIASES||"").split(",").map(x=>normalizeOrigin(x.trim())).filter(Boolean);
+const allowedOrigins=new Set([canonicalOrigin,...configuredAliases]);
+if(canonicalOrigin==="https://marbo3a.ly")allowedOrigins.add("https://www.marbo3a.ly");
+const localOrigin=origin=>/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+const allowedOrigin=origin=>!origin||allowedOrigins.has(normalizeOrigin(origin))||(process.env.NODE_ENV!=="production"&&localOrigin(String(origin)));
+const unsafeMethod=method=>!["GET","HEAD","OPTIONS"].includes(String(method||"").toUpperCase());
+const refererOrigin=req=>normalizeOrigin(req.headers.referer||"");
+function cookieMutationSourceAllowed(req){
+  if(!unsafeMethod(req.method)||!cookieToken(req)||bearerToken(req))return true;
+  const origin=String(req.headers.origin||"").trim(),referer=refererOrigin(req),site=String(req.headers["sec-fetch-site"]||"").toLowerCase();
+  if(site==="cross-site")return false;
+  if(origin)return allowedOrigin(origin);
+  if(referer)return allowedOrigin(referer);
+  return ["same-origin","same-site","none"].includes(site);
+}
 async function maintenanceState(){
   const {settings}=await operationalControls({fresh:true});
   return {
@@ -88,7 +104,17 @@ http.createServer=function requestFoundationCreateServer(app,...args){
       if(!allowedOrigin(origin))return res.status(403).json({ok:false,error:"ORIGIN_NOT_ALLOWED"});
       next();
     });
-    app.use(cors({origin:(origin,cb)=>cb(null,allowedOrigin(origin)),credentials:true,methods:["GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS"],allowedHeaders:["Content-Type","Authorization","X-Requested-With"]}));
+    app.use(cors({
+      origin:(origin,cb)=>cb(null,allowedOrigin(origin)),
+      credentials:true,
+      methods:["GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS"],
+      allowedHeaders:["Content-Type","Authorization","X-Requested-With","X-Marbo3a-Session-Mode","X-Turnstile-Token","X-Request-Id"],
+      maxAge:600
+    }));
+    app.use((req,res,next)=>{
+      if(!cookieMutationSourceAllowed(req))return res.status(403).json({ok:false,error:"CSRF_SOURCE_REJECTED"});
+      next();
+    });
 
     // This foundation wrapper is registered before every historical route.
     // Security limits must live here; a limiter registered in a later wrapper
@@ -117,10 +143,12 @@ http.createServer=function requestFoundationCreateServer(app,...args){
     });
 
     app.use((_req,res,next)=>{
-      res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; font-src 'self' data:");
+      res.setHeader("Content-Security-Policy","default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss:; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; script-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; worker-src 'self' blob:; manifest-src 'self'");
+      res.setHeader("Strict-Transport-Security","max-age=31536000; includeSubDomains");
       res.setHeader("Referrer-Policy","strict-origin-when-cross-origin");
-      res.setHeader("Permissions-Policy","camera=(self), microphone=(self), geolocation=(self)");
+      res.setHeader("Permissions-Policy","camera=(self), microphone=(self), geolocation=(self), payment=()");
       res.setHeader("X-Content-Type-Options","nosniff");
+      res.setHeader("X-Frame-Options","DENY");
       next();
     });
 
