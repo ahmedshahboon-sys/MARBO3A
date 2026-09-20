@@ -29,6 +29,12 @@ function expect(x,status,error){if(x.r.status!==status)throw new Error("expected
 async function call(path,opts={}){const x=await raw(path,opts);return expect(x,opts.status||200,opts.error)}
 async function setting(token,stepUp,key,value,reason="Group 9 runtime verification"){return call("/api/admin/advanced/settings",{token,stepUp,method:"PATCH",body:{key,value,reason}})}
 async function feature(token,stepUp,key,enabled){return call("/api/admin/advanced/features/"+key,{token,stepUp,method:"PATCH",body:{enabled,reason:"Group 9 runtime verification"}})}
+async function adminGrant(user,sessionToken){
+  await pool.query("UPDATE users SET two_factor_enabled=TRUE WHERE id=$1",[user.id]);
+  const grant=crypto.randomBytes(32).toString("hex");
+  await redis.set(`adminstepup:grant:${user.id}:${tokenHash(sessionToken)}:${grant}`,"1",{EX:900});
+  return grant;
+}
 
 try{
   const admin=await makeUser("Admin","admin"),user=await makeUser("User"),adminToken=await session(admin.id),userToken=await session(user.id);
