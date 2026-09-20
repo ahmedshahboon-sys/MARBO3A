@@ -3,7 +3,7 @@ import {useEffect} from "react";
 import {usePathname} from "next/navigation";
 
 const RETURN_KEY="marbo3a:maintenance:return";
-const safeReturn=value=>typeof value==="string"&&value.startsWith("/")&&!value.startsWith("//")&&value!=="/maintenance"?value:"/";
+const safeReturn=value=>{try{const raw=String(value||"").trim(),decoded=decodeURIComponent(raw);if(!raw.startsWith("/")||raw.startsWith("//")||raw.includes("\\")||decoded.startsWith("//")||decoded.includes("\\"))return"/";const u=new URL(raw,"https://marbo3a.invalid");return u.origin==="https://marbo3a.invalid"&&u.pathname!=="/maintenance"?`${u.pathname}${u.search}${u.hash}`:"/"}catch{return"/"}};
 
 export default function MaintenanceRuntime(){
   const path=usePathname();
