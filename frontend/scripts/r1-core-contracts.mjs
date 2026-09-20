@@ -14,9 +14,10 @@ for(const t of ["voice/leave","visibilitychange","pageshow","room-voice-remote-a
 const roomStage=read("app/RoomVoiceStage.js");
 for(const t of ["selfForcedMuted","forced_muted","t.enabled=!(mutedRef.current||forced)","المشرف كتم المايكروفون","keepalive:true","SEAT_TAKEN_OR_LOCKED"])must(roomStage,t,"room voice force-mute/re-entry enforcement");
 
-const market=read("app/MarketplaceComingSoon.js"),marketPage=read("app/marketplace/page.js"),home=read("app/home/page.js"),drawer=read("app/SideDrawer.js");
+const market=read("app/MarketplaceComingSoon.js"),marketPage=read("app/marketplace/page.js"),home=read("app/home/page.js"),drawer=read("app/SideDrawer.js"),truth=read("app/product-feature-truth.js");
 for(const t of ["متاجر إلكترونية داخل المجتمع","محفظة لاحقًا","/marketplace"])must(market,t,"marketplace teaser");
-must(marketPage,"ما فيش دفع أو بيع فعلي توا","marketplace preview safety");must(home,"MarketplaceComingSoon","home marketplace teaser");must(drawer,"المتاجر · قريبًا","navigation marketplace teaser");
+must(marketPage,"ما فيش دفع أو بيع فعلي توا","marketplace preview safety");must(home,"MarketplaceComingSoon","home marketplace teaser");
+must(truth,'navLabel:"المتاجر · قريبًا"',"marketplace feature truth");must(drawer,"marketplaceTruth.navLabel","navigation marketplace teaser");
 
 const admin=read("app/admin/sponsored/page.js");for(const t of ["/api/admin/sponsored-posts","ظهور","نقر","CTR","مموّل"])must(admin,t,"sponsored admin");
 
