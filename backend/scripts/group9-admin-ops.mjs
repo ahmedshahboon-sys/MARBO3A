@@ -27,8 +27,8 @@ async function raw(path,{token,stepUp,method="GET",body}={}){
 }
 function expect(x,status,error){if(x.r.status!==status)throw new Error("expected "+status+" got "+x.r.status+" "+x.r.url+" "+x.text);if(error&&x.data.error!==error)throw new Error("expected "+error+" got "+x.text);return x.data}
 async function call(path,opts={}){const x=await raw(path,opts);return expect(x,opts.status||200,opts.error)}
-async function setting(token,key,value,reason="Group 9 runtime verification"){return call("/api/admin/advanced/settings",{token,method:"PATCH",body:{key,value,reason}})}
-async function feature(token,key,enabled){return call("/api/admin/advanced/features/"+key,{token,method:"PATCH",body:{enabled,reason:"Group 9 runtime verification"}})}
+async function setting(token,stepUp,key,value,reason="Group 9 runtime verification"){return call("/api/admin/advanced/settings",{token,stepUp,method:"PATCH",body:{key,value,reason}})}
+async function feature(token,stepUp,key,enabled){return call("/api/admin/advanced/features/"+key,{token,stepUp,method:"PATCH",body:{enabled,reason:"Group 9 runtime verification"}})}
 
 try{
   const admin=await makeUser("Admin","admin"),user=await makeUser("User"),adminToken=await session(admin.id),userToken=await session(user.id);
