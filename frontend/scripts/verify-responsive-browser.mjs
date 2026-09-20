@@ -26,6 +26,7 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
     '<header class="v3-global-header"><a class="v3-brand-lockup" href="#"><span>مربوعة</span></a><div class="v3-audience-stats"><span><b>999</b><small>زائر</small></span><span><b>88</b><small>متصل</small></span></div><nav class="v3-header-actions"><a class="v3-header-icon" href="#">🔔</a><a class="v3-header-icon" href="#">⌕</a></nav></header>'+
     '<main class="social-page"><section class="social-shell"><article class="sf-panel"><h1>اختبار القياسات والاستجابة</h1><p>هذا نص عربي طويل لاختبار التفاف السطور وعدم خروج المحتوى خارج الشاشة في المقاسات الضيقة.</p><p class="sf-muted">username_with_a_very_long_unbroken_identifier_abcdefghijklmnopqrstuvwxyz_0123456789</p><label>حقل اختبار <input id="matrix-input" value="نص عربي طويل للاختبار"></label><button type="button">إجراء أساسي</button></article></section></main>'+
     '<section class="guest-explore-page"><div class="guest-explore-hero"><div><h1>واجهة الزائر</h1><p>محتوى عام طويل لاختبار نفس حدود العرض بدون تسجيل دخول.</p></div></div></section>'+
+    '<section class="sf-panel group14-states" aria-label="حالات واجهة الاختبار"><div class="settings-card settings-large" role="dialog" aria-modal="true" aria-label="إعدادات مربوعة"><header><h2>الإعدادات</h2><button type="button" aria-label="إغلاق">×</button></header><div class="settings-tabs"><button type="button">التطبيق</button><button type="button">الأمان</button></div></div><article class="notification-row unread"><button type="button" class="notification-main"><span>تنبيه</span><span>نص تنبيه عربي طويل للاختبار</span></button><div class="notification-actions"><button type="button">قبول</button><button type="button">رفض</button></div></article><section class="room-seat-stage" aria-label="الصوت المباشر"><div class="room-seat-grid"><button type="button" class="room-seat empty" aria-label="كرسي فارغ">1</button><button type="button" class="room-seat occupied" aria-label="كرسي مستخدم">2</button></div><div class="room-seat-controls"><button type="button">دخول كمستمع</button></div></section><div class="call-actions active-call"><button type="button">كتم</button><button type="button">سبيكر</button><button type="button">إنهاء</button></div><div class="live-studio-controls"><button type="button">مايك</button><button type="button">كاميرا</button></div><section class="app-dialog" role="dialog" aria-modal="true" aria-labelledby="g14-dialog-title"><h3 id="g14-dialog-title">تأكيد الحذف</h3><p>هذا إجراء حساس ويحتاج تأكيد واضح.</p><footer><button type="button">إلغاء</button><button type="button">حذف</button></footer></section><aside class="social-drawer"><nav><a href="/home">الرئيسية</a><a href="/settings">الإعدادات</a></nav></aside><div class="sf-alert" role="status">تعذر تحميل البيانات — حالة خطأ للاختبار</div><div class="sf-skeleton">جاري التحميل...</div><div class="sf-empty"><h2>ما فيش بيانات توا</h2></div></section>'+
     '<nav class="social-dock"><div class="social-dock-track"><button>المزيد</button><a href="#">الأصحاب</a><a href="#">الرئيسية</a><a href="#">الرسائل</a><a href="#">الغرف</a></div></nav></body></html>';
   fs.writeFileSync(fixture,html);
 
@@ -82,6 +83,8 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
         const dockActions=[...document.querySelectorAll(".social-dock a,.social-dock button")].map(x=>x.getBoundingClientRect());
         const input=rect("#matrix-input");
         const inputCss=css("#matrix-input");
+        const interactive=[...document.querySelectorAll('button,[role="button"]')].filter(x=>x.getClientRects().length).map(x=>x.getBoundingClientRect());
+        const dialogs=[...document.querySelectorAll('[role="dialog"]')].filter(x=>x.getClientRects().length);
         const pageCss=css(".social-page");
         const viewportW=innerWidth,viewportH=innerHeight;
         check(Math.abs(viewportW-expected.width)<=1,"viewport width "+viewportW+" != "+expected.width);
@@ -93,6 +96,9 @@ const imports=layout.split("\n").map(line=>line.match(/^import ["\']\.\/(.+\.css
         check(headerActions.length>=2&&headerActions.every(r=>r.width>=44&&r.height>=44),"header hit target below 44px");
         check(dockActions.length>=5&&dockActions.every(r=>r.height>=44),"dock hit target below 44px");
         check(input&&input.height>=44,"input height "+input?.height);
+        check(interactive.every(r=>r.width>=44&&r.height>=44),"interactive target below 44x44");
+        check(dialogs.every(x=>x.getAttribute("aria-modal")==="true"&&Boolean(x.getAttribute("aria-label")||x.getAttribute("aria-labelledby"))),"dialog semantics incomplete");
+        check(document.documentElement.dir==="rtl","document direction is not RTL");
         if(expected.width<=520)check(parseFloat(inputCss?.fontSize||"0")>=16,"mobile input font "+inputCss?.fontSize);
         check(shell&&shell.width<=Math.min(viewportW,600)+1,"shell width "+shell?.width);
         check(shell&&shell.left>=-1&&shell.right<=viewportW+1,"shell escapes viewport "+shell?.left+".."+shell?.right);
