@@ -38,7 +38,7 @@ async function adminGrant(user){
 }
 
 try{
-  const A=await makeUser("Group1A"),B=await makeUser("Group1B"),C=await makeUser("Group1C"),admin=await makeUser("Group1Admin","admin");
+  const A=await makeUser("Group1A"),B=await makeUser("Group1B"),C=await makeUser("Group1C"),moderator=await makeUser("Group1Moderator","moderator"),admin=await makeUser("Group1Admin","admin");
 
   const ab=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1::bigint,$2::bigint),GREATEST($1::bigint,$2::bigint)) RETURNING id`,[A.id,B.id])).rows[0];
   const bc=(await pool.query(`INSERT INTO direct_conversations(user1_id,user2_id) VALUES(LEAST($1::bigint,$2::bigint),GREATEST($1::bigint,$2::bigint)) RETURNING id`,[B.id,C.id])).rows[0];
@@ -94,6 +94,9 @@ try{
   await pool.query("UPDATE users SET two_factor_enabled=TRUE WHERE id=$1",[admin.id]);
   await api(`/api/admin/users/${C.id}/status`,{token:admin.token,method:"PATCH",body:{status:"frozen",reason:"group1 missing admin step-up"},status:403,error:"ADMIN_STEP_UP_REQUIRED"});
   const adminStepUp=await adminGrant(admin);
+  await api("/api/admin/advanced/settings",{token:moderator.token,method:"PATCH",body:{key:"post_limit_per_hour",value:12,reason:"moderator boundary"},status:403,error:"ADMIN_ONLY"});
+  await api("/api/admin/advanced/settings",{token:admin.token,method:"PATCH",body:{key:"post_limit_per_hour",value:12,reason:"missing step-up"},status:403,error:"ADMIN_STEP_UP_REQUIRED"});
+  await api("/api/admin/advanced/settings",{token:admin.token,stepUp:adminStepUp,method:"PATCH",body:{key:"post_limit_per_hour",value:12,reason:"group1 secured setting mutation"}});
   await api(`/api/admin/users/${C.id}/status`,{token:admin.token,stepUp:adminStepUp,method:"PATCH",body:{status:"frozen",reason:"group1 authorization matrix"}});
   await api("/api/auth/me",{token:C.token,status:401});
   const statusAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM admin_change_audit WHERE action='user_status_change' AND entity_id=$1`,[String(C.id)])).rows[0]?.c||0);
@@ -104,6 +107,14 @@ try{
   await api(`/api/admin/reports/${report.id}/action`,{token:admin.token,stepUp:adminStepUp,method:"POST",body:{action:"dismiss",reason:"group1 dismissal"}});
   const moderationAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM moderation_actions WHERE report_id=$1 AND action='dismiss'`,[report.id])).rows[0]?.c||0);
   if(moderationAudit<1)throw new Error("Canonical report action missing moderation audit");
+
+  const dmReport=(await pool.query(`INSERT INTO reports(reporter_id,target_type,target_id,reason,details) VALUES($1,'direct_message',$2,'group1-private-report','reported private message runtime context') RETURNING id`,[A.id,foreignDm.id])).rows[0];
+  await api(`/api/admin/advanced/reported-messages/${dmReport.id}?reason=runtime%20review`,{token:A.token,status:403,error:"ADMIN_ONLY"});
+  await api(`/api/admin/advanced/reported-messages/${dmReport.id}?reason=runtime%20review`,{token:admin.token,status:403,error:"ADMIN_STEP_UP_REQUIRED"});
+  const privateContext=(await api(`/api/admin/advanced/reported-messages/${dmReport.id}?reason=group1%20break-glass%20verification`,{token:admin.token,stepUp:adminStepUp})).data.context;
+  if(Number(privateContext?.message_id)!==Number(foreignDm.id)||privateContext?.body!=="foreign secret")throw new Error("Report-linked private message context mismatch");
+  const privateAudit=Number((await pool.query(`SELECT COUNT(*)::int c FROM admin_change_audit WHERE action='private_message_report_access' AND entity_id=$1`,[String(foreignDm.id)])).rows[0]?.c||0);
+  if(privateAudit<1)throw new Error("Break-glass private message access missing audit row");
 
   const changeToken=crypto.randomBytes(32).toString("hex");
   await redis.set(`session:${changeToken}`,String(A.id),{EX:900});
