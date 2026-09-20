@@ -85,12 +85,33 @@ jobs:
           done
           test "$(curl -sS -o /tmp/maintenance.html -w '%{http_code}' http://127.0.0.1:18080/)" = "503"
           grep -q 'مربوعة' /tmp/maintenance.html
-          curl -sSI http://127.0.0.1:18080/ | grep -qi '^Retry-After: 30'
+          curl -fsS http://127.0.0.1:18080/maintenance/maintenance.js | grep -q '/api/system/maintenance'
+          HEADERS="$(curl -sSI http://127.0.0.1:18080/)"
+          printf '%s\n' "$HEADERS" | grep -qi '^Retry-After: 30'
+          printf '%s\n' "$HEADERS" | grep -qi '^Strict-Transport-Security:'
+          printf '%s\n' "$HEADERS" | grep -qi '^X-Content-Type-Options: nosniff'
+          printf '%s\n' "$HEADERS" | grep -qi '^X-Frame-Options: DENY'
+          printf '%s\n' "$HEADERS" | grep -qi "^Content-Security-Policy:.*script-src 'self'"
+          if printf '%s\n' "$HEADERS" | grep -qi "^Content-Security-Policy:.*script-src[^;]*unsafe-inline"; then
+            echo "maintenance script-src must not allow unsafe-inline" >&2
+            exit 1
+          fi
       - name: Verify maintenance contracts
         shell: bash
         run: |
           set -euo pipefail
-          grep -q '/api/system/maintenance' ops/maintenance/index.html
+          grep -q '/api/system/maintenance' ops/maintenance/maintenance.js
+          grep -q 'src="/maintenance/maintenance.js"' ops/maintenance/index.html
+          if grep -q '<script>[[:space:]]*
+          grep -q 'maintenance_mode' backend/request-foundation.mjs
+          grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
+          grep -q 'docker builder prune -af' ops/deploy-production.sh
+          grep -q 'MARBO3A_DISK_WARN_PERCENT:-70' ops/disk-monitor.sh
+          grep -q 'MARBO3A_DISK_CRITICAL_PERCENT:-85' ops/disk-monitor.sh
+          grep -q 'backup_success' ops/backup-database.sh
+          grep -q 'restore_success' ops/verify-backup-restore.sh
+          grep -q '/api/admin/operations' backend/routes/core-admin-control.mjs
+ ops/maintenance/index.html; then echo "inline maintenance script found" >&2; exit 1; fi
           grep -q 'maintenance_mode' backend/request-foundation.mjs
           grep -q 'MaintenanceRuntime' frontend/app/AppRuntime.js
           grep -q 'docker builder prune -af' ops/deploy-production.sh
