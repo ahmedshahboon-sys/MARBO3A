@@ -35,7 +35,11 @@ function cookieFrom(response){
 async function auth(path,{token,cookie,method="GET",body,status=200,error}={}){
   const headers={};
   if(token)headers.authorization=`Bearer ${token}`;
-  if(cookie)headers.cookie=`marbo3a_session=${encodeURIComponent(cookie)}`;
+  if(cookie){
+    headers.cookie=`marbo3a_session=${encodeURIComponent(cookie)}`;
+    headers.origin=new URL(base).origin;
+    headers["sec-fetch-site"]="same-origin";
+  }
   const result=await raw(path,{method,body,headers});
   assertStatus(result,status,error);
   return result;
