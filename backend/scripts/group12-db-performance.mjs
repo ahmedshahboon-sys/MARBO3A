@@ -37,7 +37,7 @@ async function seed(){
       ON CONFLICT DO NOTHING RETURNING id`,[Math.min(viewer,peer),Math.max(viewer,peer)])).rows[0]||
       (await pool.query(`SELECT id FROM direct_conversations WHERE LEAST(user1_id,user2_id)=$1 AND GREATEST(user1_id,user2_id)=$2`,[Math.min(viewer,peer),Math.max(viewer,peer)])).rows[0];
     await pool.query(`INSERT INTO direct_messages(conversation_id,sender_id,body,created_at)
-      SELECT $1,CASE WHEN g%2=0 THEN $2 ELSE $3 END,'group12 dm '||g,NOW()-(g||' seconds')::interval FROM generate_series(1,12) g`,[row.id,viewer,peer]);
+      SELECT $1::bigint,CASE WHEN g%2=0 THEN $2::bigint ELSE $3::bigint END,'group12 dm '||g,NOW()-(g||' seconds')::interval FROM generate_series(1,12) g`,[row.id,viewer,peer]);
   }
   const room=(await pool.query(`INSERT INTO rooms(name,slug,description,is_public,owner_id,join_policy,max_members)
     VALUES('Group12 Performance Room','g12-performance-room-'||$1,'fixture',TRUE,$2,'open',500) RETURNING id`,[Date.now(),viewer])).rows[0];
