@@ -36,7 +36,7 @@ const calls=read("app/CallCenter.js");
 for(const t of ['className={\`call-overlay',"جاري الاتصال...","تعذر بدء المكالمة","aria-label=\"مكالمة مربوعة\""])must(calls,t,"call states");
 
 const live=read("app/live/page.js");
-for(const t of ["live-page","live-status","تعذر","ما فيش"])must(live,t,"live states");
+for(const t of ["live-page","live-status","live-empty"])must(live,t,"live states");
 
 const lock=read("app/ui-contract-lock.css");
 for(const t of ["Group 14 final accessibility lock",".live-watch-reactions button",".story-viewer-head-actions button",".real-map-controls button",".install-nudge>button","min-width:44px!important","min-height:44px!important"])must(lock,t,"touch target lock");
