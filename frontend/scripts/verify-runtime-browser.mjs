@@ -115,12 +115,19 @@ try{
     if(mode==="standalone")await cdp.send("Page.addScriptToEvaluateOnNewDocument",{source:standaloneBootstrap});
     await cdp.send("Page.navigate",{url:origin+route});
     await sleep(1400);
-    const result=await evaluate(`(()=>{const d=document.documentElement,b=document.body;const focusables=[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);const badButtons=focusables.filter(x=>{const r=x.getBoundingClientRect();return (x.tagName==="BUTTON"||x.getAttribute("role")==="button")&&(r.width<44||r.height<44)}).length;const unlabeled=focusables.filter(x=>{if(x.tagName==="INPUT"||x.tagName==="TEXTAREA"||x.tagName==="SELECT")return !(x.labels?.length||x.getAttribute("aria-label")||x.getAttribute("aria-labelledby")||x.getAttribute("placeholder"));return false}).length;return {title:document.title,bodyText:(b?.innerText||"").trim().length,scrollWidth:d.scrollWidth,innerWidth:innerWidth,overflow:d.scrollWidth>innerWidth+1,focusables:focusables.length,badButtons,unlabeled,theme:d.dataset.theme||"",manifest:document.querySelector('link[rel="manifest"]')?.getAttribute("href")||"",standalone:matchMedia("(display-mode: standalone)").matches,zoom:Number(visualViewport?.scale||1),hydrationText:/hydration failed|hydration mismatch/i.test(b?.innerText||"")}})()`,false);
+    let zoomScale=1;
+    if(mode==="zoom200"){
+      await cdp.send("Emulation.setPageScaleFactor",{pageScaleFactor:2});
+      await sleep(120);
+      const metrics=await cdp.send("Page.getLayoutMetrics");
+      zoomScale=Number(metrics?.visualViewport?.scale||metrics?.cssVisualViewport?.scale||1);
+    }
+    const result=await evaluate(`(()=>{const d=document.documentElement,b=document.body;const focusables=[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);const badButtons=focusables.filter(x=>{const r=x.getBoundingClientRect();return (x.tagName==="BUTTON"||x.getAttribute("role")==="button")&&(r.width<44||r.height<44)}).length;const unlabeled=focusables.filter(x=>{if(x.tagName==="INPUT"||x.tagName==="TEXTAREA"||x.tagName==="SELECT")return !(x.labels?.length||x.getAttribute("aria-label")||x.getAttribute("aria-labelledby")||x.getAttribute("placeholder"));return false}).length;return {title:document.title,bodyText:(b?.innerText||"").trim().length,scrollWidth:d.scrollWidth,innerWidth:innerWidth,overflow:d.scrollWidth>innerWidth+1,focusables:focusables.length,badButtons,unlabeled,theme:d.dataset.theme||"",manifest:document.querySelector('link[rel="manifest"]')?.getAttribute("href")||"",standalone:matchMedia("(display-mode: standalone)").matches,hydrationText:/hydration failed|hydration mismatch/i.test(b?.innerText||"")}})()`,false);
     if(!result.bodyText)fail(`${route} ${width}x${height} ${mode}: empty body`);
     if(result.overflow)fail(`${route} ${width}x${height} ${mode}: horizontal overflow ${result.scrollWidth} > ${result.innerWidth}`);
     if(result.unlabeled)fail(`${route} ${width}x${height} ${mode}: ${result.unlabeled} unlabeled form control(s)`);
     if(result.badButtons)fail(`${route} ${width}x${height} ${mode}: ${result.badButtons} interactive button target(s) below 44px`);
-    if(mode==="zoom200"&&result.zoom<1.9)fail(`${route}: 200% zoom emulation not observed (${result.zoom})`);
+    if(mode==="zoom200"&&zoomScale<1.9)fail(`${route}: 200% zoom emulation not observed via CDP (${zoomScale})`);
     if(route==="/"&&!result.manifest)fail(`${route}: manifest link missing`);
     if(mode==="standalone"&&!result.standalone)fail(`${route}: standalone emulation not observed`);
     if(result.hydrationText)fail(`${route}: hydration failure text rendered`);
