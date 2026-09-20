@@ -19,8 +19,8 @@ async function session(userId){
   await pool.query("INSERT INTO durable_sessions(token_hash,user_id,expires_at,last_seen) VALUES($1,$2,NOW()+INTERVAL '30 minutes',NOW())",[h,userId]);
   return token;
 }
-async function raw(path,{token,method="GET",body}={}){
-  const headers={};if(token)headers.authorization="Bearer "+token;if(body!==undefined)headers["content-type"]="application/json";
+async function raw(path,{token,stepUp,method="GET",body}={}){
+  const headers={};if(token)headers.authorization="Bearer "+token;if(stepUp)headers["x-marbo3a-step-up"]=stepUp;if(body!==undefined)headers["content-type"]="application/json";
   const r=await fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
   const text=await r.text(),data=(()=>{try{return JSON.parse(text)}catch{return{text}}})();
   return{r,data,text};
