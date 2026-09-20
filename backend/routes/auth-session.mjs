@@ -112,11 +112,12 @@ export function registerAuthSession(app){
     if(!await verifyPassword(password,stored?.password_hash)){await recordSecurity(u.id,"step_up_password_failed",req);return res.status(403).json({ok:false,error:"WRONG_PASSWORD"})}
     if(isAdmin(u)&&!stored.two_factor_enabled)return res.status(403).json({ok:false,error:"ADMIN_2FA_REQUIRED"});
     if(!stored.two_factor_enabled){const stepUpToken=await issueStepUpGrant(u.id,{sessionToken:tokenFrom(req)});await recordSecurity(u.id,"step_up_verified",req,{factor:"password"});return res.json({ok:true,stepUpToken,expiresIn:STEP_UP_TTL,twoFactorRequired:false})}
-    const challengeId=crypto.randomBytes(24).toString("hex"),code=String(crypto.randomInt(100000,1000000)),key=`stepup:challenge:${u.id}:${challengeId}`;
+    const challengeId=crypto.randomBytes(24).toString("hex"),code=String(crypto.randomInt(100000,1000000)),key=`stepup:challenge:${u.id}:${challengeId}`,remaining=await recoveryRemaining(u.id);
     await redis.set(key,JSON.stringify({hash:hashCode(u.id,code),attempts:0}),{EX:STEP_UP_TTL});
-    try{await sendCode({...u,email:stored.email},code,"stepup")}catch(e){await redis.del(key);return res.status(502).json({ok:false,error:e.message})}
-    await recordSecurity(u.id,"step_up_challenge",req);
-    res.json({ok:true,twoFactorRequired:true,challengeId,expiresIn:STEP_UP_TTL});
+    let emailDelivery=true;
+    try{await sendCode({...u,email:stored.email},code,"stepup")}catch(e){emailDelivery=false;if(!remaining){await redis.del(key);return res.status(502).json({ok:false,error:e.message})}}
+    await recordSecurity(u.id,"step_up_challenge",req,{emailDelivery,recoveryAvailable:remaining>0});
+    res.json({ok:true,twoFactorRequired:true,challengeId,expiresIn:STEP_UP_TTL,emailDelivery,recoveryAvailable:remaining>0});
   });
 
   app.post("/api/account/step-up/confirm",async(req,res)=>{
