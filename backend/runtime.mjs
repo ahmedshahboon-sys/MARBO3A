@@ -128,6 +128,25 @@ export async function requireAdmin(req,res){
   return u;
 }
 
+export async function requireAdminStepUp(req,res){
+  const u=await requireAdmin(req,res);
+  if(!u)return null;
+  if(!u.two_factor_enabled){res.status(403).json({ok:false,error:"ADMIN_2FA_REQUIRED"});return null}
+  const grant=String(req.headers["x-marbo3a-step-up"]||"").trim();
+  const session=tokenFrom(req);
+  if(!/^[a-f0-9]{64}$/i.test(grant)||!/^[a-f0-9]{64}$/i.test(session)){
+    res.status(403).json({ok:false,error:"ADMIN_STEP_UP_REQUIRED"});
+    return null;
+  }
+  await ensureRedis();
+  const key=`adminstepup:grant:${u.id}:${tokenHash(session)}:${grant}`;
+  if(await redis.get(key)!=="1"){
+    res.status(403).json({ok:false,error:"ADMIN_STEP_UP_REQUIRED"});
+    return null;
+  }
+  return u;
+}
+
 export async function createSession(userId,ttl=SESSION_TTL){
   await ensureRedis();
   const token=crypto.randomBytes(32).toString("hex");
