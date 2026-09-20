@@ -29,11 +29,16 @@ function expect(x,status,error){if(x.r.status!==status)throw new Error("expected
 async function call(path,opts={}){const x=await raw(path,opts);return expect(x,opts.status||200,opts.error)}
 async function setting(token,stepUp,key,value,reason="Group 9 runtime verification"){return call("/api/admin/advanced/settings",{token,stepUp,method:"PATCH",body:{key,value,reason}})}
 async function feature(token,stepUp,key,enabled){return call("/api/admin/advanced/features/"+key,{token,stepUp,method:"PATCH",body:{enabled,reason:"Group 9 runtime verification"}})}
-async function adminGrant(user,sessionToken){
+async function adminStepUpViaApi(user,sessionToken){
+  const recovery=crypto.randomBytes(6).toString("hex").toUpperCase();
+  const recoveryHash=crypto.createHash("sha256").update(String(user.id)+":"+recovery).digest("hex");
   await pool.query("UPDATE users SET two_factor_enabled=TRUE WHERE id=$1",[user.id]);
-  const grant=crypto.randomBytes(32).toString("hex");
-  await redis.set(`adminstepup:grant:${user.id}:${tokenHash(sessionToken)}:${grant}`,"1",{EX:900});
-  return grant;
+  await pool.query("INSERT INTO two_factor_recovery_codes(user_id,code_hash) VALUES($1,$2)",[user.id,recoveryHash]);
+  const requested=await call("/api/account/step-up/request",{token:sessionToken,method:"POST",body:{currentPassword:"Group9!Pass123"}});
+  if(!requested.twoFactorRequired||!requested.challengeId)throw new Error("admin step-up challenge missing");
+  const confirmed=await call("/api/account/step-up/confirm",{token:sessionToken,method:"POST",body:{challengeId:requested.challengeId,recoveryCode:recovery}});
+  if(!confirmed.recoveryUsed||!/^[a-f0-9]{64}$/i.test(String(confirmed.stepUpToken||"")))throw new Error("admin step-up confirmation failed");
+  return confirmed.stepUpToken;
 }
 
 try{
