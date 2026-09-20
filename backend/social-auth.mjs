@@ -8,7 +8,7 @@ const scryptAsync=promisify(crypto.scrypt);
 const hash=t=>crypto.createHash("sha256").update(String(t)).digest("hex");
 const randomHex=(n=24)=>crypto.randomBytes(n).toString("hex");
 const b64url=buf=>Buffer.from(buf).toString("base64url");
-const safeNext=v=>{const s=String(v||"");return s.startsWith("/")&&!s.startsWith("//")?s:"/home"};
+const safeNext=v=>{try{const raw=String(v||"").trim(),decoded=decodeURIComponent(raw);if(!raw.startsWith("/")||raw.startsWith("//")||raw.includes("\\")||decoded.startsWith("//")||decoded.includes("\\"))return"/home";const u=new URL(raw,"https://marbo3a.invalid");return u.origin==="https://marbo3a.invalid"?`${u.pathname}${u.search}${u.hash}`:"/home"}catch{return"/home"}};
 const validUsername=v=>/^[a-z0-9._]{3,24}$/.test(String(v||""));
 const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||""));
 const validPassword=v=>typeof v==="string"&&v.length>=8&&v.length<=128;
